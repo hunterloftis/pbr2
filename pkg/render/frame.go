@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"image"
 	"image/png"
 	"os"
@@ -26,7 +27,14 @@ func NewFrame(w, h float64) *Frame {
 	for w := 0; w < workers; w++ {
 		f.workers[w] = newWorker(f.results)
 	}
+	go f.process()
 	return &f
+}
+
+func (f *Frame) process() {
+	for r := range f.results {
+		fmt.Println("got result:", r)
+	}
 }
 
 func (f *Frame) Start() {

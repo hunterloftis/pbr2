@@ -1,7 +1,6 @@
 package render
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -30,6 +29,6 @@ func (w *worker) stop() {
 
 func (w *worker) process() {
 	for w.active.State() {
-		fmt.Println("processing:", w.id)
+		w.results <- []float64{w.id}
 	}
 }
