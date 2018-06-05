@@ -1,7 +1,6 @@
 package render
 
 import (
-	"fmt"
 	"image"
 	"image/png"
 	"os"
@@ -9,31 +8,32 @@ import (
 )
 
 type Frame struct {
-	Width   float64
-	Height  float64
+	Width   int
+	Height  int
+	data    Sample
 	workers []*worker
-	results chan []float64
+	samples chan *Sample
 	active  toggle
 }
 
-func NewFrame(w, h float64) *Frame {
+func NewFrame(w, h int) *Frame {
 	workers := runtime.NumCPU()
 	f := Frame{
 		Width:   w,
 		Height:  h,
 		workers: make([]*worker, workers),
-		results: make(chan []float64, workers),
+		samples: make(chan *Sample, workers),
 	}
 	for w := 0; w < workers; w++ {
-		f.workers[w] = newWorker(f.results)
+		f.workers[w] = newWorker(f.Width, f.Height, f.samples)
 	}
 	go f.process()
 	return &f
 }
 
 func (f *Frame) process() {
-	for r := range f.results {
-		fmt.Println("got result:", r)
+	for s := range f.samples {
+		f.data.Merge(s)
 	}
 }
 
@@ -55,6 +55,7 @@ func (f *Frame) Stop() {
 
 func (f *Frame) Image() image.Image {
 	im := image.NewRGBA(image.Rect(0, 0, int(f.Width), int(f.Height)))
+	// TODO: copy data into im
 	return im
 }
 

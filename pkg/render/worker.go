@@ -5,15 +5,19 @@ import (
 )
 
 type worker struct {
-	results chan []float64
-	active  toggle
-	id      float64
+	width  int
+	height int
+	out    chan *Sample
+	active toggle
+	id     float64
 }
 
-func newWorker(r chan []float64) *worker {
+func newWorker(w, h int, o chan *Sample) *worker {
 	return &worker{
-		results: r,
-		id:      rand.Float64(),
+		width:  w,
+		height: h,
+		out:    o,
+		id:     rand.Float64(),
 	}
 }
 
@@ -29,6 +33,7 @@ func (w *worker) stop() {
 
 func (w *worker) process() {
 	for w.active.State() {
-		w.results <- []float64{w.id}
+		s := NewSample(w.width, w.height)
+		w.out <- s
 	}
 }
