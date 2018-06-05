@@ -27,16 +27,8 @@ func (s *Sample) At(x, y int) (r, g, b, c float64) {
 	return s.data[i+red], s.data[i+green], s.data[i+blue], s.data[i+count]
 }
 
-// TODO: compare performance of Merge vs MoveInto
 func (s *Sample) Merge(other *Sample) {
 	for i, _ := range s.data {
 		s.data[i] += other.data[i]
-	}
-}
-
-func (s *Sample) MoveInto(other *Sample) {
-	for i, _ := range s.data {
-		other.data[i] += s.data[i]
-		s.data[i] = 0
 	}
 }

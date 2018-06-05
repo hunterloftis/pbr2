@@ -31,9 +31,11 @@ func (w *worker) stop() {
 	w.active.Set(false)
 }
 
+// TODO: instead of creating new samples to be GC'd, try zeroing out all values on a single sample created once, compare performance.
 func (w *worker) process() {
 	for w.active.State() {
 		s := NewSample(w.width, w.height)
+		// TODO: trace each pixel of the new sample
 		w.out <- s
 	}
 }
