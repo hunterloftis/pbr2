@@ -92,6 +92,19 @@ func Rot(v Vec) *Mat {
 	)
 }
 
+// Tangent creates a matrix that translates from world space to tangent space
+// and a corresponding matrix that translates from tangent space to world space.
+func Tangent(normal Dir) (to, from *Mat) {
+	angle := math.Acos(normal.Dot(Up))
+	axis, ok := normal.Cross(Up)
+	if !ok {
+		return Identity(), Identity()
+	}
+	angleAxis := axis.Scaled(angle)
+	m := Rot(angleAxis)
+	return m, m.Inverse()
+}
+
 // Mult multiplies by another matrix4
 // TODO: a and b might be flipped here
 func (a *Mat) Mult(b *Mat) *Mat {

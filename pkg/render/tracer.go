@@ -57,49 +57,67 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(ray geom.Ray, depth int) rgb.Energy {
+func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 	energy := rgb.Black
 	signal := rgb.White
 
 	for i := 0; i < depth; i++ {
-		if i > 1 {
-			if signal = signal.RandomGain(t.rnd); signal.Zero() {
-				break
-			}
-		}
 		hit, ok := t.scene.Surface.Intersect(ray)
 		if !ok {
-			energy = energy.Plus(t.scene.Env.At(ray.Dir).Times(signal))
-			break
-		}
-		pt := r.Moved(hit.Dist)
-		normal, mat := hit.Surface.At(pt)
-
-		// TODO: does this double-count lights? Should it be removed?
-		// Maybe remove this and also remove "coverage" below?
-		if light, ok := mat.Light(); ok {
-			energy = energy.Plus(light.Times(signal))
+			env := t.scene.Env.At(ray.Dir).Times(signal)
+			energy = energy.Plus(env)
 			break
 		}
 
-		bsdf := mat.BSDF(t.rnd)
+		pt := ray.Moved(hit.Dist)
+		normal, bsdf := hit.Object.At(pt, t.rnd)
+		if e := bsdf.Emit(); !e.Zero() {
+			energy = energy.Plus(e.Times(signal))
+			break
+		}
+
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())
 		wi, pdf := bsdf.Sample(wo, t.rnd)
 		cos := wi.Dot(geom.Up)
 
-		direct, coverage := t.directLight(pt, normal)
+		direct, coverage := t.directLight(pt, normal, wo, toTan)
 		weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
 
-		signal = signal.Times(reflectance)
-		energy = energy.Plus(direct)
+		energy = energy.Plus(direct.Times(signal))
+		signal = signal.Times(reflectance).RandomGain(t.rnd)
+		if signal.Zero() {
+			break
+		}
 		ray = geom.NewRay(pt, bounce)
 	}
 	return energy
 }
 
-func (t *tracer) directLight() rgb.Energy {
-	return rgb.Black
+func (t *tracer) directLight(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) rgb.Energy {
+	coverage := 0
+	energy := rgb.Black
+	lights := t.scene.Lights()
+
+	for _, l := range lights {
+		ray, solid := l.Box().ShadowRay(pt, normal, t.rnd)
+		if solid <= 0 {
+			continue
+		}
+		coverage += solid
+		hit, ok := t.scene.Surface.Intersect(ray)
+		if !ok {
+			continue
+		}
+		pt := ray.Moved(hit.Dist)
+		_, bsdf := hit.Object.At(pt)
+		wi := toTan.MultDir(ray.Dir)
+		weight := solid / math.Pi
+		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+		light := bsdf.Emit().Times(reflectance)
+		energy = energy.Plus(light)
+	}
+	return energy
 }
