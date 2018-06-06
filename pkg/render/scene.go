@@ -3,7 +3,7 @@ package render
 import "github.com/hunterloftis/pbr2/pkg/geom"
 
 type Camera interface {
-	Ray(u, v float64) geom.Ray3
+	Ray(u, v float64) geom.Ray
 }
 
 type Scene struct {

@@ -3,7 +3,7 @@ package geom
 import "testing"
 
 func TestScaled(t *testing.T) {
-	v := Vector3{0, 1, 2}.Scaled(2)
+	v := Vec{0, 1, 2}.Scaled(2)
 	if v.X != 0 {
 		t.Error("Expected 0, got", v.X)
 	}
@@ -16,8 +16,8 @@ func TestScaled(t *testing.T) {
 }
 
 func TestBy(t *testing.T) {
-	a := Vector3{0, 1, 2}
-	b := Vector3{1, 2, 3}
+	a := Vec{0, 1, 2}
+	b := Vec{1, 2, 3}
 	c := a.By(b)
 	if c.X != 0 {
 		t.Error("Expected 0, got", c.X)

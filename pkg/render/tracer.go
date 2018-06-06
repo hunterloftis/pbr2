@@ -55,6 +55,6 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(r geom.Ray3, bounces int) rgb.Energy {
+func (t *tracer) trace(r geom.Ray, bounces int) rgb.Energy {
 	return rgb.Energy{0, 1, 0}
 }
