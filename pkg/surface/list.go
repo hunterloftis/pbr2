@@ -9,7 +9,7 @@ type List struct {
 }
 
 func (l *List) Intersect(r *geom.Ray) (phys.Object, float64, bool) {
-	return phys.Object{}, 0, false
+	return nil, 0, false
 }
 
 func (l *List) Lights() []phys.Object {

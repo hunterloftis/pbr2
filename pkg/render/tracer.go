@@ -62,15 +62,15 @@ func (t *tracer) trace(ray *geom.Ray, depth int) phys.Energy {
 	signal := phys.White
 
 	for i := 0; i < depth; i++ {
-		hit, ok := t.scene.Surface.Intersect(ray)
+		obj, dist, ok := t.scene.Surface.Intersect(ray)
 		if !ok {
 			env := t.scene.Env.At(ray.Dir).Times(signal)
 			energy = energy.Plus(env)
 			break
 		}
 
-		pt := ray.Moved(hit.Dist)
-		normal, bsdf := hit.Object.At(pt, t.rnd)
+		pt := ray.Moved(dist)
+		normal, bsdf := obj.At(pt, t.rnd)
 		if e := bsdf.Emit(); !e.Zero() {
 			energy = energy.Plus(e.Times(signal))
 			break
@@ -106,12 +106,12 @@ func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (ener
 			continue
 		}
 		coverage += solid
-		hit, ok := t.scene.Surface.Intersect(ray)
+		obj, dist, ok := t.scene.Surface.Intersect(ray)
 		if !ok {
 			continue
 		}
-		pt := ray.Moved(hit.Dist)
-		_, bsdf := hit.Object.At(pt, t.rnd)
+		pt := ray.Moved(dist)
+		_, bsdf := obj.At(pt, t.rnd)
 		wi := toTan.MultDir(ray.Dir)
 		weight := solid / math.Pi
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
