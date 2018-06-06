@@ -7,7 +7,6 @@ import (
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/phys"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
 const maxDepth = 7
@@ -59,8 +58,8 @@ func (t *tracer) process() {
 }
 
 func (t *tracer) trace(ray *geom.Ray, depth int) phys.Energy {
-	energy := rgb.Black
-	signal := rgb.White
+	energy := phys.Black
+	signal := phys.White
 
 	for i := 0; i < depth; i++ {
 		hit, ok := t.scene.Surface.Intersect(ray)

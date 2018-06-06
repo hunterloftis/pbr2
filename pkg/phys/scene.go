@@ -2,7 +2,6 @@ package phys
 
 import (
 	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
 type Camera interface {
@@ -15,7 +14,7 @@ type Surface interface {
 }
 
 type Environment interface {
-	At(geom.Dir) phys.Energy
+	At(geom.Dir) Energy
 }
 
 type Scene struct {

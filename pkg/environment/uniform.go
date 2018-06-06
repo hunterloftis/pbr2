@@ -2,7 +2,7 @@ package environment
 
 import (
 	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
+	"github.com/hunterloftis/pbr2/pkg/phys"
 )
 
 type Uniform struct {

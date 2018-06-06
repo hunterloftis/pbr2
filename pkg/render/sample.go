@@ -3,7 +3,7 @@ package render
 import (
 	"image"
 
-	"github.com/hunterloftis/pbr2/pkg/rgb"
+	"github.com/hunterloftis/pbr2/pkg/phys"
 )
 
 const (

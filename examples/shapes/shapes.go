@@ -15,9 +15,9 @@ import (
 
 func main() {
 	cam := camera.NewPinhole()
-	list := &surface.List{}
-	env := &environment.Uniform{phys.Energy{100, 100, 100}}
-	scene := phys.NewScene(800, 600, cam, list, env)
+	list := surface.List{}
+	env := environment.Uniform{phys.Energy{255, 255, 255}}
+	scene := phys.NewScene(800, 600, cam, &list, &env)
 	frame := render.NewFrame(scene)
 	kill := make(chan os.Signal, 2)
 
