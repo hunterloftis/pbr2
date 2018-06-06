@@ -5,14 +5,14 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/hunterloftis/pbr/geom"
+	"github.com/hunterloftis/pbr2/pkg/geom"
 )
 
 // Energy stores RGB light energy as a 3D Vector.
-// TODO: replace all Energy instances with Vector3 (simpler, less duplication)
-type Energy geom.Vector3
+// TODO: replace all Energy instances with Vec (simpler, less duplication)
+type Energy geom.Vec
 
-// TODO: type Energy struct { geom.Vector3 }
+// TODO: type Energy struct { geom.Vec }
 
 var Full, White = Energy{1, 1, 1}, Energy{1, 1, 1}
 var Empty, Black = Energy{0, 0, 0}, Energy{0, 0, 0}
@@ -67,7 +67,7 @@ func (a Energy) Limit(n float64) Energy {
 // Weak signals are more likely to be destroyed but gain more amplification.
 // This creates greater overall system throughput (higher energy per signal, fewer signals).
 func (a Energy) RandomGain(rnd *rand.Rand) Energy {
-	greatest := geom.Vector3(a).Greatest()
+	greatest := geom.Vec(a).Greatest()
 	if rnd.Float64() > greatest {
 		return Energy{}
 	}
@@ -81,7 +81,7 @@ func (a Energy) Times(b Energy) Energy {
 
 // Diff returns the difference in two Energies
 func (a Energy) Variance(b Energy) float64 {
-	d := geom.Vector3(a).Minus(geom.Vector3(b))
+	d := geom.Vec(a).Minus(geom.Vec(b))
 	return d.X*d.X + d.Y*d.Y + d.Z*d.Z
 }
 
@@ -94,7 +94,7 @@ func (a Energy) Max() float64 {
 }
 
 func (a Energy) Lerp(b Energy, n float64) Energy {
-	return Energy(geom.Vector3(a).Lerp(geom.Vector3(b), n))
+	return Energy(geom.Vec(a).Lerp(geom.Vec(b), n))
 }
 
 func (a *Energy) Set(b Energy) {
@@ -104,7 +104,7 @@ func (a *Energy) Set(b Energy) {
 }
 
 func (a *Energy) UnmarshalText(b []byte) error {
-	v, err := geom.ParseVector3(string(b))
+	v, err := geom.ParseVec(string(b))
 	if err != nil {
 		return err
 	}
@@ -113,6 +113,6 @@ func (a *Energy) UnmarshalText(b []byte) error {
 }
 
 func ParseEnergy(s string) (e Energy, err error) {
-	v, err := geom.ParseVector3(s)
+	v, err := geom.ParseVec(s)
 	return Energy(v), err
 }

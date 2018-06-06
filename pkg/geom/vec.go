@@ -145,7 +145,7 @@ func (a *Vec) Set(b Vec) {
 
 // UnmarshalText unmarshals a byte slice into a Vector3 value
 func (a *Vec) UnmarshalText(b []byte) error {
-	v, err := ParseVector3(string(b))
+	v, err := ParseVec(string(b))
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func (a *Vec) UnmarshalText(b []byte) error {
 	return nil
 }
 
-func ParseVector3(s string) (v Vec, err error) {
+func ParseVec(s string) (v Vec, err error) {
 	xyz := strings.Split(s, ",")
 	if len(xyz) != 3 {
 		return v, fmt.Errorf("pbr: 3 values required for Vector3, received %v", len(xyz))

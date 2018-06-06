@@ -143,7 +143,7 @@ func (a Dir) RandHemi(rnd *rand.Rand) Dir {
 }
 
 func ParseDirection(s string) (d Dir, err error) {
-	v, err := ParseVector3(s)
+	v, err := ParseVec(s)
 	if err != nil {
 		return d, err
 	}
