@@ -8,16 +8,16 @@ import (
 )
 
 type Frame struct {
-	scene   *scene
+	scene   *Scene
 	data    *Sample
-	workers []*worker
+	workers []*tracer
 	samples chan *Sample
 	active  toggle
 }
 
 func NewFrame(w, h int, c Camera) *Frame {
 	workers := runtime.NumCPU()
-	s := scene{
+	s := Scene{
 		Width:  w,
 		Height: h,
 		Camera: c,
@@ -25,11 +25,11 @@ func NewFrame(w, h int, c Camera) *Frame {
 	f := Frame{
 		scene:   &s,
 		data:    NewSample(s.Width, s.Height),
-		workers: make([]*worker, workers),
+		workers: make([]*tracer, workers),
 		samples: make(chan *Sample, workers),
 	}
 	for w := 0; w < workers; w++ {
-		f.workers[w] = newWorker(f.scene, f.samples)
+		f.workers[w] = newTracer(f.scene, f.samples)
 	}
 	go f.process()
 	return &f

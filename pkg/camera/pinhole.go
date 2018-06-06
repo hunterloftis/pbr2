@@ -1,6 +1,6 @@
 package camera
 
-import "github.com/hunterloftis/pbr/geom"
+import "github.com/hunterloftis/pbr2/pkg/geom"
 
 type Pinhole struct {
 }
