@@ -7,21 +7,27 @@ import (
 	"syscall"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
+	"github.com/hunterloftis/pbr2/pkg/environment"
+	"github.com/hunterloftis/pbr2/pkg/phys"
 	"github.com/hunterloftis/pbr2/pkg/render"
+	"github.com/hunterloftis/pbr2/pkg/surface"
 )
 
 func main() {
-	c := camera.NewPinhole()
-	f := render.NewFrame(800, 600, c)
+	cam := camera.NewPinhole()
+	list := &surface.List{}
+	env := &environment.Uniform{phys.Energy{100, 100, 100}}
+	scene := phys.NewScene(800, 600, cam, list, env)
+	frame := render.NewFrame(scene)
 	kill := make(chan os.Signal, 2)
 
 	fmt.Println("rendering shapes.png (press Ctrl+C to finish)...")
 	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
-	f.Start()
+	frame.Start()
 	<-kill
-	f.Stop()
+	frame.Stop()
 
-	if err := f.WritePNG("shapes.png"); err != nil {
+	if err := frame.WritePNG("shapes.png"); err != nil {
 		panic(err)
 	}
 }

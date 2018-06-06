@@ -29,17 +29,17 @@ func NewSample(w, h int) *Sample {
 	}
 }
 
-func (s *Sample) At(x, y int) rgb.Energy {
+func (s *Sample) At(x, y int) phys.Energy {
 	i := (y*s.Width + x) * stride
 	c := s.data[i+count]
-	return rgb.Energy{
+	return phys.Energy{
 		X: s.data[i+red] / c,
 		Y: s.data[i+green] / c,
 		Z: s.data[i+blue] / c,
 	}
 }
 
-func (s *Sample) Add(x, y int, e rgb.Energy) {
+func (s *Sample) Add(x, y int, e phys.Energy) {
 	i := (y*s.Width + x) * stride
 	s.data[i+red] += e.X
 	s.data[i+green] += e.Y

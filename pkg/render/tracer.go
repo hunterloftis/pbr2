@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
+	"github.com/hunterloftis/pbr2/pkg/phys"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
@@ -13,13 +14,13 @@ const maxDepth = 7
 const maxWeight = 20
 
 type tracer struct {
-	scene  *Scene
+	scene  *phys.Scene
 	out    chan *Sample
 	active toggle
 	rnd    *rand.Rand
 }
 
-func newTracer(s *Scene, o chan *Sample) *tracer {
+func newTracer(s *phys.Scene, o chan *Sample) *tracer {
 	return &tracer{
 		scene: s,
 		out:   o,
@@ -57,7 +58,7 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
+func (t *tracer) trace(ray *geom.Ray, depth int) phys.Energy {
 	energy := rgb.Black
 	signal := rgb.White
 
@@ -97,7 +98,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 }
 
 // TODO: pretty long arg list...
-func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy rgb.Energy, coverage float64) {
+func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy phys.Energy, coverage float64) {
 	lights := t.scene.Surface.Lights()
 
 	for _, l := range lights {

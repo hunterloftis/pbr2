@@ -5,25 +5,22 @@ import (
 	"image/png"
 	"os"
 	"runtime"
+
+	"github.com/hunterloftis/pbr2/pkg/phys"
 )
 
 type Frame struct {
-	scene   *Scene
+	scene   *phys.Scene
 	data    *Sample
 	workers []*tracer
 	samples chan *Sample
 	active  toggle
 }
 
-func NewFrame(w, h int, c Camera) *Frame {
+func NewFrame(s *phys.Scene) *Frame {
 	workers := runtime.NumCPU()
-	s := Scene{
-		Width:  w,
-		Height: h,
-		Camera: c,
-	}
 	f := Frame{
-		scene:   &s,
+		scene:   s,
 		data:    NewSample(s.Width, s.Height),
 		workers: make([]*tracer, workers),
 		samples: make(chan *Sample, workers),

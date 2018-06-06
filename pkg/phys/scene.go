@@ -1,4 +1,4 @@
-package render
+package phys
 
 import (
 	"github.com/hunterloftis/pbr2/pkg/geom"
@@ -15,7 +15,7 @@ type Surface interface {
 }
 
 type Environment interface {
-	At(geom.Dir) rgb.Energy
+	At(geom.Dir) phys.Energy
 }
 
 type Scene struct {
@@ -23,4 +23,14 @@ type Scene struct {
 	Camera        Camera
 	Env           Environment
 	Surface       Surface
+}
+
+func NewScene(w, h int, c Camera, s Surface, e Environment) *Scene {
+	return &Scene{
+		Width:   w,
+		Height:  h,
+		Env:     e,
+		Surface: s,
+		Camera:  c,
+	}
 }
