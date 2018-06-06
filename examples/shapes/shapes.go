@@ -6,11 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/render"
 )
 
 func main() {
-	f := render.NewFrame(800, 600)
+	c := camera.NewPinhole()
+	f := render.NewFrame(800, 600, c)
 	kill := make(chan os.Signal, 2)
 
 	fmt.Println("rendering shapes.png (press Ctrl+C to finish)...")

@@ -1,5 +1,11 @@
 package render
 
+import (
+	"image"
+
+	"github.com/hunterloftis/pbr2/pkg/rgb"
+)
+
 const (
 	red = int(iota)
 	green
@@ -8,6 +14,7 @@ const (
 	stride
 )
 
+// TODO: hide Width and Height (expose as Width()/Height() if necessary)
 type Sample struct {
 	Width  int
 	Height int
@@ -22,13 +29,37 @@ func NewSample(w, h int) *Sample {
 	}
 }
 
-func (s *Sample) At(x, y int) (r, g, b, c float64) {
+func (s *Sample) At(x, y int) rgb.Energy {
 	i := (y*s.Width + x) * stride
-	return s.data[i+red], s.data[i+green], s.data[i+blue], s.data[i+count]
+	c := s.data[i+count]
+	return rgb.Energy{
+		X: s.data[i+red] / c,
+		Y: s.data[i+green] / c,
+		Z: s.data[i+blue] / c,
+	}
+}
+
+func (s *Sample) Add(x, y int, e rgb.Energy) {
+	i := (y*s.Width + x) * stride
+	s.data[i+red] += e.X
+	s.data[i+green] += e.Y
+	s.data[i+blue] += e.Z
+	s.data[i+count]++
 }
 
 func (s *Sample) Merge(other *Sample) {
 	for i, _ := range s.data {
 		s.data[i] += other.data[i]
 	}
+}
+
+func (s *Sample) ToRGBA() *image.RGBA {
+	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
+	for y := 0; y < s.Height; y++ {
+		for x := 0; x < s.Width; x++ {
+			c := s.At(x, y).ToRGBA()
+			im.SetRGBA(x, y, c)
+		}
+	}
+	return im
 }

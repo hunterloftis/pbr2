@@ -8,24 +8,28 @@ import (
 )
 
 type Frame struct {
-	Width   int
-	Height  int
-	data    Sample
+	scene   *scene
+	data    *Sample
 	workers []*worker
 	samples chan *Sample
 	active  toggle
 }
 
-func NewFrame(w, h int) *Frame {
+func NewFrame(w, h int, c Camera) *Frame {
 	workers := runtime.NumCPU()
+	s := scene{
+		Width:  w,
+		Height: h,
+		Camera: c,
+	}
 	f := Frame{
-		Width:   w,
-		Height:  h,
+		scene:   &s,
+		data:    NewSample(s.Width, s.Height),
 		workers: make([]*worker, workers),
 		samples: make(chan *Sample, workers),
 	}
 	for w := 0; w < workers; w++ {
-		f.workers[w] = newWorker(f.Width, f.Height, f.samples)
+		f.workers[w] = newWorker(f.scene, f.samples)
 	}
 	go f.process()
 	return &f
@@ -53,10 +57,8 @@ func (f *Frame) Stop() {
 	}
 }
 
-func (f *Frame) Image() image.Image {
-	im := image.NewRGBA(image.Rect(0, 0, int(f.Width), int(f.Height)))
-	// TODO: copy data into im
-	return im
+func (f *Frame) Image() *image.RGBA {
+	return f.data.ToRGBA()
 }
 
 func (f *Frame) WritePNG(name string) error {
