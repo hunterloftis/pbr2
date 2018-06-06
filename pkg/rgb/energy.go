@@ -9,13 +9,10 @@ import (
 )
 
 // Energy stores RGB light energy as a 3D Vector.
-// TODO: replace all Energy instances with Vec (simpler, less duplication)
 type Energy geom.Vec
 
-// TODO: type Energy struct { geom.Vec }
-
-var Full, White = Energy{1, 1, 1}, Energy{1, 1, 1}
-var Empty, Black = Energy{0, 0, 0}, Energy{0, 0, 0}
+var White = Energy{1, 1, 1}
+var Black = Energy{0, 0, 0}
 
 // Merged merges energy b into energy a with a given signal strength.
 func (a Energy) Merged(b Energy, signal Energy) Energy {

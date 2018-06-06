@@ -1,6 +1,7 @@
 package render
 
 import (
+	"math"
 	"math/rand"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 )
 
 const maxDepth = 7
+const maxWeight = 20
 
 type tracer struct {
 	scene  *Scene
@@ -55,6 +57,36 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(r geom.Ray, bounces int) rgb.Energy {
-	return rgb.Energy{0, 1, 0}
+func (t *tracer) trace(r geom.Ray, bounces int, strength float64) rgb.Energy {
+	if bounces <= 0 {
+		return rgb.Black
+	}
+	hit, ok := t.scene.surface.Intersect(r)
+	if !ok {
+		return rgb.Black
+	}
+	pt := r.Moved(hit.Dist)
+	normal, mat := hit.Surface.At(pt)
+	if e, emits := mat.Light(); emits {
+		return e
+	}
+
+	bsdf := mat.BSDF(t.rnd)
+	toTan, fromTan := geom.Tangent(normal)
+	wo := toTan.MultDir(r.Dir.Inv())
+	wi, pdf := bsdf.Sample(wo, t.rnd)
+	cos := wi.Dot(geom.Up)
+	bounce := geom.NewRay(pt, fromTan.MultDir(wi))
+
+	direct, coverage := t.directLight(pt, normal)
+	weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
+	reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+	incoming := t.trace(bounce, bounces-1, reflectance.Mean())
+	indirect := incoming.Times(reflectance)
+
+	return direct.Plus(indirect)
+}
+
+func (t *tracer) directLight() rgb.Energy {
+	return rgb.Black
 }
