@@ -11,7 +11,7 @@ type Camera interface {
 
 type Surface interface {
 	Intersect(*geom.Ray) (Hit, bool)
-	Bounds() Bounds
+	Lights() []Object
 }
 
 type Environment interface {

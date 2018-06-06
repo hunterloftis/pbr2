@@ -81,7 +81,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 		wi, pdf := bsdf.Sample(wo, t.rnd)
 		cos := wi.Dot(geom.Up)
 
-		direct, coverage := t.directLight(pt, normal, wo, toTan)
+		direct, coverage := t.direct(pt, normal, wo, toTan)
 		weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
@@ -96,13 +96,12 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 	return energy
 }
 
-func (t *tracer) directLight(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) rgb.Energy {
-	coverage := 0
-	energy := rgb.Black
-	lights := t.scene.Lights()
+// TODO: pretty long arg list...
+func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy rgb.Energy, coverage float64) {
+	lights := t.scene.Surface.Lights()
 
 	for _, l := range lights {
-		ray, solid := l.Box().ShadowRay(pt, normal, t.rnd)
+		ray, solid := l.Bounds().ShadowRay(pt, normal, t.rnd)
 		if solid <= 0 {
 			continue
 		}
@@ -112,12 +111,12 @@ func (t *tracer) directLight(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) 
 			continue
 		}
 		pt := ray.Moved(hit.Dist)
-		_, bsdf := hit.Object.At(pt)
+		_, bsdf := hit.Object.At(pt, t.rnd)
 		wi := toTan.MultDir(ray.Dir)
 		weight := solid / math.Pi
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		light := bsdf.Emit().Times(reflectance)
 		energy = energy.Plus(light)
 	}
-	return energy
+	return energy, coverage
 }

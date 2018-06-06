@@ -15,6 +15,7 @@ type BSDF interface {
 
 type Object interface {
 	At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
+	Bounds() *Bounds
 }
 
 type Hit struct {
