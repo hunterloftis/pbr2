@@ -8,8 +8,8 @@ import (
 type List struct {
 }
 
-func (l *List) Intersect(r *geom.Ray) (phys.Hit, bool) {
-	return phys.Hit{}, false
+func (l *List) Intersect(r *geom.Ray) (phys.Object, float64, bool) {
+	return phys.Object{}, 0, false
 }
 
 func (l *List) Lights() []phys.Object {
