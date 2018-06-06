@@ -57,34 +57,47 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(r geom.Ray, bounces int, strength float64) rgb.Energy {
-	if bounces <= 0 {
-		return rgb.Black
-	}
-	hit, ok := t.scene.surface.Intersect(r)
-	if !ok {
-		return rgb.Black
-	}
-	pt := r.Moved(hit.Dist)
-	normal, mat := hit.Surface.At(pt)
-	if e, emits := mat.Light(); emits {
-		return e
-	}
+func (t *tracer) trace(ray geom.Ray, depth int) rgb.Energy {
+	energy := rgb.Black
+	signal := rgb.White
 
-	bsdf := mat.BSDF(t.rnd)
-	toTan, fromTan := geom.Tangent(normal)
-	wo := toTan.MultDir(r.Dir.Inv())
-	wi, pdf := bsdf.Sample(wo, t.rnd)
-	cos := wi.Dot(geom.Up)
-	bounce := geom.NewRay(pt, fromTan.MultDir(wi))
+	for i := 0; i < depth; i++ {
+		if i > 1 {
+			if signal = signal.RandomGain(t.rnd); signal.Zero() {
+				break
+			}
+		}
+		hit, ok := t.scene.Surface.Intersect(ray)
+		if !ok {
+			energy = energy.Plus(t.scene.Env.At(ray.Dir).Times(signal))
+			break
+		}
+		pt := r.Moved(hit.Dist)
+		normal, mat := hit.Surface.At(pt)
 
-	direct, coverage := t.directLight(pt, normal)
-	weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
-	reflectance := bsdf.Eval(wi, wo).Scaled(weight)
-	incoming := t.trace(bounce, bounces-1, reflectance.Mean())
-	indirect := incoming.Times(reflectance)
+		// TODO: does this double-count lights? Should it be removed?
+		// Maybe remove this and also remove "coverage" below?
+		if light, ok := mat.Light(); ok {
+			energy = energy.Plus(light.Times(signal))
+			break
+		}
 
-	return direct.Plus(indirect)
+		bsdf := mat.BSDF(t.rnd)
+		toTan, fromTan := geom.Tangent(normal)
+		wo := toTan.MultDir(ray.Dir.Inv())
+		wi, pdf := bsdf.Sample(wo, t.rnd)
+		cos := wi.Dot(geom.Up)
+
+		direct, coverage := t.directLight(pt, normal)
+		weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
+		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+		bounce := fromTan.MultDir(wi)
+
+		signal = signal.Times(reflectance)
+		energy = energy.Plus(direct)
+		ray = geom.NewRay(pt, bounce)
+	}
+	return energy
 }
 
 func (t *tracer) directLight() rgb.Energy {
