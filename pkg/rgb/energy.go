@@ -66,7 +66,7 @@ func (a Energy) Limit(n float64) Energy {
 func (a Energy) RandomGain(rnd *rand.Rand) Energy {
 	greatest := geom.Vec(a).Greatest()
 	if rnd.Float64() > greatest {
-		return Energy{}
+		return Black
 	}
 	return a.Scaled(1 / greatest)
 }

@@ -15,7 +15,7 @@ import (
 
 func main() {
 	cam := camera.NewStandard()
-	cube := surface.UnitCube().Move(0, 0, -5).Rotate(0, 1, 0)
+	cube := surface.UnitCube().Move(0, -1, -5).Rotate(0, 1, 0)
 	env := &env.Gradient{Up: rgb.Energy{255, 255, 255}, Down: rgb.Black}
 	scene := render.NewScene(1280, 720, cam, cube, env)
 	frame := render.NewFrame(scene)
