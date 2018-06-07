@@ -85,6 +85,10 @@ func (c *Cube) Bounds() *geom.Bounds {
 	return c.bounds
 }
 
+func (c *Cube) Lights() []render.Object {
+	return nil
+}
+
 func (c *Cube) transform(m *geom.Mat) *Cube {
 	c.Pos = c.Pos.Mult(m)
 	min := c.Pos.MultPoint(geom.Vec{})

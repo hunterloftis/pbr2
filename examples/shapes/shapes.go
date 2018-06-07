@@ -15,9 +15,9 @@ import (
 
 func main() {
 	cam := camera.NewStandard()
-	list := surface.List{}
+	cube := surface.UnitCube().Move(0, 0, -5)
 	env := environment.Uniform{rgb.Energy{50, 100, 150}}
-	scene := render.NewScene(800, 600, cam, &list, &env)
+	scene := render.NewScene(800, 600, cam, cube, &env)
 	frame := render.NewFrame(scene)
 	kill := make(chan os.Signal, 2)
 
