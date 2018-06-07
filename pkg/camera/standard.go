@@ -31,8 +31,8 @@ func NewStandard() *Standard {
 		lens:     0.050, // 50mm focal length
 		fstop:    4,
 		position: geom.Vec{0, 0, 0},
-		target:   geom.Vec{0, 0, -1},
-		focus:    geom.Vec{0, 0, -1},
+		target:   geom.Vec{0, 0, -5},
+		focus:    geom.Vec{0, 0, -5},
 	}
 	s.transform()
 	return s
@@ -89,13 +89,13 @@ func (s *Standard) Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray {
 	u := x / width
 	v := y / height
 	if aImage > aSense { // wider image; crop vertically
-		v *= aSense / aImage
+		v = (1-aSense/aImage)*0.5 + v*aSense/aImage
 	} else if aSense > aImage { // taller image; crop horizontally
-		u *= aImage / aSense
+		u = (1-aImage/aSense)*0.5 + u*aImage/aSense
 	}
 	sensorPt := s.sensorPoint(u, v)
 	straight, _ := geom.Vec{}.Minus(sensorPt).Unit()
-	focalPt := geom.Vec(straight).Scaled(s.focusDist)
+	focalPt := geom.Vec(straight).Scaled(s.focusDist) // TODO: is this creating a curved focal plane? need to project along the center axis?
 	lensPt := s.aperturePoint(rnd)
 	refracted, _ := focalPt.Minus(lensPt).Unit()
 	ray := geom.NewRay(lensPt, refracted)
