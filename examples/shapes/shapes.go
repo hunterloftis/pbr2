@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
-	"github.com/hunterloftis/pbr2/pkg/environment"
+	"github.com/hunterloftis/pbr2/pkg/env"
 	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 	"github.com/hunterloftis/pbr2/pkg/surface"
@@ -15,9 +15,9 @@ import (
 
 func main() {
 	cam := camera.NewStandard()
-	cube := surface.UnitCube().Move(0, 0, -5) //.Rotate(0, 1, 0)
-	env := environment.Uniform{rgb.Energy{255, 255, 255}}
-	scene := render.NewScene(1280, 720, cam, cube, &env)
+	cube := surface.UnitCube().Move(0, 0, -5).Rotate(0, 1, 0)
+	env := &env.Gradient{Up: rgb.Energy{255, 255, 255}, Down: rgb.Black}
+	scene := render.NewScene(1280, 720, cam, cube, env)
 	frame := render.NewFrame(scene)
 	kill := make(chan os.Signal, 2)
 

@@ -84,14 +84,16 @@ func (s *Standard) Orientation() (pos, target, focus geom.Vec) {
 }
 
 func (s *Standard) Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray {
-	aSense := s.width / s.height
-	aImage := width / height
 	u := x / width
 	v := y / height
+	aSense := s.width / s.height
+	aImage := width / height
 	if aImage > aSense { // wider image; crop vertically
-		v = (1-aSense/aImage)*0.5 + v*aSense/aImage
+		r := aSense / aImage
+		v = (1-r)*0.5 + v*r
 	} else if aSense > aImage { // taller image; crop horizontally
-		u = (1-aImage/aSense)*0.5 + u*aImage/aSense
+		r := aImage / aSense
+		u = (1-r)*0.5 + u*r
 	}
 	sensorPt := s.sensorPoint(u, v)
 	straight, _ := geom.Vec{}.Minus(sensorPt).Unit()

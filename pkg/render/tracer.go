@@ -100,15 +100,20 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 			break
 		}
 
-		toTan, fromTan := geom.Tangent(normal)
-		wo := toTan.MultDir(ray.Dir.Inv())
-		wi, pdf := bsdf.Sample(wo, t.rnd)
-		cos := wi.Dot(geom.Up)
+		// toTan, fromTan := geom.Tangent(normal)
+		// wo := toTan.MultDir(ray.Dir.Inv())
+		// wi, pdf := bsdf.Sample(wo, t.rnd)
+		// cos := wi.Dot(geom.Up)
 
-		direct, coverage := t.direct(pt, normal, wo, toTan)
-		weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
-		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
-		bounce := fromTan.MultDir(wi)
+		// direct, coverage := t.direct(pt, normal, wo, toTan)
+		// weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
+		// reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+		// bounce := fromTan.MultDir(wi)
+
+		bounce, _ := normal.RandHemiCos(t.rnd)
+		cos := bounce.Dot(normal)
+		direct := rgb.Black
+		reflectance := rgb.White.Scaled(cos)
 
 		energy = energy.Plus(direct.Times(signal))
 		signal = signal.Times(reflectance).RandomGain(t.rnd)
