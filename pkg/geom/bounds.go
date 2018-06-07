@@ -10,6 +10,16 @@ type Bounds struct {
 	Radius   float64
 }
 
+func NewBounds(min, max Vec) *Bounds {
+	center := min.Plus(max).Scaled(0.5)
+	return &Bounds{
+		Min:    min,
+		Max:    max,
+		Center: center,
+		Radius: max.Minus(center).Len(),
+	}
+}
+
 // RayFrom inscribes the box within a unit sphere,
 // projects a solid angle disc from that sphere towards the origin,
 // chooses a random point within that disc,

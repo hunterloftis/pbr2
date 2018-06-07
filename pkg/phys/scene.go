@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
+	"github.com/hunterloftis/pbr2/pkg/surface"
 )
 
 type Scene struct {
@@ -18,19 +19,8 @@ type Camera interface {
 }
 
 type Surface interface {
-	Intersect(*geom.Ray) (obj Object, dist float64, ok bool)
-	Lights() []Object
-}
-
-type Object interface {
-	At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
-	Bounds() *geom.Bounds
-}
-
-type BSDF interface {
-	Sample(out geom.Dir, rnd *rand.Rand) (in geom.Dir, pdf float64)
-	Eval(in, out geom.Dir) Energy
-	Emit() Energy
+	Intersect(*geom.Ray) (obj surface.Object, dist float64, ok bool)
+	Lights() []surface.Object
 }
 
 type Environment interface {

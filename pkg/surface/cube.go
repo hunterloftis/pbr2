@@ -10,7 +10,7 @@ import (
 type Cube struct {
 	Pos    *geom.Mat
 	Mat    Material
-	bounds geom.Bounds
+	bounds *geom.Bounds
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with material and optional transforms.
@@ -38,7 +38,7 @@ func (c *Cube) transform(m *geom.Mat) *Cube {
 			}
 		}
 	}
-	c.box = NewBox(min, max)
+	c.bounds = geom.NewBounds(min, max)
 	return c
 }
 
