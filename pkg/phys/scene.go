@@ -24,7 +24,7 @@ type Surface interface {
 
 type Object interface {
 	At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
-	Bounds() *Bounds
+	Bounds() *geom.Bounds
 }
 
 type BSDF interface {
