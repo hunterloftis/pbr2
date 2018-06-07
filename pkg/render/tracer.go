@@ -47,9 +47,9 @@ func (t *tracer) process() {
 		s := NewSample(width, height)
 		for y := 0; y < height; y++ {
 			for x := 0; x < width; x++ {
-				u := float64(x) / float64(width)
-				v := float64(y) / float64(height)
-				r := camera.Ray(u, v)
+				rx := float64(x) + t.rnd.Float64()
+				ry := float64(y) + t.rnd.Float64()
+				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
 				s.Add(x, y, t.trace(r, maxDepth))
 			}
 		}

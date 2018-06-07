@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	cam := camera.NewPinhole()
+	cam := camera.NewStandard()
 	list := surface.List{}
 	env := environment.Uniform{phys.Energy{50, 100, 150}}
 	scene := phys.NewScene(800, 600, cam, &list, &env)

@@ -14,7 +14,7 @@ type Scene struct {
 }
 
 type Camera interface {
-	Ray(u, v float64) *geom.Ray
+	Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray
 }
 
 type Surface interface {
