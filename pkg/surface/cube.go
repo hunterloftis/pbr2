@@ -2,8 +2,10 @@ package surface
 
 import (
 	"math"
+	"math/rand"
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
+	"github.com/hunterloftis/pbr2/pkg/render"
 )
 
 // Cube describes the orientation and material of a unit cube
@@ -17,7 +19,7 @@ type Cube struct {
 func UnitCube(m ...Material) *Cube {
 	c := &Cube{
 		Pos: geom.Identity(),
-		Mat: DefaultMaterial{},
+		Mat: &DefaultMaterial{},
 	}
 	if len(m) > 0 {
 		c.Mat = m[0]
@@ -25,36 +27,7 @@ func UnitCube(m ...Material) *Cube {
 	return c.transform(geom.Identity())
 }
 
-func (c *Cube) transform(m *geom.Mat) *Cube {
-	c.Pos = c.Pos.Mult(m)
-	min := c.Pos.MultPoint(geom.Vec{})
-	max := c.Pos.MultPoint(geom.Vec{})
-	for x := -0.5; x <= 0.5; x += 1 {
-		for y := -0.5; y <= 0.5; y += 1 {
-			for z := -0.5; z <= 0.5; z += 1 {
-				pt := c.Pos.MultPoint(geom.Vec{x, y, z})
-				min = min.Min(pt)
-				max = max.Max(pt)
-			}
-		}
-	}
-	c.bounds = geom.NewBounds(min, max)
-	return c
-}
-
-func (c *Cube) Move(x, y, z float64) *Cube {
-	return c.transform(geom.Trans(x, y, z))
-}
-
-func (c *Cube) Scale(x, y, z float64) *Cube {
-	return c.transform(geom.Scale(x, y, z))
-}
-
-func (c *Cube) Rotate(x, y, z float64) *Cube {
-	return c.transform(geom.Rot(geom.Vec{x, y, z}))
-}
-
-func (c *Cube) Intersect(ray *geom.Ray) (obj Object, dist float64, ok bool) {
+func (c *Cube) Intersect(ray *geom.Ray) (obj render.Object, dist float64, ok bool) {
 	if ok, _, _ := c.bounds.Check(ray); !ok {
 		return nil, 0, false
 	}
@@ -91,12 +64,8 @@ func (c *Cube) Intersect(ray *geom.Ray) (obj Object, dist float64, ok bool) {
 	return nil, 0, false
 }
 
-func (c *Cube) Center() geom.Vec {
-	return c.Pos.MultPoint(geom.Vec{})
-}
-
 // At returns the normal geom.Vec at this point on the Surface
-func (c *Cube) At(pt geom.Vec) (normal geom.Dir, mat Material) {
+func (c *Cube) At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
 	normal = geom.Dir{}
 	i := c.Pos.Inverse()  // global to local transform
 	p1 := i.MultPoint(pt) // translate point into local space
@@ -112,10 +81,39 @@ func (c *Cube) At(pt geom.Vec) (normal geom.Dir, mat Material) {
 	return c.Pos.MultDir(normal), c.Mat.At(0, 0)
 }
 
-func (c *Cube) Box() *Box {
-	return c.box
+func (c *Cube) Bounds() *geom.Bounds {
+	return c.bounds
 }
 
-func (c *Cube) Emits() bool {
-	return c.Mat.Emits()
+func (c *Cube) transform(m *geom.Mat) *Cube {
+	c.Pos = c.Pos.Mult(m)
+	min := c.Pos.MultPoint(geom.Vec{})
+	max := c.Pos.MultPoint(geom.Vec{})
+	for x := -0.5; x <= 0.5; x += 1 {
+		for y := -0.5; y <= 0.5; y += 1 {
+			for z := -0.5; z <= 0.5; z += 1 {
+				pt := c.Pos.MultPoint(geom.Vec{x, y, z})
+				min = min.Min(pt)
+				max = max.Max(pt)
+			}
+		}
+	}
+	c.bounds = geom.NewBounds(min, max)
+	return c
+}
+
+func (c *Cube) Move(x, y, z float64) *Cube {
+	return c.transform(geom.Trans(x, y, z))
+}
+
+func (c *Cube) Scale(x, y, z float64) *Cube {
+	return c.transform(geom.Scale(x, y, z))
+}
+
+func (c *Cube) Rotate(x, y, z float64) *Cube {
+	return c.transform(geom.Rot(geom.Vec{x, y, z}))
+}
+
+func (c *Cube) Center() geom.Vec {
+	return c.Pos.MultPoint(geom.Vec{})
 }

@@ -6,20 +6,44 @@ import (
 	"time"
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/phys"
+	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
 const maxDepth = 7
 const maxWeight = 20
 
+type Camera interface {
+	Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray
+}
+
+type Surface interface {
+	Intersect(*geom.Ray) (obj Object, dist float64, ok bool)
+	Lights() []Object
+}
+
+type Environment interface {
+	At(geom.Dir) rgb.Energy
+}
+
+type Object interface {
+	At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
+	Bounds() *geom.Bounds
+}
+
+type BSDF interface {
+	Sample(wo geom.Dir, rnd *rand.Rand) (wi geom.Dir, pdf float64)
+	Eval(wi, wo geom.Dir) rgb.Energy
+	Emit() rgb.Energy
+}
+
 type tracer struct {
-	scene  *phys.Scene
+	scene  *Scene
 	out    chan *Sample
 	active toggle
 	rnd    *rand.Rand
 }
 
-func newTracer(s *phys.Scene, o chan *Sample) *tracer {
+func newTracer(s *Scene, o chan *Sample) *tracer {
 	return &tracer{
 		scene: s,
 		out:   o,
@@ -57,9 +81,9 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(ray *geom.Ray, depth int) phys.Energy {
-	energy := phys.Black
-	signal := phys.White
+func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
+	energy := rgb.Black
+	signal := rgb.White
 
 	for i := 0; i < depth; i++ {
 		obj, dist, ok := t.scene.Surface.Intersect(ray)
@@ -97,7 +121,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) phys.Energy {
 }
 
 // TODO: pretty long arg list...
-func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy phys.Energy, coverage float64) {
+func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy rgb.Energy, coverage float64) {
 	lights := t.scene.Surface.Lights()
 
 	for _, l := range lights {

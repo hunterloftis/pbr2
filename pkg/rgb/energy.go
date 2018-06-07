@@ -1,4 +1,4 @@
-package phys
+package rgb
 
 import (
 	"image/color"
