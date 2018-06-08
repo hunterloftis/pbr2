@@ -11,6 +11,7 @@ import (
 
 type Material interface {
 	At(u, v float64) render.BSDF
+	Light() rgb.Energy
 }
 
 type DefaultMaterial struct {
@@ -18,6 +19,10 @@ type DefaultMaterial struct {
 
 func (d *DefaultMaterial) At(u, v float64) render.BSDF {
 	return Lambert{}
+}
+
+func (d *DefaultMaterial) Light() rgb.Energy {
+	return rgb.Black
 }
 
 type Lambert struct {

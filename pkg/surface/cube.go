@@ -6,6 +6,7 @@ import (
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/render"
+	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
 // Cube describes the orientation and material of a unit cube
@@ -27,9 +28,9 @@ func UnitCube(m ...Material) *Cube {
 	return c.transform(geom.Identity())
 }
 
-func (c *Cube) Intersect(ray *geom.Ray) (obj render.Object, dist float64, ok bool) {
+func (c *Cube) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
 	if ok, _, _ := c.bounds.Check(ray); !ok {
-		return nil, 0, false
+		return nil, 0
 	}
 	inv := c.Pos.Inverse() // global to local transform
 	r := inv.MultRay(ray)  // translate ray into local space
@@ -48,20 +49,20 @@ func (c *Cube) Intersect(ray *geom.Ray) (obj render.Object, dist float64, ok boo
 			tmax = t1
 		}
 		if tmax < tmin {
-			return nil, 0, false
+			return nil, 0
 		}
 	}
 	if tmin > 0 {
 		if dist := c.Pos.MultDist(r.Dir.Scaled(tmin)).Len(); dist >= bias {
-			return c, dist, true
+			return c, dist
 		}
 	}
 	if tmax > 0 {
 		if dist := c.Pos.MultDist(r.Dir.Scaled(tmax)).Len(); dist >= bias {
-			return c, dist, true
+			return c, dist
 		}
 	}
-	return nil, 0, false
+	return nil, 0
 }
 
 // At returns the normal geom.Vec at this point on the Surface
@@ -87,6 +88,10 @@ func (c *Cube) Bounds() *geom.Bounds {
 
 func (c *Cube) Lights() []render.Object {
 	return nil
+}
+
+func (c *Cube) Light() rgb.Energy {
+	return c.Mat.Light()
 }
 
 func (c *Cube) transform(m *geom.Mat) *Cube {

@@ -12,6 +12,7 @@ type Gradient struct {
 }
 
 func (g *Gradient) At(dir geom.Dir) rgb.Energy {
-	vertical := math.Max(0, dir.Dot(geom.Up))
-	return g.Down.Lerp(g.Up, vertical)
+	cos := dir.Dot(geom.Up)
+	vertical := (1 + cos) / 2
+	return g.Down.Lerp(g.Up, math.Pow(vertical, 3))
 }

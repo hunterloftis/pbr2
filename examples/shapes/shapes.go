@@ -15,9 +15,11 @@ import (
 
 func main() {
 	cam := camera.NewStandard()
-	cube := surface.UnitCube().Move(0, -1, -5).Rotate(0, 1, 0)
+	ball := surface.UnitSphere().Move(0, 0, -5)
+	floor := surface.UnitCube().Move(0, -1, -5).Scale(100, 1, 100)
+	surf := surface.NewList(ball, floor)
 	env := &env.Gradient{Up: rgb.Energy{1000, 1000, 1000}, Down: rgb.Black}
-	scene := render.NewScene(1280, 720, cam, cube, env)
+	scene := render.NewScene(640, 360, cam, surf, env)
 	frame := render.NewFrame(scene)
 	kill := make(chan os.Signal, 2)
 

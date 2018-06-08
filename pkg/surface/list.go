@@ -1,17 +1,32 @@
 package surface
 
 import (
+	"math"
+
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/render"
 )
 
 type List struct {
+	surfs []render.Surface
 }
 
-func (l *List) Intersect(r *geom.Ray) (render.Object, float64, bool) {
-	return nil, 0, false
+func NewList(ss ...render.Surface) *List {
+	return &List{
+		surfs: ss,
+	}
+}
+
+func (l *List) Intersect(r *geom.Ray) (obj render.Object, dist float64) {
+	dist = math.Inf(1)
+	for _, s := range l.surfs {
+		if o, d := s.Intersect(r); o != nil && d < dist {
+			obj, dist = o, d
+		}
+	}
+	return obj, dist
 }
 
 func (l *List) Lights() []render.Object {
-	return []render.Object{}
+	return nil
 }

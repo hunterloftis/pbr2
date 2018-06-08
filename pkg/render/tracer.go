@@ -17,7 +17,7 @@ type Camera interface {
 }
 
 type Surface interface {
-	Intersect(*geom.Ray) (obj Object, dist float64, ok bool)
+	Intersect(*geom.Ray) (obj Object, dist float64)
 	Lights() []Object
 }
 
@@ -28,12 +28,12 @@ type Environment interface {
 type Object interface {
 	At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
 	Bounds() *geom.Bounds
+	Light() rgb.Energy
 }
 
 type BSDF interface {
 	Sample(wo geom.Dir, rnd *rand.Rand) (wi geom.Dir, pdf float64)
 	Eval(wi, wo geom.Dir) rgb.Energy
-	Emit() rgb.Energy
 }
 
 type tracer struct {
@@ -86,36 +86,36 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 	signal := rgb.White
 
 	for i := 0; i < depth; i++ {
-		obj, dist, ok := t.scene.Surface.Intersect(ray)
-		if !ok {
+		obj, dist := t.scene.Surface.Intersect(ray)
+		if obj == nil {
 			env := t.scene.Env.At(ray.Dir).Times(signal)
 			energy = energy.Plus(env)
+			break
+		}
+		if l := obj.Light(); !l.Zero() {
+			energy = energy.Plus(l.Times(signal))
 			break
 		}
 
 		pt := ray.Moved(dist)
 		normal, bsdf := obj.At(pt, t.rnd)
-		if e := bsdf.Emit(); !e.Zero() {
-			energy = energy.Plus(e.Times(signal))
-			break
-		}
 
-		// toTan, fromTan := geom.Tangent(normal)
-		// wo := toTan.MultDir(ray.Dir.Inv())
-		// wi, pdf := bsdf.Sample(wo, t.rnd)
-		// cos := wi.Dot(geom.Up)
+		toTan, fromTan := geom.Tangent(normal)
+		wo := toTan.MultDir(ray.Dir.Inv())
+		wi, pdf := bsdf.Sample(wo, t.rnd)
+		cos := wi.Dot(geom.Up)
 
-		// direct, coverage := t.direct(pt, normal, wo, toTan)
-		// weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
-		// reflectance := bsdf.Eval(wi, wo).Scaled(weight)
-		// bounce := fromTan.MultDir(wi)
+		direct, coverage := t.direct(pt, normal, wo, toTan)
+		weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
+		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+		bounce := fromTan.MultDir(wi)
 
 		// vanilla:
-		bounce, _ := normal.RandHemiCos(t.rnd)
-		cos := bounce.Dot(normal)
-		pdf := cos * math.Pi
-		direct := rgb.Black
-		reflectance := rgb.White.Scaled(cos / pdf)
+		// bounce, _ := normal.RandHemiCos(t.rnd)
+		// cos := bounce.Dot(normal)
+		// pdf := cos * math.Pi
+		// direct := rgb.Black
+		// reflectance := rgb.White.Scaled(cos / pdf)
 
 		energy = energy.Plus(direct.Times(signal))
 		signal = signal.Times(reflectance).RandomGain(t.rnd)
@@ -137,8 +137,8 @@ func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (ener
 			continue
 		}
 		coverage += solid
-		obj, dist, ok := t.scene.Surface.Intersect(ray)
-		if !ok {
+		obj, dist := t.scene.Surface.Intersect(ray)
+		if obj == nil {
 			continue
 		}
 		pt := ray.Moved(dist)
@@ -146,7 +146,7 @@ func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (ener
 		wi := toTan.MultDir(ray.Dir)
 		weight := solid / math.Pi
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
-		light := bsdf.Emit().Times(reflectance)
+		light := obj.Light().Times(reflectance)
 		energy = energy.Plus(light)
 	}
 	return energy, coverage

@@ -27,11 +27,15 @@ func (a Energy) Compressed(n float64) (b Energy, scale float64) {
 
 func (a Energy) ToRGBA() color.RGBA {
 	return color.RGBA{
-		R: uint8(a.X),
-		G: uint8(a.Y),
-		B: uint8(a.Z),
+		R: rgba(a.X),
+		G: rgba(a.Y),
+		B: rgba(a.Z),
 		A: 255,
 	}
+}
+
+func rgba(n float64) uint8 {
+	return uint8(math.Min(255, math.Max(0, n)))
 }
 
 // Scaled returns energy a scaled by n.
