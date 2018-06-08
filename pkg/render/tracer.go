@@ -112,6 +112,10 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 
 		pt := ray.Moved(dist)
 		normal, bsdf := obj.At(pt, t.rnd)
+		if !ray.Dir.Enters(normal) { // TODO: is there a more elegant way to do this?
+			ray = geom.NewRay(pt, ray.Dir)
+			continue
+		}
 
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())

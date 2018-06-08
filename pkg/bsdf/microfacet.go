@@ -49,7 +49,7 @@ func (m Microfacet) Eval(wi, wo geom.Dir) rgb.Energy {
 	wg := geom.Up
 	wm := wo.Half(wi)
 	if wi.Y <= 0 || wi.Dot(wm) <= 0 {
-		return rgb.Energy{0, 0, 0}
+		return rgb.White // exiting, shouldn't be here
 	}
 	F := rgb.Energy{
 		X: fresnelSchlick(wi.Dot(wm), m.Specular.X),
