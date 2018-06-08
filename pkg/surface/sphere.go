@@ -111,7 +111,3 @@ func (s *Sphere) At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf render.B
 func (s *Sphere) Light() rgb.Energy {
 	return s.Mat.Light()
 }
-
-func (s *Sphere) Lights() []render.Object {
-	return nil
-}

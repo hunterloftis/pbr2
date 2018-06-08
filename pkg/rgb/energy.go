@@ -8,6 +8,8 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/geom"
 )
 
+const sRGB = 2.2
+
 // Energy stores RGB light energy as a 3D Vector.
 type Energy geom.Vec
 
@@ -27,9 +29,9 @@ func (a Energy) Compressed(n float64) (b Energy, scale float64) {
 
 func (a Energy) ToRGBA() color.RGBA {
 	return color.RGBA{
-		R: rgba(a.X, 2.2),
-		G: rgba(a.Y, 2.2),
-		B: rgba(a.Z, 2.2),
+		R: rgba(a.X, sRGB),
+		G: rgba(a.Y, sRGB),
+		B: rgba(a.Z, sRGB),
 		A: 255,
 	}
 }
