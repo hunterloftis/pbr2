@@ -22,9 +22,6 @@ type Environment interface {
 
 type Surface interface {
 	Intersect(*geom.Ray) (obj Object, dist float64)
-}
-
-type Container interface {
 	Lights() []Object
 }
 
@@ -138,11 +135,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 
 // TODO: pretty long arg list...
 func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy rgb.Energy, coverage float64) {
-	c, ok := t.scene.Surface.(Container)
-	if !ok {
-		return energy, coverage
-	}
-	lights := c.Lights()
+	lights := t.scene.Surface.Lights()
 
 	for _, l := range lights {
 		ray, solid := l.Bounds().ShadowRay(pt, normal, t.rnd)

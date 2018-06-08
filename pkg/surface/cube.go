@@ -86,6 +86,13 @@ func (c *Cube) Bounds() *geom.Bounds {
 	return c.bounds
 }
 
+func (c *Cube) Lights() []render.Object {
+	if !c.Mat.Light().Zero() {
+		return []render.Object{c}
+	}
+	return nil
+}
+
 func (c *Cube) Light() rgb.Energy {
 	return c.Mat.Light()
 }

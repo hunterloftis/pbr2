@@ -27,6 +27,9 @@ func (l *List) Intersect(r *geom.Ray) (obj render.Object, dist float64) {
 	return obj, dist
 }
 
-func (l *List) Lights() []render.Object {
-	return nil
+func (l *List) Lights() (ll []render.Object) {
+	for _, s := range l.surfs {
+		ll = append(ll, s.Lights()...)
+	}
+	return ll
 }
