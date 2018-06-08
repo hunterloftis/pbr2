@@ -25,24 +25,22 @@ func (a Energy) Compressed(n float64) (b Energy, scale float64) {
 	return a.Scaled(n / max), scale
 }
 
-// linear color: gamma = 1
-// sRGB: gamma = 2.2
-func (a Energy) ToRGBA(gamma float64) color.RGBA {
+func (a Energy) ToRGBA() color.RGBA {
 	return color.RGBA{
-		R: rgba(a.X, gamma),
-		G: rgba(a.Y, gamma),
-		B: rgba(a.Z, gamma),
+		R: rgba(a.X, 2.2),
+		G: rgba(a.Y, 2.2),
+		B: rgba(a.Z, 2.2),
 		A: 255,
 	}
 }
 
-func rgba(n, g float64) uint8 {
-	mapped := gamma(n, g)
+func rgba(c, g float64) uint8 {
+	mapped := gamma(c, g)
 	return uint8(math.Min(255, math.Max(0, mapped)))
 }
 
-func gamma(n, g float64) float64 {
-	return math.Pow(n/255, (1/g)) * 255
+func gamma(c, g float64) float64 {
+	return math.Pow(c/255, (1/g)) * 255
 }
 
 // Scaled returns energy a scaled by n.
