@@ -8,7 +8,7 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/geom"
 )
 
-const sRGB = 2.2
+const sRGB = 1.8
 
 // Energy stores RGB light energy as a 3D Vector.
 type Energy geom.Vec

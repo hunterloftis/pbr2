@@ -9,6 +9,7 @@ import (
 )
 
 // Cook-Torrance microfacet model
+// TODO: consider not squaring roughness to give a more linear progression
 type Microfacet struct {
 	Specular   rgb.Energy
 	Roughness  float64

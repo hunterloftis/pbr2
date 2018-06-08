@@ -2,6 +2,7 @@ package render
 
 import (
 	"image"
+	"math"
 
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
@@ -31,7 +32,7 @@ func NewSample(w, h int) *Sample {
 
 func (s *Sample) At(x, y int) rgb.Energy {
 	i := (y*s.Width + x) * stride
-	c := s.data[i+count]
+	c := math.Max(1, s.data[i+count])
 	return rgb.Energy{
 		X: s.data[i+red] / c,
 		Y: s.data[i+green] / c,
