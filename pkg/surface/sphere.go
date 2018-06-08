@@ -105,7 +105,7 @@ func (s *Sphere) At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf render.B
 	i := s.Pos.Inverse()
 	p := i.MultPoint(pt)
 	pu, _ := p.Unit()
-	return s.Pos.MultDir(pu), s.Mat.At(0, 0)
+	return s.Pos.MultDir(pu), s.Mat.At(0, 0, rnd)
 }
 
 func (s *Sphere) Light() rgb.Energy {

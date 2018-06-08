@@ -10,14 +10,14 @@ import (
 )
 
 type Material interface {
-	At(u, v float64) render.BSDF
+	At(u, v float64, rnd *rand.Rand) render.BSDF
 	Light() rgb.Energy
 }
 
 type DefaultMaterial struct {
 }
 
-func (d *DefaultMaterial) At(u, v float64) render.BSDF {
+func (d *DefaultMaterial) At(u, v float64, rnd *rand.Rand) render.BSDF {
 	return Lambert{}
 }
 

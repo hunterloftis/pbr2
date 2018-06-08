@@ -110,13 +110,6 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
 
-		// vanilla:
-		// bounce, _ := normal.RandHemiCos(t.rnd)
-		// cos := bounce.Dot(normal)
-		// pdf := cos * math.Pi
-		// direct := rgb.Black
-		// reflectance := rgb.White.Scaled(cos / pdf)
-
 		energy = energy.Plus(direct.Times(signal))
 		signal = signal.Times(reflectance).RandomGain(t.rnd)
 		if signal.Zero() {

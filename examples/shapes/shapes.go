@@ -8,6 +8,7 @@ import (
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
+	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 	"github.com/hunterloftis/pbr2/pkg/surface"
@@ -15,10 +16,10 @@ import (
 
 func main() {
 	cam := camera.NewStandard()
-	ball := surface.UnitSphere().Move(0, 0, -5)
+	ball := surface.UnitSphere(material.Gold(0.1)).Move(0, 0, -5)
 	floor := surface.UnitCube().Move(0, -1, -5).Scale(100, 1, 100)
 	surf := surface.NewList(ball, floor)
-	env := &env.Gradient{Up: rgb.Energy{1000, 1000, 1000}, Down: rgb.Black}
+	env := env.NewGradient(rgb.Black, rgb.Energy{1000, 1000, 1000})
 	scene := render.NewScene(640, 360, cam, surf, env)
 	frame := render.NewFrame(scene)
 	kill := make(chan os.Signal, 2)
