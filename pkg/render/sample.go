@@ -53,6 +53,8 @@ func (s *Sample) Merge(other *Sample) {
 	}
 }
 
+// TODO: optional blur around super-bright pixels
+// (essentially a gaussian blur that ignores light < some threshold)
 func (s *Sample) ToRGBA() *image.RGBA {
 	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
 	for y := 0; y < s.Height; y++ {

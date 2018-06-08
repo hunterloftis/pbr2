@@ -25,13 +25,13 @@ func main() {
 	frame := render.NewFrame(scene)
 	kill := make(chan os.Signal, 2)
 
-	fmt.Println("rendering shapes.png (press Ctrl+C to finish)...")
+	fmt.Println("rendering hello.png (press Ctrl+C to finish)...")
 	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
 	frame.Start()
 	<-kill
 	frame.Stop()
 
-	if err := frame.WritePNG("shapes.png"); err != nil {
+	if err := frame.WritePNG("hello.png"); err != nil {
 		panic(err)
 	}
 }
