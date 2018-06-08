@@ -17,9 +17,9 @@ import (
 func main() {
 	cam := camera.NewStandard()
 	ball := surface.UnitSphere(material.Gold(0.1)).Move(0, 0, -5)
-	floor := surface.UnitCube().Move(0, -1, -5).Scale(100, 1, 100)
+	floor := surface.UnitCube(material.Plastic(1, 1, 1)).Move(0, -1, -5).Scale(100, 1, 100)
 	surf := surface.NewList(ball, floor)
-	env := env.NewGradient(rgb.Black, rgb.Energy{1000, 1000, 1000})
+	env := env.NewGradient(rgb.Black, rgb.Energy{500, 500, 500}, 4)
 	scene := render.NewScene(640, 360, cam, surf, env)
 	frame := render.NewFrame(scene)
 	kill := make(chan os.Signal, 2)

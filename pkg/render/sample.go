@@ -14,6 +14,8 @@ const (
 	stride
 )
 
+const gamma = 1.8
+
 // TODO: hide Width and Height (expose as Width()/Height() if necessary)
 type Sample struct {
 	Width  int
@@ -57,7 +59,7 @@ func (s *Sample) ToRGBA() *image.RGBA {
 	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
 	for y := 0; y < s.Height; y++ {
 		for x := 0; x < s.Width; x++ {
-			c := s.At(x, y).ToRGBA()
+			c := s.At(x, y).ToRGBA(gamma)
 			im.SetRGBA(x, y, c)
 		}
 	}

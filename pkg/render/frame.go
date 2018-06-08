@@ -52,6 +52,7 @@ func (f *Frame) Stop() {
 	}
 }
 
+// TODO: gamma correction
 func (f *Frame) Image() *image.RGBA {
 	return f.data.ToRGBA()
 }

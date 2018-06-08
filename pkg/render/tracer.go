@@ -81,6 +81,19 @@ func (t *tracer) process() {
 	}
 }
 
+// func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
+// 	obj, dist := t.scene.Surface.Intersect(ray)
+// 	if obj == nil {
+// 		return t.scene.Env.At(ray.Dir)
+// 	}
+// 	if l := obj.Light(); !l.Zero() {
+// 		return l
+// 	}
+// 	for i := 0; i < branches; i++ {
+
+// 	}
+// }
+
 func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 	energy := rgb.Black
 	signal := rgb.White
