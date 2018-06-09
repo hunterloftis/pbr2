@@ -29,7 +29,6 @@ func (un *Uniform) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
 		if un.Transmission == 0 {
 			return bsdf.Ignore{}
 		}
-		return bsdf.Ignore{}
 		return bsdf.Transmit{
 			Specular:   un.Specularity,
 			Roughness:  un.Roughness,

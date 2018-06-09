@@ -20,10 +20,9 @@ func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
 	// return wo.Inv(), 1
 	ior := fresnelToRefractiveIndex(t.Specular)
 	if wo.Dot(geom.Up) < 0 {
-		ior = 1 / ior
+		return snell2(wo.Inv(), ior, 1), 1
 	}
-	wi := snell(wo, geom.Up, ior)
-	return wi, 1
+	return snell2(wo.Inv(), 1, ior), 1
 }
 
 func (t Transmit) PDF(wi, wo geom.Dir) float64 {
@@ -34,6 +33,18 @@ func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
 	return rgb.White.Scaled(t.Multiplier)
 }
 
+func snell2(in geom.Dir, n1, n2 float64) (refracted geom.Dir) {
+	cos := in.Inv().Dot(geom.Up)
+	theta1 := math.Acos(cos)
+	theta2 := math.Asin((math.Sin(theta1) * n1) / n2)
+	ratio := math.Sin(theta2) / math.Sin(theta1)
+	x := in.X * ratio
+	y := in.Y
+	z := in.Z * ratio
+	dir, _ := geom.Vec{x, y, z}.Unit()
+	return dir
+}
+
 // Snell's law of refraction
 // https://www.bramz.net/data/writings/reflection_transmission.pdf
 func snell(in, normal geom.Dir, ior float64) geom.Dir {
@@ -42,11 +53,24 @@ func snell(in, normal geom.Dir, ior float64) geom.Dir {
 	cosI := -normal.Dot(incident)
 	sinT2 := n * n * (1 - cosI*cosI)
 	if sinT2 > 1 {
+		return incident
 		return in.Reflect2(normal.Inv()) // Total internal reflection
 	}
 	cosT := math.Sqrt(1 - sinT2)
 	dir, _ := incident.Scaled(n).Plus(normal.Scaled(n*cosI - cosT)).Unit()
 	return dir
+
+	// a := in.Inv()
+	// ratio := 1 / ior
+	// cos := normal.Dot(a)
+	// k := 1 - ratio*ratio*(1-cos*cos)
+	// if k < 0 {
+	// 	return a.Reflect2(normal.Inv())
+	// 	// return in.Reflected(normal.Inv())
+	// }
+	// offset := normal.Scaled(ratio*cos + math.Sqrt(k))
+	// dir, _ := a.Scaled(ratio).Minus(offset).Unit()
+	// return dir
 
 	// in1 := in.Inv()
 	// cos := -normal.Dot(in1)
