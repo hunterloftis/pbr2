@@ -24,7 +24,7 @@ func main() {
 	gold := material.Gold(0.01)
 	greenGlass := material.Glass(0.00001)
 
-	sky := env.NewFlat(30, 35, 40)
+	sky := env.NewFlat(40, 50, 60)
 	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Vec{}, geom.Vec{0, -0.025, 0.2})
 	surf := surface.NewList(
 		surface.UnitCube(whitePlastic).Move(0, -0.55, 0).Scale(1000, 1, 1000),

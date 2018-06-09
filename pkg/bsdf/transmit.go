@@ -33,8 +33,8 @@ func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
 	return rgb.White.Scaled(t.Multiplier)
 }
 
-// https://www.bramz.net/data/writings/reflection_transmission.pdf
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
+// https://www.bramz.net/data/writings/reflection_transmission.pdf
 func snell3(in, normal geom.Dir, n1, n2 float64) geom.Dir {
 	n := n1 / n2
 	cosI := -normal.Dot(in) // why negative in reference?
