@@ -20,9 +20,9 @@ func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
 	// return wo.Inv(), 1
 	ior := fresnelToRefractiveIndex(t.Specular)
 	if wo.Dot(geom.Up) < 0 {
-		return snell2(wo.Inv(), ior, 1), 1
+		return snell3(wo.Inv(), ior, 1), 1
 	}
-	return snell2(wo.Inv(), 1, ior), 1
+	return snell3(wo.Inv(), 1, ior), 1
 }
 
 func (t Transmit) PDF(wi, wo geom.Dir) float64 {
@@ -33,11 +33,27 @@ func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
 	return rgb.White.Scaled(t.Multiplier)
 }
 
+func snell3(in geom.Dir, n1, n2 float64) geom.Dir {
+	n := n1 / n2
+	cosI := -geom.Up.Dot(in)
+	sinT2 := n * n * (1 - cosI*cosI)
+	if sinT2 > 1 {
+		return in
+		// return in.Inv().Reflect2(geom.Up)
+	}
+	cosT := math.Sqrt(1 - sinT2)
+	dir, _ := in.Scaled(n).Plus(geom.Up.Scaled(n*cosI - cosT)).Unit()
+	return dir
+}
+
 func snell2(in geom.Dir, n1, n2 float64) (refracted geom.Dir) {
 	cos := in.Inv().Dot(geom.Up)
 	theta1 := math.Acos(cos)
 	theta2 := math.Asin((math.Sin(theta1) * n1) / n2)
 	ratio := math.Sin(theta2) / math.Sin(theta1)
+	if ratio <= 0 {
+		return in.Inv().Reflect2(geom.Up)
+	}
 	x := in.X * ratio
 	y := in.Y
 	z := in.Z * ratio
