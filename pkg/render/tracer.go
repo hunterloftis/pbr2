@@ -112,22 +112,21 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 
 		pt := ray.Moved(dist)
 		normal, bsdf := obj.At(pt, t.rnd)
-		if !ray.Dir.Enters(normal) { // TODO: is there a more elegant way to do this?
-			ray = geom.NewRay(pt, ray.Dir)
-			continue
-		}
-
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())
 		wi, pdf := bsdf.Sample(wo, t.rnd)
-		cos := wi.Dot(geom.Up)
 
-		direct, coverage := t.direct(pt, normal, wo, toTan)
-		weight := math.Min(maxWeight, (1-coverage)*cos/pdf)
+		indirect := 1.0
+		if ray.Dir.Enters(normal) {
+			direct, coverage := t.direct(pt, normal, wo, toTan)
+			energy = energy.Plus(direct.Times(signal))
+			indirect -= coverage
+		}
+
+		cos := wi.Dot(geom.Up)
+		weight := math.Min(maxWeight, indirect*cos/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
-
-		energy = energy.Plus(direct.Times(signal))
 		signal = signal.Times(reflectance).RandomGain(t.rnd)
 		if signal.Zero() {
 			break
