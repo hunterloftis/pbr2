@@ -58,5 +58,6 @@ func (m Microfacet) Eval(wi, wo geom.Dir) rgb.Energy {
 	D := ggx(wi, wo, wg, m.Roughness)  // The NDF (Normal Distribution Function)
 	G := smithGGX(wo, wg, m.Roughness) // The Geometric Shadowing function
 	r := (D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
-	return F.Scaled(r * m.Multiplier)
+	cos := wi.Dot(geom.Up)
+	return F.Scaled(r * cos * m.Multiplier)
 }

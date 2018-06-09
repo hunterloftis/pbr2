@@ -23,5 +23,6 @@ func (l Lambert) PDF(wi, wo geom.Dir) float64 {
 }
 
 func (l Lambert) Eval(wi, wo geom.Dir) rgb.Energy {
-	return l.Color.Scaled(l.Multiplier)
+	cos := wi.Dot(geom.Up)
+	return l.Color.Scaled(cos * l.Multiplier)
 }

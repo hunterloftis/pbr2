@@ -123,8 +123,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 		// 	indirect -= coverage
 		// }
 
-		cos := wi.Dot(geom.Up)
-		weight := math.Min(maxWeight, indirect*cos/pdf)
+		weight := math.Min(maxWeight, indirect/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
 		signal = signal.Times(reflectance).RandomGain(t.rnd)
