@@ -18,11 +18,11 @@ type Transmit struct {
 // Simple, perfect refraction with no roughness
 func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
 	// return wo.Inv(), 1
-	ior := fresnelToRefractiveIndex(t.Specular)
+	// ior := fresnelToRefractiveIndex(t.Specular)
 	if wo.Dot(geom.Up) < 0 {
-		return snell3(wo.Inv(), ior, 1), 1
+		return snell3(wo.Inv(), 1, 1), 1
 	}
-	return snell3(wo.Inv(), 1, ior), 1
+	return snell3(wo.Inv(), 1, 1), 1
 }
 
 func (t Transmit) PDF(wi, wo geom.Dir) float64 {
@@ -33,13 +33,13 @@ func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
 	return rgb.White.Scaled(t.Multiplier)
 }
 
+// https://www.bramz.net/data/writings/reflection_transmission.pdf
 func snell3(in geom.Dir, n1, n2 float64) geom.Dir {
 	n := n1 / n2
-	cosI := -geom.Up.Dot(in)
+	cosI := geom.Up.Dot(in) // why negative in reference?
 	sinT2 := n * n * (1 - cosI*cosI)
 	if sinT2 > 1 {
-		return in
-		// return in.Inv().Reflect2(geom.Up)
+		return in.Inv().Reflect2(geom.Up)
 	}
 	cosT := math.Sqrt(1 - sinT2)
 	dir, _ := in.Scaled(n).Plus(geom.Up.Scaled(n*cosI - cosT)).Unit()
