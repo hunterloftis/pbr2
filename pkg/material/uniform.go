@@ -24,7 +24,17 @@ func (un *Uniform) Light() rgb.Energy {
 	return un.Color.Scaled(un.Emission)
 }
 
-func (un *Uniform) At(u, v float64, rnd *rand.Rand) render.BSDF {
+func (un *Uniform) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
+	if cos > 0 {
+		if un.Transmission == 0 {
+			return bsdf.Ignore{}
+		}
+		return bsdf.Transmit{
+			Specular:   un.Specularity,
+			Roughness:  un.Roughness,
+			Multiplier: 1,
+		}
+	}
 	if rnd.Float64() <= un.Metalness {
 		return bsdf.Microfacet{
 			Specular:   un.Color,
@@ -33,18 +43,22 @@ func (un *Uniform) At(u, v float64, rnd *rand.Rand) render.BSDF {
 		}
 	}
 	// TODO: dynamic reflect/refract ratio based on material properties
+	hemispheres := 1.0
+	if un.Transmission > 0 {
+		hemispheres = 2
+	}
 	if rnd.Float64() < reflect {
 		return bsdf.Microfacet{
 			Specular:   rgb.Energy{un.Specularity, un.Specularity, un.Specularity},
 			Roughness:  un.Roughness,
-			Multiplier: 1 / reflect,
+			Multiplier: hemispheres / reflect,
 		}
 	}
 	if un.Transmission > 0 {
 		return bsdf.Transmit{
-			Specular:   un.Color,
+			Specular:   un.Specularity,
 			Roughness:  un.Roughness,
-			Multiplier: 1 / refract,
+			Multiplier: hemispheres / refract,
 		}
 	}
 	return bsdf.Lambert{

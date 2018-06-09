@@ -101,11 +101,12 @@ func (s *Sphere) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
 }
 
 // At returns the surface normal given a point on the surface.
-func (s *Sphere) At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
+func (s *Sphere) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
 	i := s.Pos.Inverse()
 	p := i.MultPoint(pt)
 	pu, _ := p.Unit()
-	return s.Pos.MultDir(pu), s.Mat.At(0, 0, rnd)
+	n := s.Pos.MultDir(pu)
+	return n, s.Mat.At(0, 0, in.Dot(n), rnd)
 }
 
 func (s *Sphere) Light() rgb.Energy {

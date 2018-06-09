@@ -66,7 +66,7 @@ func (c *Cube) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
 }
 
 // At returns the normal geom.Vec at this point on the Surface
-func (c *Cube) At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
+func (c *Cube) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
 	normal = geom.Dir{}
 	i := c.Pos.Inverse()  // global to local transform
 	p1 := i.MultPoint(pt) // translate point into local space
@@ -79,7 +79,8 @@ func (c *Cube) At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSD
 	default:
 		normal = geom.Dir{0, 0, math.Copysign(1, p1.Z)}
 	}
-	return c.Pos.MultDir(normal), c.Mat.At(0, 0, rnd)
+	n := c.Pos.MultDir(normal)
+	return n, c.Mat.At(0, 0, in.Dot(n), rnd)
 }
 
 func (c *Cube) Bounds() *geom.Bounds {

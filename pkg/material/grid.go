@@ -15,8 +15,8 @@ type Grid struct {
 	thickness float64
 }
 
-func (g *Grid) At(u, v float64, rnd *rand.Rand) render.BSDF {
-	return g.base.At(u, v, rnd)
+func (g *Grid) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
+	return g.base.At(u, v, cos, rnd)
 }
 
 func (g *Grid) Light() rgb.Energy {

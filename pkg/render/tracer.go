@@ -26,7 +26,7 @@ type Surface interface {
 }
 
 type Object interface {
-	At(pt geom.Vec, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
+	At(pt geom.Vec, dir geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
 	Bounds() *geom.Bounds
 	Light() rgb.Energy
 }
@@ -111,7 +111,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 		}
 
 		pt := ray.Moved(dist)
-		normal, bsdf := obj.At(pt, t.rnd)
+		normal, bsdf := obj.At(pt, ray.Dir, t.rnd)
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())
 		wi, pdf := bsdf.Sample(wo, t.rnd)
@@ -150,7 +150,7 @@ func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (ener
 			continue
 		}
 		pt := ray.Moved(dist)
-		_, bsdf := obj.At(pt, t.rnd)
+		_, bsdf := obj.At(pt, ray.Dir, t.rnd)
 		wi := toTan.MultDir(ray.Dir)
 		weight := solid / math.Pi
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)

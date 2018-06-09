@@ -10,7 +10,7 @@ import (
 
 // Cook-Torrance microfacet model
 type Transmit struct {
-	Specular   rgb.Energy
+	Specular   float64
 	Roughness  float64
 	Multiplier float64
 }
@@ -18,12 +18,12 @@ type Transmit struct {
 // Simple, perfect refraction with no roughness
 func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
 	return wo.Inv(), 1
-	// ior := fresnelToRefractiveIndex(t.Specular.Mean())
-	// if wo.Dot(geom.Up) < 0 {
-	// 	ior = 1 / ior
-	// }
-	// wi := snell(wo, geom.Up, ior)
-	// return wi, 1
+	ior := fresnelToRefractiveIndex(t.Specular)
+	if wo.Dot(geom.Up) < 0 {
+		ior = 1 / ior
+	}
+	wi := snell(wo, geom.Up, ior)
+	return wi, 1
 }
 
 func (t Transmit) PDF(wi, wo geom.Dir) float64 {
@@ -31,13 +31,13 @@ func (t Transmit) PDF(wi, wo geom.Dir) float64 {
 }
 
 func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
-	return rgb.White
+	return rgb.White.Scaled(t.Multiplier)
 }
 
 // Snell's law of refraction
 // https://www.bramz.net/data/writings/reflection_transmission.pdf
 func snell(in, normal geom.Dir, ior float64) geom.Dir {
-	in1 := in //.Inv()
+	in1 := in.Inv()
 	cos := normal.Dot(in1)
 	k := 1 - ior*ior*(1-cos*cos)
 	if k < 0 {
