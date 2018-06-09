@@ -40,13 +40,13 @@ func (un *Uniform) At(u, v float64, rnd *rand.Rand) render.BSDF {
 			Multiplier: 1 / reflect,
 		}
 	}
-	// if un.Transmission > 0 {
-	// 	return Microfacet{
-	// 		Specular:   un.Color,
-	// 		Roughness:  un.Roughness,
-	// 		Multiplier: 1 / reflect,
-	// 	}
-	// }
+	if un.Transmission > 0 {
+		return bsdf.Transmit{
+			Specular:   un.Color,
+			Roughness:  un.Roughness,
+			Multiplier: 1 / refract,
+		}
+	}
 	return bsdf.Lambert{
 		Color:      un.Color,
 		Multiplier: 1 / refract,

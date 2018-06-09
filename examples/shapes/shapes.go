@@ -22,7 +22,7 @@ func main() {
 	bluePlastic := material.Plastic(0, 0, 1)
 	greenPlastic := material.Plastic(0, 1, 0)
 	gold := material.Gold(0.01)
-	greenGlass := material.Mirror(0.01)
+	greenGlass := material.Glass(0.01)
 
 	sky := env.NewFlat(30, 35, 40)
 	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Vec{}, geom.Vec{0, -0.025, 0.2})
