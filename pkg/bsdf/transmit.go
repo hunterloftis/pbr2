@@ -17,7 +17,7 @@ type Transmit struct {
 
 // Simple, perfect refraction with no roughness
 func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
-	return wo.Inv(), 1
+	// return wo.Inv(), 1
 	ior := fresnelToRefractiveIndex(t.Specular)
 	if wo.Dot(geom.Up) < 0 {
 		ior = 1 / ior
@@ -37,18 +37,31 @@ func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
 // Snell's law of refraction
 // https://www.bramz.net/data/writings/reflection_transmission.pdf
 func snell(in, normal geom.Dir, ior float64) geom.Dir {
-	in1 := in.Inv()
-	cos := normal.Dot(in1)
-	k := 1 - ior*ior*(1-cos*cos)
-	if k < 0 {
-		return in1.Reflect2(normal) // Total internal reflection
+	incident := in.Inv()
+	n := 1 / ior
+	cosI := -normal.Dot(incident)
+	sinT2 := n * n * (1 - cosI*cosI)
+	if sinT2 > 1 {
+		return in.Reflect2(normal.Inv()) // Total internal reflection
 	}
-	offset := normal.Scaled(ior*cos + math.Sqrt(k))
-	dir, _ := in1.Scaled(ior).Minus(offset).Unit()
+	cosT := math.Sqrt(1 - sinT2)
+	dir, _ := incident.Scaled(n).Plus(normal.Scaled(n*cosI - cosT)).Unit()
 	return dir
+
+	// in1 := in.Inv()
+	// cos := -normal.Dot(in1)
+	// ratio := 1 / ior
+	// k := 1 - ratio*ratio*(1-cos*cos)
+	// if k < 0 {
+	// 	return in1.Reflect2(normal) // Total internal reflection
+	// }
+	// offset := normal.Scaled(ratio*cos + math.Sqrt(k))
+	// dir, _ := in1.Scaled(ratio).Minus(offset).Unit()
+	// return dir
 }
 
 // https://docs.blender.org/manual/en/dev/render/cycles/nodes/types/shaders/principled.html
+// http://www.visual-barn.com/2017/03/14/f0-converting-substance-fresnel-vray-values/
 func fresnelToRefractiveIndex(f float64) float64 {
 	return (1 + math.Sqrt(f)) / (1 - math.Sqrt(f))
 }
