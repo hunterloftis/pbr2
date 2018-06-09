@@ -117,11 +117,11 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 		wi, pdf := bsdf.Sample(wo, t.rnd)
 
 		indirect := 1.0
-		if ray.Dir.Enters(normal) {
-			direct, coverage := t.direct(pt, normal, wo, toTan)
-			energy = energy.Plus(direct.Times(signal))
-			indirect -= coverage
-		}
+		// if ray.Dir.Enters(normal) {
+		// 	direct, coverage := t.direct(pt, normal, wo, toTan)
+		// 	energy = energy.Plus(direct.Times(signal))
+		// 	indirect -= coverage
+		// }
 
 		cos := wi.Dot(geom.Up)
 		weight := math.Min(maxWeight, indirect*cos/pdf)

@@ -17,12 +17,13 @@ type Transmit struct {
 
 // Simple, perfect refraction with no roughness
 func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
-	ior := fresnelToRefractiveIndex(t.Specular.Mean())
-	if wo.Dot(geom.Up) < 0 {
-		ior = 1 / ior
-	}
-	wi := snell(wo, geom.Up, ior)
-	return wi, 1
+	return wo.Inv(), 1
+	// ior := fresnelToRefractiveIndex(t.Specular.Mean())
+	// if wo.Dot(geom.Up) < 0 {
+	// 	ior = 1 / ior
+	// }
+	// wi := snell(wo, geom.Up, ior)
+	// return wi, 1
 }
 
 func (t Transmit) PDF(wi, wo geom.Dir) float64 {
