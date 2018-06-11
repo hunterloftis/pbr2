@@ -40,10 +40,10 @@ func main() {
 	}
 
 	light := material.Light(1500, 1500, 1500)
-	redPlastic := material.Plastic(1, 0, 0)
-	whitePlastic := material.Plastic(1, 1, 1)
-	bluePlastic := material.Plastic(0, 0, 1)
-	greenPlastic := material.Plastic(0, 1, 0)
+	redPlastic := material.Plastic(1, 0, 0, 0.01)
+	whitePlastic := material.Plastic(1, 1, 1, 0.07)
+	bluePlastic := material.Plastic(0, 0, 1, 0.01)
+	greenPlastic := material.Plastic(0, 1, 0, 0.01)
 	gold := material.Gold(0.05)
 	greenGlass := material.Glass(0.00001)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
