@@ -1,11 +1,14 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math"
 	"os"
 	"os/signal"
+	"runtime/pprof"
 	"syscall"
+	"time"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
@@ -16,6 +19,26 @@ import (
 )
 
 func main() {
+	kill := make(chan os.Signal, 2)
+	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
+
+	fProfile := flag.String("profile", "", "output file for cpu profiling")
+	flag.Parse()
+
+	if *fProfile != "" {
+		f, err := os.Create(*fProfile)
+		if err != nil {
+			panic(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+		go func() {
+			t := time.NewTimer(10 * time.Second)
+			<-t.C
+			kill <- syscall.SIGTERM
+		}()
+	}
+
 	light := material.Light(1500, 1500, 1500)
 	redPlastic := material.Plastic(1, 0, 0)
 	whitePlastic := material.Plastic(1, 1, 1)
@@ -41,10 +64,8 @@ func main() {
 
 	scene := render.NewScene(888, 600, cam, surf, sky)
 	frame := render.NewFrame(scene)
-	kill := make(chan os.Signal, 2)
 
 	fmt.Println("rendering shapes.png (press Ctrl+C to finish)...")
-	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
 	frame.Start()
 	<-kill
 	frame.Stop()
