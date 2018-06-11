@@ -124,8 +124,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.E
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
 		signal = signal.Times(reflectance).RandomGain(t.rnd)
-		i++
-		if i > depth || signal.Zero() {
+		if i++; i > depth || signal.Zero() {
 			break
 		}
 
