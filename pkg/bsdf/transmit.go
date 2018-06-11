@@ -17,12 +17,8 @@ type Transmit struct {
 
 // Simple, perfect refraction with no roughness
 func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
-	// return wo.Inv(), 1
 	ior := fresnelToRefractiveIndex(t.Specular)
-	if wo.Dot(geom.Up) < 0 {
-		return snell3(wo.Inv(), geom.Up.Inv(), ior, 1), 1
-	}
-	return snell3(wo.Inv(), geom.Up, 1, ior), 1
+	return refract(wo.Inv(), geom.Up, ior), 1
 }
 
 func (t Transmit) PDF(wi, wo geom.Dir) float64 {
@@ -31,6 +27,28 @@ func (t Transmit) PDF(wi, wo geom.Dir) float64 {
 
 func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
 	return rgb.White.Scaled(t.Multiplier)
+}
+
+// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
+// https://www.bramz.net/data/writings/reflection_transmission.pdf
+func refract(in, normal geom.Dir, ior float64) geom.Dir {
+	cosi := math.Min(1, math.Max(-1, in.Dot(normal))) // TODO: clamping necessary?
+	etai := 1.0
+	etat := ior
+	n := normal
+	if cosi < 0 {
+		cosi = -cosi
+	} else {
+		etai, etat = etat, etai
+		n = normal.Inv()
+	}
+	eta := etai / etat
+	k := 1 - eta*eta*(1-cosi*cosi)
+	if k < 0 {
+		return in.Reflect2(n)
+	}
+	dir, _ := in.Scaled(eta).Plus(n.Scaled(eta*cosi - math.Sqrt(k))).Unit()
+	return dir
 }
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel

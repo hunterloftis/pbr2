@@ -21,7 +21,7 @@ func main() {
 	whitePlastic := material.Plastic(1, 1, 1)
 	bluePlastic := material.Plastic(0, 0, 1)
 	greenPlastic := material.Plastic(0, 1, 0)
-	gold := material.Gold(0.01)
+	gold := material.Gold(0.05)
 	greenGlass := material.Glass(0.00001)
 
 	sky := env.NewFlat(40, 50, 60)
