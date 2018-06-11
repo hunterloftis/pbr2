@@ -31,17 +31,17 @@ func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
 // https://www.bramz.net/data/writings/reflection_transmission.pdf
 func refract(in, normal geom.Dir, ior float64) geom.Dir {
+	var n geom.Dir
+	var eta float64
 	cosi := in.Dot(normal)
-	etai := 1.0
-	etat := ior
-	n := normal
-	if cosi < 0 {
-		cosi = -cosi
-	} else {
-		etai, etat = etat, etai
+	if cosi >= 0 {
+		eta = ior / 1
 		n = normal.Inv()
+	} else {
+		cosi = -cosi
+		eta = 1 / ior
+		n = normal
 	}
-	eta := etai / etat
 	k := 1 - eta*eta*(1-cosi*cosi)
 	if k < 0 {
 		return in.Inv().Reflect2(n)
