@@ -17,7 +17,7 @@ type Uniform struct {
 	Roughness    float64
 	Specularity  float64 // TODO: consider renaming to "F0" or "Fresnel0"
 	Emission     float64
-	Transmission float64
+	Transmission float64 // TODO: scale this non-linearly so a 0-1 range is more natural (since 0.0001% - 100% is a "normal" range)
 }
 
 func (un *Uniform) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {

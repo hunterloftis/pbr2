@@ -11,11 +11,11 @@ func Glass(roughness float64) *Uniform {
 	}
 }
 
-func CokeBottleGlass(roughness float64) *Uniform {
+func ColoredGlass(r, g, b, roughness float64) *Uniform {
 	return &Uniform{
-		Color:        rgb.Energy{0, 1, 0},
+		Color:        rgb.Energy{r, g, b},
 		Roughness:    roughness,
 		Specularity:  0.042,
-		Transmission: 0.001,
+		Transmission: 0.91339, // https://www.shimadzu.com/an/industry/electronicselectronic/chem0501005.htm
 	}
 }

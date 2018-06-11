@@ -45,7 +45,7 @@ func main() {
 	bluePlastic := material.Plastic(0, 0, 1, 0.01)
 	greenPlastic := material.Plastic(0, 1, 0, 0.01)
 	gold := material.Gold(0.05)
-	greenGlass := material.CokeBottleGlass(0.00001)
+	greenGlass := material.ColoredGlass(0, 1, 0.1, 0.00001)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
 
 	sky := env.NewFlat(40, 50, 60)
@@ -69,7 +69,7 @@ func main() {
 	fmt.Println("rendering shapes.png (press Ctrl+C to finish)...")
 	frame.Start()
 	<-kill
-	frame.Stop()
+	frame.Stop() // TODO: instead of stopping immediately, do a graceful stop (so each frame can finish rendering what it's working on)?
 
 	if err := frame.WritePNG("shapes.png"); err != nil {
 		panic(err)

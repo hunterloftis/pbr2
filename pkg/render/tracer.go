@@ -29,8 +29,8 @@ type Surface interface {
 type Object interface {
 	At(pt geom.Vec, dir geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
 	Bounds() *geom.Bounds
-	Light() rgb.Energy // TODO: rename to Emit()
-	Transmit() rgb.Energy
+	Light() rgb.Energy    // TODO: rename to Emit()?
+	Transmit() rgb.Energy // TODO: rename to Absorb() and precompute logarithms?
 }
 
 type BSDF interface {
