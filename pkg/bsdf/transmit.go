@@ -15,9 +15,9 @@ type Transmit struct {
 	Multiplier float64
 }
 
-func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
+func (t Transmit) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64, bool) {
 	ior := fresnelToRefractiveIndex(t.Specular)
-	return refract(wo.Inv(), geom.Up, ior), 1
+	return refract(wo.Inv(), geom.Up, ior), 1, false
 }
 
 func (t Transmit) PDF(wi, wo geom.Dir) float64 {
@@ -25,6 +25,11 @@ func (t Transmit) PDF(wi, wo geom.Dir) float64 {
 }
 
 func (t Transmit) Eval(wi, wo geom.Dir) rgb.Energy {
+	ior := fresnelToRefractiveIndex(t.Specular)
+	dir := refract(wo.Inv(), geom.Up, ior)
+	if !wi.Equals(dir) {
+		return rgb.Black
+	}
 	return rgb.White.Scaled(t.Multiplier)
 }
 

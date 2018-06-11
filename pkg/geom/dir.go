@@ -66,6 +66,10 @@ func (a Dir) Reflect2(normal Dir) Dir {
 	return dir
 }
 
+func (a Dir) Equals(b Dir) bool {
+	return Vec(a).Equals(Vec(b))
+}
+
 // Scaled multiplies a Direction by a scalar to produce a Vector3.
 func (a Dir) Scaled(n float64) Vec {
 	return Vec(a).Scaled(n)

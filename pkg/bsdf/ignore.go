@@ -9,8 +9,8 @@ import (
 
 type Ignore struct{}
 
-func (i Ignore) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
-	return wo.Inv(), 1
+func (i Ignore) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64, bool) {
+	return wo.Inv(), 1, false
 }
 
 func (i Ignore) PDF(wi, wo geom.Dir) float64 {

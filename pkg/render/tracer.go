@@ -32,7 +32,7 @@ type Object interface {
 }
 
 type BSDF interface {
-	Sample(wo geom.Dir, rnd *rand.Rand) (wi geom.Dir, pdf float64)
+	Sample(wo geom.Dir, rnd *rand.Rand) (wi geom.Dir, pdf float64, shadow bool)
 	Eval(wi, wo geom.Dir) rgb.Energy
 }
 
@@ -114,14 +114,14 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 		normal, bsdf := obj.At(pt, ray.Dir, t.rnd)
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())
-		wi, pdf := bsdf.Sample(wo, t.rnd)
+		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
 
 		indirect := 1.0
-		// if ray.Dir.Enters(normal) {
-		// 	direct, coverage := t.direct(pt, normal, wo, toTan)
-		// 	energy = energy.Plus(direct.Times(signal))
-		// 	indirect -= coverage
-		// }
+		if shadow {
+			direct, coverage := t.direct(pt, normal, wo, toTan)
+			energy = energy.Plus(direct.Times(signal))
+			indirect -= coverage
+		}
 
 		weight := math.Min(maxWeight, indirect/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)

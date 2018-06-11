@@ -17,7 +17,7 @@ type Microfacet struct {
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
-func (m Microfacet) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
+func (m Microfacet) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64, bool) {
 	r0 := rnd.Float64()
 	r1 := rnd.Float64()
 	a := m.Roughness
@@ -26,7 +26,7 @@ func (m Microfacet) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64) {
 	phi := 2 * math.Pi * r1
 	wm, _ := geom.SphericalDirection(theta, phi)
 	wi := wo.Reflect2(wm)
-	return wi, m.PDF(wi, wo)
+	return wi, m.PDF(wi, wo), true
 }
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
