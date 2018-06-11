@@ -11,7 +11,7 @@ import (
 
 const maxDepth = 7
 const maxWeight = 20
-const branches = 4
+const branches = 8
 
 type Camera interface {
 	Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray
@@ -86,7 +86,7 @@ func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
 	obj, dist := t.scene.Surface.Intersect(ray)
 	energy := rgb.Black
 	for i := 0; i < branches; i++ {
-		energy = energy.Plus(t.trace(ray, depth-1, obj, dist))
+		energy = energy.Plus(t.trace(ray, depth, obj, dist))
 	}
 	return energy.Scaled(1.0 / float64(branches))
 }
