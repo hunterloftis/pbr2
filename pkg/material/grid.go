@@ -37,3 +37,7 @@ func (g *Grid) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
 func (g *Grid) Light() rgb.Energy {
 	return rgb.Black
 }
+
+func (g *Grid) Transmit() rgb.Energy {
+	return rgb.Black
+}

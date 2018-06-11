@@ -45,7 +45,7 @@ func main() {
 	bluePlastic := material.Plastic(0, 0, 1, 0.01)
 	greenPlastic := material.Plastic(0, 1, 0, 0.01)
 	gold := material.Gold(0.05)
-	greenGlass := material.Glass(0.00001)
+	greenGlass := material.CokeBottleGlass(0.00001)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
 
 	sky := env.NewFlat(40, 50, 60)

@@ -11,7 +11,7 @@ import (
 
 const maxDepth = 7
 const maxWeight = 20
-const branches = 8
+const branches = 1
 
 type Camera interface {
 	Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray
@@ -29,7 +29,8 @@ type Surface interface {
 type Object interface {
 	At(pt geom.Vec, dir geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf BSDF)
 	Bounds() *geom.Bounds
-	Light() rgb.Energy
+	Light() rgb.Energy // TODO: rename to Emit()
+	Transmit() rgb.Energy
 }
 
 type BSDF interface {
@@ -123,6 +124,10 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.E
 			break
 		}
 
+		if !ray.Dir.Enters(normal) {
+			transmittance := beers(dist, obj.Transmit())
+			signal = signal.Times(transmittance)
+		}
 		weight := math.Min(maxWeight, indirect/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
@@ -160,4 +165,24 @@ func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (ener
 		energy = energy.Plus(light)
 	}
 	return energy, coverage
+}
+
+// Beer's Law.
+// http://www.epolin.com/converting-absorbance-transmittance
+// https://en.wikipedia.org/wiki/Optical_depth
+func beers(dist float64, transmit rgb.Energy) rgb.Energy {
+	// Avoid edge cases
+	if dist == 0 || transmit.Zero() {
+		return rgb.White
+	}
+	// TODO: precompute this on materials, use absorption instead of transmission?
+	absorb := rgb.Energy{
+		X: 2 - math.Log10(transmit.X*100),
+		Y: 2 - math.Log10(transmit.Y*100),
+		Z: 2 - math.Log10(transmit.Z*100),
+	}
+	r := math.Exp(-absorb.X * dist)
+	g := math.Exp(-absorb.Y * dist)
+	b := math.Exp(-absorb.Z * dist)
+	return rgb.Energy{r, g, b}
 }

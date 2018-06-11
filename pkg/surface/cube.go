@@ -105,6 +105,10 @@ func (c *Cube) Light() rgb.Energy {
 	return c.Mat.Light()
 }
 
+func (c *Cube) Transmit() rgb.Energy {
+	return c.Mat.Transmit()
+}
+
 func (c *Cube) transform(m *geom.Mat) *Cube {
 	c.Pos = c.Pos.Mult(m)
 	min := c.Pos.MultPoint(geom.Vec{})

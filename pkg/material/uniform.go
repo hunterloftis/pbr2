@@ -15,13 +15,9 @@ type Uniform struct {
 	Color        rgb.Energy
 	Metalness    float64
 	Roughness    float64
-	Specularity  float64
+	Specularity  float64 // TODO: consider renaming to "F0" or "Fresnel0"
 	Emission     float64
 	Transmission float64
-}
-
-func (un *Uniform) Light() rgb.Energy {
-	return un.Color.Scaled(un.Emission)
 }
 
 func (un *Uniform) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
@@ -61,4 +57,12 @@ func (un *Uniform) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
 		Color:      un.Color,
 		Multiplier: 1 / refract,
 	}
+}
+
+func (un *Uniform) Light() rgb.Energy {
+	return un.Color.Scaled(un.Emission)
+}
+
+func (un *Uniform) Transmit() rgb.Energy {
+	return un.Color.Scaled(un.Transmission)
 }

@@ -12,6 +12,7 @@ import (
 type Material interface {
 	At(u, v, cos float64, rnd *rand.Rand) render.BSDF
 	Light() rgb.Energy
+	Transmit() rgb.Energy
 }
 
 type DefaultMaterial struct {
@@ -22,6 +23,10 @@ func (d *DefaultMaterial) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
 }
 
 func (d *DefaultMaterial) Light() rgb.Energy {
+	return rgb.Black
+}
+
+func (d *DefaultMaterial) Transmit() rgb.Energy {
 	return rgb.Black
 }
 

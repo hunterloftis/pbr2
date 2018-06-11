@@ -113,6 +113,10 @@ func (s *Sphere) Light() rgb.Energy {
 	return s.Mat.Light()
 }
 
+func (s *Sphere) Transmit() rgb.Energy {
+	return s.Mat.Transmit()
+}
+
 func (s *Sphere) Lights() []render.Object {
 	if !s.Mat.Light().Zero() {
 		return []render.Object{s}
