@@ -50,7 +50,7 @@ func main() {
 
 	sky := env.NewFlat(40, 50, 60)
 	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Vec{}, geom.Vec{0, -0.025, 0.2})
-	surf := surface.NewList(
+	surf := surface.NewTree(
 		surface.UnitCube(grid).Move(0, -0.55, 0).Scale(1000, 1, 1000),
 		surface.UnitCube(redPlastic).Rotate(0, -0.25*math.Pi, 0).Scale(0.1, 0.1, 0.1),
 		surface.UnitCube(gold).Move(0, 0, -0.4).Rotate(0, 0.1*math.Pi, 0).Scale(0.1, 0.1, 0.1),

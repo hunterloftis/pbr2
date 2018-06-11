@@ -9,7 +9,7 @@ type Bounds struct {
 	Min, Max           Vec
 	Center             Vec
 	Radius             float64
-	minArray, maxArray [3]float64
+	MinArray, MaxArray [3]float64
 }
 
 func NewBounds(min, max Vec) *Bounds {
@@ -19,8 +19,8 @@ func NewBounds(min, max Vec) *Bounds {
 		Max:      max,
 		Center:   center,
 		Radius:   max.Minus(center).Len(),
-		minArray: min.Array(),
-		maxArray: max.Array(),
+		MinArray: min.Array(),
+		MaxArray: max.Array(),
 	}
 }
 
@@ -52,8 +52,8 @@ func (b *Bounds) Check(r *Ray) (ok bool, near, far float64) {
 	tmin := bias
 	tmax := math.Inf(1)
 	for a := 0; a < 3; a++ {
-		t0 := (b.minArray[a] - r.OrArray[a]) * r.InvArray[a]
-		t1 := (b.maxArray[a] - r.OrArray[a]) * r.InvArray[a]
+		t0 := (b.MinArray[a] - r.OrArray[a]) * r.InvArray[a]
+		t1 := (b.MaxArray[a] - r.OrArray[a]) * r.InvArray[a]
 		if r.InvArray[a] < 0 {
 			t0, t1 = t1, t0
 		}
