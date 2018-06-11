@@ -94,8 +94,9 @@ func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
 func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.Energy {
 	energy := rgb.Black
 	signal := rgb.White
+	i := 0
 
-	for i := 0; i < depth; i++ {
+	for {
 		if obj == nil {
 			env := t.scene.Env.At(ray.Dir).Times(signal)
 			energy = energy.Plus(env)
@@ -123,9 +124,11 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.E
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
 		signal = signal.Times(reflectance).RandomGain(t.rnd)
-		if signal.Zero() {
+		i++
+		if i > depth || signal.Zero() {
 			break
 		}
+
 		ray = geom.NewRay(pt, bounce)
 		obj, dist = t.scene.Surface.Intersect(ray)
 	}
