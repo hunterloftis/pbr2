@@ -21,7 +21,7 @@ func NewFrame(s *Scene) *Frame {
 		scene:   s,
 		data:    NewSample(s.Width, s.Height),
 		workers: make([]*tracer, workers),
-		samples: make(chan *Sample, workers),
+		samples: make(chan *Sample, workers*2),
 	}
 	for w := 0; w < workers; w++ {
 		f.workers[w] = newTracer(f.scene, f.samples)
