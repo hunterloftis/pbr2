@@ -71,16 +71,23 @@ func (c *Cube) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, bs
 	i := c.Pos.Inverse()  // global to local transform
 	p1 := i.MultPoint(pt) // translate point into local space
 	abs := p1.Abs()
+	u, v := 0.0, 0.0
 	switch {
 	case abs.X > abs.Y && abs.X > abs.Z:
 		normal = geom.Dir{math.Copysign(1, p1.X), 0, 0}
+		u = p1.Z + 0.5
+		v = p1.Y + 0.5
 	case abs.Y > abs.Z:
 		normal = geom.Dir{0, math.Copysign(1, p1.Y), 0}
+		u = p1.Z + 0.5
+		v = p1.X + 0.5
 	default:
 		normal = geom.Dir{0, 0, math.Copysign(1, p1.Z)}
+		u = p1.X + 0.5
+		v = p1.Y + 0.5
 	}
 	n := c.Pos.MultDir(normal)
-	return n, c.Mat.At(0, 0, in.Dot(n), rnd)
+	return n, c.Mat.At(u, v, in.Dot(n), rnd)
 }
 
 func (c *Cube) Bounds() *geom.Bounds {
