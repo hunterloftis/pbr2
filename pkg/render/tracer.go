@@ -11,6 +11,7 @@ import (
 
 const maxDepth = 7
 const maxWeight = 20
+const branches = 4
 
 type Camera interface {
 	Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray
@@ -74,32 +75,27 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				s.Add(x, y, t.trace(r, maxDepth))
+				s.Add(x, y, t.branch(r, maxDepth, branches))
 			}
 		}
 		t.out <- s
 	}
 }
 
-// func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
-// 	obj, dist := t.scene.Surface.Intersect(ray)
-// 	if obj == nil {
-// 		return t.scene.Env.At(ray.Dir)
-// 	}
-// 	if l := obj.Light(); !l.Zero() {
-// 		return l
-// 	}
-// 	for i := 0; i < branches; i++ {
+func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
+	obj, dist := t.scene.Surface.Intersect(ray)
+	energy := rgb.Black
+	for i := 0; i < branches; i++ {
+		energy = energy.Plus(t.trace(ray, depth-1, obj, dist))
+	}
+	return energy.Scaled(1.0 / float64(branches))
+}
 
-// 	}
-// }
-
-func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
+func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.Energy {
 	energy := rgb.Black
 	signal := rgb.White
 
 	for i := 0; i < depth; i++ {
-		obj, dist := t.scene.Surface.Intersect(ray)
 		if obj == nil {
 			env := t.scene.Env.At(ray.Dir).Times(signal)
 			energy = energy.Plus(env)
@@ -131,6 +127,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 			break
 		}
 		ray = geom.NewRay(pt, bounce)
+		obj, dist = t.scene.Surface.Intersect(ray)
 	}
 	return energy
 }
