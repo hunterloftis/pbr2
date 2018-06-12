@@ -15,7 +15,7 @@ type Lambert struct {
 
 func (l Lambert) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64, bool) {
 	wi, _ := geom.Up.RandHemiCos(rnd)
-	return wi, l.PDF(wi, wo), true
+	return wi, l.PDF(wi, wo), wo.Dot(geom.Up) > 0
 }
 
 func (l Lambert) PDF(wi, wo geom.Dir) float64 {

@@ -115,7 +115,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.E
 		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
 
 		indirect := 1.0
-		if ray.Dir.Enters(normal) && shadow {
+		if shadow {
 			direct, coverage := t.direct(pt, normal, wo, toTan)
 			energy = energy.Plus(direct.Times(signal))
 			indirect -= coverage

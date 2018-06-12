@@ -26,7 +26,7 @@ func (m Microfacet) Sample(wo geom.Dir, rnd *rand.Rand) (geom.Dir, float64, bool
 	phi := 2 * math.Pi * r1
 	wm, _ := geom.SphericalDirection(theta, phi)
 	wi := wo.Reflect2(wm)
-	return wi, m.PDF(wi, wo), true
+	return wi, m.PDF(wi, wo), wo.Dot(geom.Up) > 0
 }
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
