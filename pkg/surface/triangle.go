@@ -45,9 +45,40 @@ func (t *Triangle) Bounds() *geom.Bounds {
 	return t.bounds
 }
 
-// Intersect determines whether or not, and where, a Ray intersects this Triangle
 // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 func (t *Triangle) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
+	v0 := t.Points[0]
+	v1 := t.Points[1]
+	v2 := t.Points[2]
+	edge1 := v1.Minus(v0)
+	edge2 := v2.Minus(v0)
+	h := geom.Vec(ray.Dir).Cross(edge2)
+	a := edge1.Dot(h)
+	if a > -bias && a < bias {
+		return nil, 0
+	}
+	f := 1 / a
+	s := ray.Origin.Minus(v0)
+	u := f * s.Dot(h)
+	if u < 0 || u > 1 {
+		return nil, 0
+	}
+	q := s.Cross(edge1)
+	v := f * geom.Vec(ray.Dir).Dot(q)
+	if v < 0 || u+v > 1 {
+		return nil, 0
+	}
+	dist = f * edge2.Dot(q)
+	if dist <= bias {
+		return nil, 0
+	}
+	return t, dist
+}
+
+// Intersect determines whether or not, and where, a Ray intersects this Triangle
+// https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+// TODO: fix.
+func (t *Triangle) Intersect2(ray *geom.Ray) (obj render.Object, dist float64) {
 	if ok, _, _ := t.bounds.Check(ray); !ok {
 		return nil, 0
 	}
