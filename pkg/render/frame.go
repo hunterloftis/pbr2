@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"image"
 	"image/png"
 	"os"
@@ -33,6 +34,7 @@ func NewFrame(s *Scene) *Frame {
 func (f *Frame) process() {
 	for s := range f.samples {
 		f.data.Merge(s)
+		fmt.Println("sampled")
 	}
 }
 

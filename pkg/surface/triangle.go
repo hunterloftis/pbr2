@@ -95,16 +95,10 @@ func (t *Triangle) Transmit() rgb.Energy {
 }
 
 // SetNormals sets values for each vertex normal
-func (t *Triangle) SetNormals(a, b, c *geom.Dir) {
-	if a != nil {
-		t.Normals[0] = *a
-	}
-	if b != nil {
-		t.Normals[1] = *b
-	}
-	if c != nil {
-		t.Normals[2] = *c
-	}
+func (t *Triangle) SetNormals(a, b, c geom.Dir) {
+	t.Normals[0] = a
+	t.Normals[1] = b
+	t.Normals[2] = c
 }
 
 func (t *Triangle) SetTexture(a, b, c geom.Vec) {
