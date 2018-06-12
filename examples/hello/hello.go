@@ -17,7 +17,7 @@ import (
 func main() {
 	cam := camera.NewStandard()
 	ball := surface.UnitSphere(material.Gold(0.1)).Move(0, 0, -5)
-	floor := surface.UnitCube(material.Plastic(1, 1, 1)).Move(0, -1, -5).Scale(100, 1, 100)
+	floor := surface.UnitCube(material.Plastic(1, 1, 1, 0.01)).Move(0, -1, -5).Scale(100, 1, 100)
 	light := surface.UnitSphere(material.Halogen(3000)).Move(1, 0, -5).Scale(0.5, 0.5, 0.5)
 	surf := surface.NewList(ball, floor, light)
 	env := env.NewGradient(rgb.Black, rgb.Energy{750, 750, 750}, 7)
