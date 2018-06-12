@@ -45,7 +45,9 @@ func main() {
 	bluePlastic := material.Plastic(0, 0, 1, 0.01)
 	greenPlastic := material.Plastic(0, 1, 0, 0.01)
 	gold := material.Gold(0.05)
+	glass := material.Glass(0.0001)
 	greenGlass := material.ColoredGlass(0, 1, 0.1, 0.00001)
+	redGlass := material.ColoredGlass(1, 0.0001, 0.0001, 0.00001)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
 
 	sky := env.NewFlat(40, 50, 60)
@@ -55,8 +57,8 @@ func main() {
 		surface.UnitCube(redPlastic).Rotate(0, -0.25*math.Pi, 0).Scale(0.1, 0.1, 0.1),
 		surface.UnitCube(gold).Move(0, 0, -0.4).Rotate(0, 0.1*math.Pi, 0).Scale(0.1, 0.1, 0.1),
 		surface.UnitCube(greenGlass).Move(-0.3, 0, 0.3).Rotate(0, -0.1*math.Pi, 0).Scale(0.1, 0.1, 0.1),
-		surface.UnitCube(greenGlass).Move(0.175, 0.05, 0.18).Rotate(0, 0.55*math.Pi, 0).Scale(0.02, 0.2, 0.2),
-		surface.UnitSphere(greenGlass).Move(-0.2, 0.001, -0.2).Scale(0.1, 0.1, 0.1),
+		surface.UnitCube(redGlass).Move(0.175, 0.05, 0.18).Rotate(0, 0.55*math.Pi, 0).Scale(0.02, 0.2, 0.2),
+		surface.UnitSphere(glass).Move(-0.2, 0.001, -0.2).Scale(0.1, 0.1, 0.1),
 		surface.UnitSphere(bluePlastic).Move(0.3, 0.05, 0).Scale(0.2, 0.2, 0.2),
 		surface.UnitSphere(light).Move(7, 30, 6).Scale(30, 30, 30),
 		surface.UnitSphere(greenPlastic).Move(0, -0.025, 0.2).Scale(0.1, 0.05, 0.1),
