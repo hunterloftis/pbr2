@@ -39,7 +39,7 @@ func main() {
 	a := geom.Vec{-0.1, 0.1, 0}
 	b := geom.Vec{0, 0.2, 0}
 	c := geom.Vec{0.1, 0.1, 0}
-	triangle := surface.NewTriangle(c, b, a)
+	triangle := surface.NewTriangle(a, b, c)
 
 	sky := env.NewFlat(40, 50, 60)
 	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Vec{}, geom.Vec{0, -0.025, 0.2})
