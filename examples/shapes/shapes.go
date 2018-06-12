@@ -35,11 +35,6 @@ func main() {
 	tealGlass := material.ColoredGlass(0, 1, 0.1, 0.00001)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
 
-	a := geom.Vec{-0.1, 0.1, 0}
-	b := geom.Vec{0, 0.2, 0}
-	c := geom.Vec{0.1, 0.1, 0}
-	triangle := surface.NewTriangle(c, b, a)
-
 	sky := env.NewFlat(40, 50, 60)
 	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Vec{}, geom.Vec{0, -0.025, 0.2})
 	surf := surface.NewTree(
@@ -53,7 +48,6 @@ func main() {
 		surface.UnitSphere(light).Move(7, 30, 6).Scale(30, 30, 30),
 		surface.UnitSphere(greenPlastic).Move(0, -0.025, 0.2).Scale(0.1, 0.05, 0.1),
 		surface.UnitSphere(gold).Move(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2),
-		triangle,
 	)
 
 	scene := render.NewScene(888, 600, cam, surf, sky)
