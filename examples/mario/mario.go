@@ -11,6 +11,7 @@ import (
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
+	"github.com/hunterloftis/pbr2/pkg/formats/obj"
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"
@@ -29,14 +30,19 @@ func main() {
 	bluePlastic := material.Plastic(0, 0, 1, 0.01)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
 
+	mario, err := obj.ReadAll("fixtures/models/mario/mario-sculpture.obj")
+	if err != nil {
+		panic(err)
+	}
+
 	sky := env.NewFlat(40, 50, 60)
 	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Vec{}, geom.Vec{0, -0.025, 0.2})
-	surf := surface.NewTree(
-		surface.UnitCube(grid).Move(0, -0.55, 0).Scale(1000, 1, 1000),
-		surface.UnitSphere(light).Move(7, 30, 6).Scale(30, 30, 30),
-	)
+	floor := surface.UnitCube(grid).Move(0, -0.55, 0).Scale(1000, 1, 1000)
+	lamp := surface.UnitSphere(light).Move(7, 30, 6).Scale(30, 30, 30)
 
-	scene := render.NewScene(888, 600, cam, surf, sky)
+	ss := append(mario.SurfaceObjects(), floor, lamp)
+	tree := surface.NewTree(ss...)
+	scene := render.NewScene(888, 600, cam, tree, sky)
 	frame := render.NewFrame(scene)
 
 	func() {
