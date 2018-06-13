@@ -9,18 +9,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hunterloftis/pbr2/pkg/formats/mtl"
 	"github.com/hunterloftis/pbr2/pkg/geom"
+	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/surface"
-)
-
-const (
-	vertex   = "v"
-	normal   = "vn"
-	texture  = "vt"
-	face     = "f"
-	library  = "mtllib"
-	material = "usemtl"
 )
 
 type Mesh struct {
@@ -52,11 +45,40 @@ func ReadFile(filename string, recursive bool) (*Mesh, error) {
 		return nil, fmt.Errorf("unable to open scene %v, %v", filename, err)
 	}
 	defer f.Close()
-	m := Read(f)
+	mesh := Read(f, filepath.Dir(filename))
 	if recursive {
-		// TODO: recursively read materials, textures, apply to mesh
+		ReadMaterials(mesh)
 	}
-	return m, nil
+	return mesh, nil
+}
+
+func ReadMaterials(mesh *Mesh) {
+	// TODO: *material.Uniform => *material.Mapped
+	lib := make(map[string]*material.Uniform)
+	for _, t := range mesh.triangles {
+		if m, ok := t.Mat.(*Material); ok {
+			if lib[m.Name] == nil {
+				readLibraries(lib, m.Files)
+			}
+			if lib[m.Name] != nil {
+				t.Mat = lib[m.Name]
+			}
+		}
+	}
+}
+
+func readLibraries(lib map[string]*material.Uniform, files []string) {
+	fmt.Println("reading files:", files)
+	for _, f := range files {
+		mats, err := mtl.ReadFile(f, true)
+		if err != nil {
+			fmt.Println(err)
+		}
+		for name, mat := range mats {
+			lib[name] = mat
+			fmt.Println(name, mat)
+		}
+	}
 }
 
 type tablegroup struct {
@@ -77,7 +99,16 @@ func (t *tablegroup) tex(i int) geom.Vec {
 	return t.tt[i-1]
 }
 
-func Read(r io.Reader) *Mesh {
+func Read(r io.Reader, dir string) *Mesh {
+	const (
+		vertex   = "v"
+		normal   = "vn"
+		texture  = "vt"
+		face     = "f"
+		library  = "mtllib"
+		material = "usemtl"
+	)
+
 	mesh := Mesh{}
 	table := &tablegroup{}
 	mat := &Material{}
@@ -88,6 +119,9 @@ func Read(r io.Reader) *Mesh {
 	for scanner.Scan() {
 		line := scanner.Text()
 		f := strings.Fields(line)
+		if len(f) < 2 {
+			continue
+		}
 		key, args := f[0], f[1:]
 
 		switch key {
@@ -123,9 +157,9 @@ func Read(r io.Reader) *Mesh {
 	}
 
 	for _, mat := range mats {
-		mat.Libs = make([]string, len(libs))
+		mat.Files = make([]string, len(libs))
 		for i, lib := range libs {
-			mat.Libs[i], _ = filepath.Abs(lib)
+			mat.Files[i], _ = filepath.Abs(filepath.Join(dir, lib))
 		}
 		fmt.Println(mat)
 	}
@@ -162,7 +196,7 @@ func newMaterial(args []string, mats map[string]*Material) *Material {
 	return mats[name]
 }
 
-func newTriangles(args []string, table *tablegroup, mat surface.Material) ([]*surface.Triangle, error) {
+func newTriangles(args []string, table *tablegroup, mat *Material) ([]*surface.Triangle, error) {
 	size := len(args)
 	if size < 3 {
 		return nil, fmt.Errorf("face requires at least 3 vertices (contains %v)", size)
@@ -187,7 +221,7 @@ func newTriangles(args []string, table *tablegroup, mat surface.Material) ([]*su
 	}
 	tris := make([]*surface.Triangle, 0)
 	for i := 2; i < size; i++ {
-		tri := surface.NewTriangle(verts[0], verts[i-1], verts[i])
+		tri := surface.NewTriangle(verts[0], verts[i-1], verts[i], mat)
 		if len(norms) == size {
 			tri.SetNormals(norms[0], norms[i-1], norms[i])
 		}

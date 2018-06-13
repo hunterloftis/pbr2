@@ -9,8 +9,8 @@ import (
 )
 
 type Material struct {
-	Name string
-	Libs []string
+	Name  string
+	Files []string
 }
 
 func (m *Material) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
