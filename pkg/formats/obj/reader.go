@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -79,7 +80,9 @@ func (t *tablegroup) tex(i int) geom.Vec {
 func Read(r io.Reader) *Mesh {
 	mesh := Mesh{}
 	table := &tablegroup{}
-	mat := &surface.DefaultMaterial{}
+	mat := &Material{}
+	mats := make(map[string]*Material)
+	libs := make([]string, 0)
 	scanner := bufio.NewScanner(r)
 
 	for scanner.Scan() {
@@ -113,9 +116,20 @@ func Read(r io.Reader) *Mesh {
 			}
 			mesh.triangles = append(mesh.triangles, tris...)
 		case library:
+			libs = append(libs, args...)
 		case material:
+			mat = newMaterial(args, mats)
 		}
 	}
+
+	for _, mat := range mats {
+		mat.Libs = make([]string, len(libs))
+		for i, lib := range libs {
+			mat.Libs[i], _ = filepath.Abs(lib)
+		}
+		fmt.Println(mat)
+	}
+
 	return &mesh
 }
 
@@ -135,6 +149,17 @@ func newTex(args []string) (geom.Vec, error) {
 	}
 	str := strings.Join(args, ",")
 	return geom.ParseVec(str)
+}
+
+func newMaterial(args []string, mats map[string]*Material) *Material {
+	if len(args) == 0 {
+		return &Material{}
+	}
+	name := args[0]
+	if mats[name] == nil {
+		mats[name] = &Material{Name: name}
+	}
+	return mats[name]
 }
 
 func newTriangles(args []string, table *tablegroup, mat surface.Material) ([]*surface.Triangle, error) {
