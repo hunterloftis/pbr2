@@ -11,7 +11,7 @@ import (
 
 const maxDepth = 7
 const maxWeight = 20
-const branches = 1
+const branches = 8
 const maxLights = 8
 
 type Camera interface {

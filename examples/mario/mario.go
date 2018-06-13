@@ -26,7 +26,7 @@ func main() {
 	fProfile := flag.String("profile", "", "output file for cpu profiling")
 	flag.Parse()
 
-	light := material.Light(7000, 7000, 7000)
+	light := material.Light(8000, 8000, 8000)
 	whitePlastic := material.Plastic(1, 1, 1, 0.07)
 	bluePlastic := material.Plastic(0, 0, 1, 0.01)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 200, 0.1)
