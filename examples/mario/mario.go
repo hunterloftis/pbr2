@@ -29,7 +29,7 @@ func main() {
 	// light := material.Light(1700, 1700, 1700)
 	whitePlastic := material.Plastic(1, 1, 1, 0.07)
 	bluePlastic := material.Plastic(0, 0, 1, 0.01)
-	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
+	grid := material.NewGrid(whitePlastic, bluePlastic, 200, 0.1)
 
 	mario, err := obj.ReadFile("fixtures/models/mario/mario-sculpture.obj", true)
 	if err != nil {
@@ -40,12 +40,14 @@ func main() {
 	sky := env.NewGradient(rgb.Black, rgb.Energy{2000, 2000, 2000}, 4)
 	cam := camera.NewStandard().MoveTo(0, 0, 300).LookAt(geom.Vec{}, geom.Vec{0, 0, 0})
 	floor := surface.UnitCube(grid).Move(0, -32, 0).Scale(1000, 1, 1000)
+	_ = floor
 	// lamp := surface.UnitSphere(light).Move(7, 30, 6).Scale(30, 30, 30)
 
 	// objects := append(mario.SurfaceObjects(), floor, lamp)
-	objects := append(mario.SurfaceObjects(), floor)
+	objects := append(mario.SurfaceObjects())
 	tree := surface.NewTree(objects...)
-	scene := render.NewScene(888, 600, cam, tree, sky)
+	list := surface.NewList(tree, floor)
+	scene := render.NewScene(888, 600, cam, list, sky)
 	frame := render.NewFrame(scene)
 
 	func() {
