@@ -1,8 +1,6 @@
 package surface
 
 import (
-	"fmt"
-	"reflect"
 	"sort"
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
@@ -29,15 +27,9 @@ type Tree struct {
 }
 
 func NewTree(ss ...SurfaceObject) *Tree {
-	counter := make(map[SurfaceObject]int)
-	t := newBranch(boundsAround(ss...), ss, counter, 0)
+	t := newBranch(boundsAround(ss...), ss, 0)
 	for _, s := range t.surfaces {
 		t.lights = append(t.lights, s.Lights()...)
-	}
-	for _, s := range t.surfaces {
-		if counter[s] > leafTarget {
-			fmt.Println("This should probably not be in the tree:", reflect.TypeOf(s).String(), counter[s])
-		}
 	}
 	return t
 }
@@ -84,23 +76,20 @@ func (t *Tree) Lights() []render.Object {
 	return t.lights
 }
 
-func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, counter map[SurfaceObject]int, depth int) *Tree {
+func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, depth int) *Tree {
 	t := &Tree{
 		surfaces: overlaps(bounds, surfaces),
 		bounds:   bounds,
 	}
 	if len(t.surfaces) <= leafTarget || depth > maxDepth {
 		t.leaf = true
-		for _, s := range surfaces {
-			counter[s]++
-		}
 		return t
 	}
 	t.axis = depth % 3
 	t.wall = median(t.surfaces, t.axis)
 	lbounds, rbounds := bounds.Split(t.axis, t.wall)
-	t.left = newBranch(lbounds, t.surfaces, counter, depth+1)
-	t.right = newBranch(rbounds, t.surfaces, counter, depth+1)
+	t.left = newBranch(lbounds, t.surfaces, depth+1)
+	t.right = newBranch(rbounds, t.surfaces, depth+1)
 	return t
 }
 
