@@ -55,7 +55,7 @@ func main() {
 			pprof.StartCPUProfile(f)
 			defer pprof.StopCPUProfile()
 			go func() {
-				t := time.NewTimer(10 * time.Second)
+				t := time.NewTimer(30 * time.Second)
 				<-t.C
 				kill <- syscall.SIGTERM
 			}()
