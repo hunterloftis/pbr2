@@ -26,7 +26,7 @@ func main() {
 	fProfile := flag.String("profile", "", "output file for cpu profiling")
 	flag.Parse()
 
-	light := material.Light(8000, 8000, 8000)
+	light := material.Light(9000, 9000, 9000)
 	whitePlastic := material.Plastic(1, 1, 1, 0.07)
 	bluePlastic := material.Plastic(0, 0, 1, 0.01)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 200, 0.1)
@@ -36,7 +36,7 @@ func main() {
 		panic(err)
 	}
 
-	sky := env.NewGradient(rgb.Black, rgb.Energy{500, 500, 500}, 5)
+	sky := env.NewGradient(rgb.Black, rgb.Energy{900, 900, 900}, 5)
 	cam := camera.NewStandard().MoveTo(0, 100, 300).LookAt(geom.Vec{}, geom.Vec{})
 	floor := surface.UnitCube(grid).Move(0, -65, 0).Scale(1000, 1, 1000)
 	lamp := surface.UnitSphere(light).Move(50, 50, 50).Scale(10, 10, 10)

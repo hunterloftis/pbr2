@@ -53,8 +53,7 @@ func ReadFile(filename string, recursive bool) (*Mesh, error) {
 }
 
 func ReadMaterials(mesh *Mesh) {
-	// TODO: *material.Uniform => *material.Mapped
-	lib := make(map[string]*material.Uniform)
+	lib := make(map[string]*material.Mapped)
 	for _, t := range mesh.triangles {
 		if m, ok := t.Mat.(*Material); ok {
 			if lib[m.Name] == nil {
@@ -67,8 +66,7 @@ func ReadMaterials(mesh *Mesh) {
 	}
 }
 
-func readLibraries(lib map[string]*material.Uniform, files []string) {
-	fmt.Println("reading files:", files)
+func readLibraries(lib map[string]*material.Mapped, files []string) {
 	for _, f := range files {
 		mats, err := mtl.ReadFile(f, true)
 		if err != nil {
