@@ -1,7 +1,8 @@
 package surface
 
 import (
-	"math"
+	"fmt"
+	"reflect"
 	"sort"
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
@@ -17,15 +18,14 @@ type SurfaceObject interface {
 }
 
 type Tree struct {
-	surfaces    []SurfaceObject
-	lights      []render.Object
-	overlappers []SurfaceObject
-	bounds      *geom.Bounds
-	left        *Tree
-	right       *Tree
-	axis        int
-	wall        float64
-	leaf        bool
+	surfaces []SurfaceObject
+	lights   []render.Object
+	bounds   *geom.Bounds
+	left     *Tree
+	right    *Tree
+	axis     int
+	wall     float64
+	leaf     bool
 }
 
 func NewTree(ss ...SurfaceObject) *Tree {
@@ -36,27 +36,10 @@ func NewTree(ss ...SurfaceObject) *Tree {
 	}
 	for _, s := range t.surfaces {
 		if counter[s] > leafTarget {
-			t.overlappers = append(t.overlappers, s)
-			t.Cull(s)
-			// fmt.Println("This should probably not be in the tree:", reflect.TypeOf(s).String(), counter[s])
+			fmt.Println("This should probably not be in the tree:", reflect.TypeOf(s).String(), counter[s])
 		}
 	}
 	return t
-}
-
-func (t *Tree) Cull(unwanted SurfaceObject) {
-	keep := t.surfaces[:0]
-	for _, s := range t.surfaces {
-		if s != unwanted {
-			keep = append(keep, s)
-		}
-	}
-	t.surfaces = keep
-	if t.leaf {
-		return
-	}
-	t.left.Cull(unwanted)
-	t.right.Cull(unwanted)
 }
 
 // http://slideplayer.com/slide/7653218/
@@ -76,33 +59,15 @@ func (t *Tree) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
 	}
 	split := (t.wall - ray.OrArray[t.axis]) * ray.InvArray[t.axis]
 	if min >= split {
-		o, d := far.Intersect(ray)
-		return t.withOverlap(ray, o, d)
+		return far.Intersect(ray)
 	}
 	if max <= split {
-		o, d := near.Intersect(ray)
-		return t.withOverlap(ray, o, d)
+		return near.Intersect(ray)
 	}
 	if o, d := near.Intersect(ray); o != nil {
-		return t.withOverlap(ray, o, d)
+		return o, d
 	}
-	o, d := far.Intersect(ray)
-	return t.withOverlap(ray, o, d)
-}
-
-func (t *Tree) withOverlap(ray *geom.Ray, obj render.Object, dist float64) (render.Object, float64) {
-	if len(t.overlappers) == 0 {
-		return obj, dist
-	}
-	if obj == nil {
-		dist = math.Inf(1)
-	}
-	for _, s := range t.overlappers {
-		if o, d := s.Intersect(ray); o != nil && d < dist {
-			obj, dist = o, d
-		}
-	}
-	return obj, dist
+	return far.Intersect(ray)
 }
 
 func (t *Tree) IntersectSurfaces(r *geom.Ray, max float64) (obj render.Object, dist float64) {
