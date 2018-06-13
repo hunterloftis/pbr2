@@ -44,10 +44,10 @@ func main() {
 	// lamp := surface.UnitSphere(light).Move(7, 30, 6).Scale(30, 30, 30)
 
 	// objects := append(mario.SurfaceObjects(), floor, lamp)
-	objects := append(mario.SurfaceObjects())
+	objects := append(mario.SurfaceObjects(), floor)
 	tree := surface.NewTree(objects...)
-	list := surface.NewList(tree, floor)
-	scene := render.NewScene(888, 600, cam, list, sky)
+	// list := surface.NewList(tree, floor)
+	scene := render.NewScene(888, 600, cam, tree, sky)
 	frame := render.NewFrame(scene)
 
 	func() {

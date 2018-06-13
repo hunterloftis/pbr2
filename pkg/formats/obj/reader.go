@@ -30,6 +30,7 @@ func (m *Mesh) SurfaceObjects() []surface.SurfaceObject {
 	for i, t := range m.triangles {
 		ss[i] = t
 	}
+	fmt.Println("Number of surfaces:", len(ss))
 	return ss
 }
 
