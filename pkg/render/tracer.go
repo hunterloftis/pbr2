@@ -12,6 +12,7 @@ import (
 const maxDepth = 7
 const maxWeight = 20
 const branches = 1
+const maxLights = 8
 
 type Camera interface {
 	Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray
@@ -146,6 +147,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.E
 func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy rgb.Energy, coverage float64) {
 	lights := t.scene.Surface.Lights()
 
+	// TODO: limit by maxLights
 	for _, l := range lights {
 		ray, solid := l.Bounds().ShadowRay(pt, normal, t.rnd)
 		if solid <= 0 {

@@ -15,6 +15,7 @@ type SurfaceObject interface {
 	render.Object
 }
 
+// TODO: This is a very simple k-d tree and could probably be heavily optimized.
 type Tree struct {
 	surfaces []SurfaceObject
 	lights   []render.Object
