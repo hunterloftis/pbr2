@@ -47,6 +47,9 @@ func (t *Triangle) Bounds() *geom.Bounds {
 
 // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 func (t *Triangle) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
+	if ok, _, _ := t.bounds.Check(ray); !ok {
+		return nil, 0
+	}
 	h := geom.Vec(ray.Dir).Cross(t.edge2)
 	a := t.edge1.Dot(h)
 	if a > -bias && a < bias {

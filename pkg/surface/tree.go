@@ -8,7 +8,7 @@ import (
 )
 
 const maxDepth = 20
-const leafTarget = 20
+const leafTarget = 10
 
 type SurfaceObject interface {
 	render.Surface
@@ -86,6 +86,9 @@ func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, depth int) *Tree {
 		t.leaf = true
 		return t
 	}
+	// TODO: check each of 3 axes and evaluate how good the split would be
+	// (balance, number in children vs number in parent, # of overlaps)
+	// then choose the best one.
 	t.axis = depth % 3
 	t.wall = median(t.surfaces, t.axis)
 	lbounds, rbounds := bounds.Split(t.axis, t.wall)
