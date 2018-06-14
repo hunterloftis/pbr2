@@ -11,6 +11,7 @@ import (
 // The rays produced are determined by position,
 // orientation, sensor type, focus, exposure, and lens selection.
 // TODO: make Width, Height, Lens, FStop public and remove getters/setters
+// TODO: Bloom filter: https://en.wikipedia.org/wiki/Bloom_(shader_effect)
 type Standard struct {
 	width     float64
 	height    float64
