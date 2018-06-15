@@ -17,40 +17,46 @@ type SurfaceObject interface {
 
 // TODO: This is a very simple k-d tree and could probably be heavily optimized.
 type Tree struct {
+	Branch
+	lights []render.Object
+}
+
+type Branch struct {
 	surfaces []SurfaceObject
-	lights   []render.Object
 	bounds   *geom.Bounds
-	left     *Tree
-	right    *Tree
+	left     *Branch
+	right    *Branch
 	axis     int
 	wall     float64
 	leaf     bool
 }
 
 func NewTree(ss ...SurfaceObject) *Tree {
-	t := newBranch(boundsAround(ss...), ss, 0)
-	for _, s := range t.surfaces {
+	t := Tree{
+		Branch: *newBranch(boundsAround(ss...), ss, 0),
+	}
+	for _, s := range t.Branch.surfaces {
 		t.lights = append(t.lights, s.Lights()...)
 	}
-	return t
+	return &t
 }
 
 // http://slideplayer.com/slide/7653218/
-func (t *Tree) Intersect(ray *geom.Ray, maxDist float64) (obj render.Object, dist float64) {
-	hit, min, max := t.bounds.Check(ray)
+func (b *Branch) Intersect(ray *geom.Ray, maxDist float64) (obj render.Object, dist float64) {
+	hit, min, max := b.bounds.Check(ray)
 	if !hit || min >= maxDist {
 		return nil, 0
 	}
-	if t.leaf {
-		return t.IntersectSurfaces(ray, max)
+	if b.leaf {
+		return b.IntersectSurfaces(ray, max)
 	}
-	var near, far *Tree
-	if ray.DirArray[t.axis] >= 0 {
-		near, far = t.left, t.right
+	var near, far *Branch
+	if ray.DirArray[b.axis] >= 0 {
+		near, far = b.left, b.right
 	} else {
-		near, far = t.right, t.left
+		near, far = b.right, b.left
 	}
-	split := (t.wall - ray.OrArray[t.axis]) * ray.InvArray[t.axis]
+	split := (b.wall - ray.OrArray[b.axis]) * ray.InvArray[b.axis]
 	if min >= split {
 		return far.Intersect(ray, maxDist)
 	}
@@ -63,9 +69,9 @@ func (t *Tree) Intersect(ray *geom.Ray, maxDist float64) (obj render.Object, dis
 	return far.Intersect(ray, maxDist)
 }
 
-func (t *Tree) IntersectSurfaces(r *geom.Ray, max float64) (obj render.Object, dist float64) {
+func (b *Branch) IntersectSurfaces(r *geom.Ray, max float64) (obj render.Object, dist float64) {
 	dist = max
-	for _, s := range t.surfaces {
+	for _, s := range b.surfaces {
 		if o, d := s.Intersect(r, dist); o != nil {
 			obj, dist = o, d
 		}
@@ -77,24 +83,24 @@ func (t *Tree) Lights() []render.Object {
 	return t.lights
 }
 
-func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, depth int) *Tree {
-	t := &Tree{
+func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, depth int) *Branch {
+	b := Branch{
 		surfaces: overlaps(bounds, surfaces),
 		bounds:   bounds,
 	}
-	if len(t.surfaces) <= leafTarget || depth > maxDepth {
-		t.leaf = true
-		return t
+	if len(b.surfaces) <= leafTarget || depth > maxDepth {
+		b.leaf = true
+		return &b
 	}
 	// TODO: check each of 3 axes and evaluate how good the split would be
 	// (balance, number in children vs number in parent, # of overlaps)
 	// then choose the best one.
-	t.axis = depth % 3
-	t.wall = median(t.surfaces, t.axis)
-	lbounds, rbounds := bounds.Split(t.axis, t.wall)
-	t.left = newBranch(lbounds, t.surfaces, depth+1)
-	t.right = newBranch(rbounds, t.surfaces, depth+1)
-	return t
+	b.axis = depth % 3
+	b.wall = median(b.surfaces, b.axis)
+	lbounds, rbounds := bounds.Split(b.axis, b.wall)
+	b.left = newBranch(lbounds, b.surfaces, depth+1)
+	b.right = newBranch(rbounds, b.surfaces, depth+1)
+	return &b
 }
 
 func overlaps(bounds *geom.Bounds, surfaces []SurfaceObject) []SurfaceObject {
