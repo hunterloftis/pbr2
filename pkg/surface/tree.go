@@ -1,14 +1,19 @@
 package surface
 
 import (
-	"sort"
+	"math"
 
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/render"
 )
 
-const maxDepth = 20
-const leafTarget = 10
+const (
+	maxDepth   = 20
+	leafTarget = 10
+	xAxis      = 0
+	yAxis      = 1
+	zAxis      = 2
+)
 
 type SurfaceObject interface {
 	render.Surface
@@ -92,15 +97,30 @@ func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, depth int) *Branch
 		b.leaf = true
 		return &b
 	}
-	// TODO: check each of 3 axes and evaluate how good the split would be
-	// (balance, number in children vs number in parent, # of overlaps)
-	// then choose the best one.
-	b.axis = depth % 3
-	b.wall = median(b.surfaces, b.axis)
+	axis, min, max := extents(b.surfaces)
+	b.axis = axis
+	b.wall = (max + min) / 2
 	lbounds, rbounds := bounds.Split(b.axis, b.wall)
 	b.left = newBranch(lbounds, b.surfaces, depth+1)
 	b.right = newBranch(rbounds, b.surfaces, depth+1)
 	return &b
+}
+
+func extents(ss []SurfaceObject) (axis int, low, high float64) {
+	min := geom.Vec{math.Inf(1), math.Inf(1), math.Inf(1)}
+	max := geom.Vec{math.Inf(-1), math.Inf(-1), math.Inf(-1)}
+	for _, s := range ss {
+		c := s.Bounds().Center
+		min = c.Min(min)
+		max = c.Max(max)
+	}
+	span := max.Minus(min).Abs()
+	if span.X > span.Y && span.X > span.Z {
+		return xAxis, min.X, max.X
+	} else if span.Y > span.X && span.Y > span.Z {
+		return yAxis, min.Y, max.Y
+	}
+	return zAxis, min.Z, max.Z
 }
 
 func overlaps(bounds *geom.Bounds, surfaces []SurfaceObject) []SurfaceObject {
@@ -122,14 +142,4 @@ func boundsAround(oo ...SurfaceObject) *geom.Bounds {
 		Bounds = geom.MergeBounds(Bounds, s.Bounds())
 	}
 	return Bounds
-}
-
-func median(surfaces []SurfaceObject, axis int) float64 {
-	vals := make([]float64, 0)
-	for _, s := range surfaces {
-		b := s.Bounds()
-		vals = append(vals, b.MinArray[axis], b.MaxArray[axis])
-	}
-	sort.Float64s(vals)
-	return vals[len(vals)/2]
 }
