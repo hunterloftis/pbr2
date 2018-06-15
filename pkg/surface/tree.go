@@ -36,9 +36,9 @@ func NewTree(ss ...SurfaceObject) *Tree {
 }
 
 // http://slideplayer.com/slide/7653218/
-func (t *Tree) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
+func (t *Tree) Intersect(ray *geom.Ray, maxDist float64) (obj render.Object, dist float64) {
 	hit, min, max := t.bounds.Check(ray)
-	if !hit {
+	if !hit || min >= maxDist {
 		return nil, 0
 	}
 	if t.leaf {
@@ -52,21 +52,21 @@ func (t *Tree) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
 	}
 	split := (t.wall - ray.OrArray[t.axis]) * ray.InvArray[t.axis]
 	if min >= split {
-		return far.Intersect(ray)
+		return far.Intersect(ray, maxDist)
 	}
 	if max <= split {
-		return near.Intersect(ray)
+		return near.Intersect(ray, maxDist)
 	}
-	if o, d := near.Intersect(ray); o != nil {
+	if o, d := near.Intersect(ray, maxDist); o != nil {
 		return o, d
 	}
-	return far.Intersect(ray)
+	return far.Intersect(ray, maxDist)
 }
 
 func (t *Tree) IntersectSurfaces(r *geom.Ray, max float64) (obj render.Object, dist float64) {
 	dist = max
 	for _, s := range t.surfaces {
-		if o, d := s.Intersect(r); o != nil && d < dist {
+		if o, d := s.Intersect(r, dist); o != nil {
 			obj, dist = o, d
 		}
 	}

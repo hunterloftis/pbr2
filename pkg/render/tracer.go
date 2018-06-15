@@ -11,8 +11,10 @@ import (
 
 const maxDepth = 7
 const maxWeight = 20
-const branches = 8
+const branches = 1 // TODO: raise this to 8 once branching is adaptive
 const maxLights = 8
+
+var infinity = math.Inf(1)
 
 type Camera interface {
 	Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray
@@ -23,7 +25,7 @@ type Environment interface {
 }
 
 type Surface interface {
-	Intersect(*geom.Ray) (obj Object, dist float64)
+	Intersect(r *geom.Ray, max float64) (obj Object, dist float64)
 	Lights() []Object
 }
 
@@ -85,7 +87,7 @@ func (t *tracer) process() {
 }
 
 func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
-	obj, dist := t.scene.Surface.Intersect(ray)
+	obj, dist := t.scene.Surface.Intersect(ray, infinity)
 	energy := rgb.Black
 	for i := 0; i < branches; i++ {
 		energy = energy.Plus(t.trace(ray, depth, obj, dist))
@@ -138,7 +140,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.E
 		}
 
 		ray = geom.NewRay(pt, bounce)
-		obj, dist = t.scene.Surface.Intersect(ray)
+		obj, dist = t.scene.Surface.Intersect(ray, infinity)
 	}
 	return energy
 }
@@ -154,7 +156,7 @@ func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (ener
 			continue
 		}
 		coverage += solid
-		obj, dist := t.scene.Surface.Intersect(ray)
+		obj, dist := t.scene.Surface.Intersect(ray, infinity)
 		if obj == nil {
 			continue
 		}

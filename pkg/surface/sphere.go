@@ -70,8 +70,8 @@ func (s *Sphere) Bounds() *geom.Bounds {
 // Intersect tests whether the sphere intersects a given ray.
 // http://tfpsly.free.fr/english/index.html?url=http://tfpsly.free.fr/english/3d/Raytracing.html
 // TODO: http://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection.html
-func (s *Sphere) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
-	if ok, _, _ := s.bounds.Check(ray); !ok {
+func (s *Sphere) Intersect(ray *geom.Ray, max float64) (obj render.Object, dist float64) {
+	if ok, near, _ := s.bounds.Check(ray); !ok || near >= max {
 		return nil, 0
 	}
 	i := s.Pos.Inverse()

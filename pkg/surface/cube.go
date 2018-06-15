@@ -28,8 +28,8 @@ func UnitCube(m ...Material) *Cube {
 	return c.transform(geom.Identity())
 }
 
-func (c *Cube) Intersect(ray *geom.Ray) (obj render.Object, dist float64) {
-	if ok, _, _ := c.bounds.Check(ray); !ok {
+func (c *Cube) Intersect(ray *geom.Ray, max float64) (obj render.Object, dist float64) {
+	if ok, near, _ := c.bounds.Check(ray); !ok || near >= max {
 		return nil, 0
 	}
 	inv := c.Pos.Inverse() // global to local transform

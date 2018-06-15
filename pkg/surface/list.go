@@ -1,8 +1,6 @@
 package surface
 
 import (
-	"math"
-
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/render"
 )
@@ -22,10 +20,10 @@ func NewList(ss ...render.Surface) *List {
 	return &l
 }
 
-func (l *List) Intersect(r *geom.Ray) (obj render.Object, dist float64) {
-	dist = math.Inf(1)
+func (l *List) Intersect(r *geom.Ray, max float64) (obj render.Object, dist float64) {
+	dist = max
 	for _, s := range l.surfs {
-		if o, d := s.Intersect(r); o != nil && d < dist {
+		if o, d := s.Intersect(r, dist); o != nil {
 			obj, dist = o, d
 		}
 	}
