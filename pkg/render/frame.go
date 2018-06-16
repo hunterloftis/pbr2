@@ -1,19 +1,20 @@
 package render
 
 import (
-	"fmt"
 	"image"
 	"image/png"
 	"os"
 	"runtime"
+	"sync/atomic"
 )
 
 type Frame struct {
 	scene   *Scene
 	data    *Sample
 	workers []*tracer
-	samples chan *Sample
+	in      chan *Sample
 	active  toggle
+	samples uint64
 }
 
 func NewFrame(s *Scene) *Frame {
@@ -22,20 +23,13 @@ func NewFrame(s *Scene) *Frame {
 		scene:   s,
 		data:    NewSample(s.Width, s.Height),
 		workers: make([]*tracer, workers),
-		samples: make(chan *Sample, workers*2),
+		in:      make(chan *Sample, workers*2),
 	}
 	for w := 0; w < workers; w++ {
-		f.workers[w] = newTracer(f.scene, f.samples)
+		f.workers[w] = newTracer(f.scene, f.in)
 	}
 	go f.process()
 	return &f
-}
-
-func (f *Frame) process() {
-	for s := range f.samples {
-		f.data.Merge(s)
-		fmt.Println("sampled")
-	}
 }
 
 func (f *Frame) Start() {
@@ -54,16 +48,30 @@ func (f *Frame) Stop() {
 	}
 }
 
-// TODO: gamma correction
 func (f *Frame) Image() *image.RGBA {
+	f.active.mu.RLock()
+	defer f.active.mu.RUnlock()
 	return f.data.ToRGBA()
 }
 
 func (f *Frame) WritePNG(name string) error {
+	f.active.mu.RLock()
+	defer f.active.mu.RUnlock()
 	out, err := os.Create(name)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
 	return png.Encode(out, f.Image())
+}
+
+func (f *Frame) Samples() uint64 {
+	return atomic.LoadUint64(&f.samples)
+}
+
+func (f *Frame) process() {
+	for s := range f.in {
+		f.data.Merge(s)
+		atomic.AddUint64(&f.samples, 1)
+	}
 }

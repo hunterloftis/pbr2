@@ -18,15 +18,15 @@ const (
 )
 
 type Tree struct {
-	Branch
+	branch
 	lights []render.Object
 }
 
-type Branch struct {
+type branch struct {
 	surfaces []render.Surface
 	bounds   *geom.Bounds
-	left     *Branch
-	right    *Branch
+	left     *branch
+	right    *branch
 	axis     int
 	wall     float64
 	leaf     bool
@@ -35,16 +35,45 @@ type Branch struct {
 func NewTree(ss ...render.Surface) *Tree {
 	maxDepth := int(math.Round(8 + 1.3*math.Log2(float64(len(ss))))) // PBRT "acceleration structures" chapter
 	t := Tree{
-		Branch: *newBranch(boundsAround(ss), ss, maxDepth),
+		branch: *newBranch(boundsAround(ss), ss, maxDepth),
 	}
-	for _, s := range t.Branch.surfaces {
+	for _, s := range t.branch.surfaces {
 		t.lights = append(t.lights, s.Lights()...)
 	}
 	return &t
 }
 
+func (t *Tree) Lights() []render.Object {
+	return t.lights
+}
+
+func (t *Tree) Bounds() *geom.Bounds {
+	return t.bounds
+}
+
+func newBranch(bounds *geom.Bounds, surfaces []render.Surface, depth int) *branch {
+	b := branch{
+		surfaces: overlaps(bounds, surfaces),
+		bounds:   bounds,
+	}
+	if depth <= 0 || len(b.surfaces) <= minContents {
+		b.leaf = true
+		return &b
+	}
+	axis, wall, ok := split(b.surfaces, b.bounds)
+	if !ok {
+		b.leaf = true
+		return &b
+	}
+	b.axis, b.wall = axis, wall
+	lbounds, rbounds := bounds.Split(b.axis, b.wall)
+	b.left = newBranch(lbounds, b.surfaces, depth-1)
+	b.right = newBranch(rbounds, b.surfaces, depth-1)
+	return &b
+}
+
 // http://slideplayer.com/slide/7653218/
-func (b *Branch) Intersect(ray *geom.Ray, maxDist float64) (obj render.Object, dist float64) {
+func (b *branch) Intersect(ray *geom.Ray, maxDist float64) (obj render.Object, dist float64) {
 	hit, min, max := b.bounds.Check(ray)
 	if !hit || min >= maxDist {
 		return nil, 0
@@ -52,7 +81,7 @@ func (b *Branch) Intersect(ray *geom.Ray, maxDist float64) (obj render.Object, d
 	if b.leaf {
 		return b.IntersectSurfaces(ray, max)
 	}
-	var near, far *Branch
+	var near, far *branch
 	if ray.DirArray[b.axis] >= 0 {
 		near, far = b.left, b.right
 	} else {
@@ -71,7 +100,7 @@ func (b *Branch) Intersect(ray *geom.Ray, maxDist float64) (obj render.Object, d
 	return far.Intersect(ray, maxDist)
 }
 
-func (b *Branch) IntersectSurfaces(r *geom.Ray, max float64) (obj render.Object, dist float64) {
+func (b *branch) IntersectSurfaces(r *geom.Ray, max float64) (obj render.Object, dist float64) {
 	dist = max
 	for _, s := range b.surfaces {
 		if o, d := s.Intersect(r, dist); o != nil {
@@ -79,35 +108,6 @@ func (b *Branch) IntersectSurfaces(r *geom.Ray, max float64) (obj render.Object,
 		}
 	}
 	return obj, dist
-}
-
-func (t *Tree) Lights() []render.Object {
-	return t.lights
-}
-
-func (t *Tree) Bounds() *geom.Bounds {
-	return t.bounds
-}
-
-func newBranch(bounds *geom.Bounds, surfaces []render.Surface, depth int) *Branch {
-	b := Branch{
-		surfaces: overlaps(bounds, surfaces),
-		bounds:   bounds,
-	}
-	if depth <= 0 || len(b.surfaces) <= minContents {
-		b.leaf = true
-		return &b
-	}
-	axis, wall, ok := split(b.surfaces, b.bounds)
-	if !ok {
-		b.leaf = true
-		return &b
-	}
-	b.axis, b.wall = axis, wall
-	lbounds, rbounds := bounds.Split(b.axis, b.wall)
-	b.left = newBranch(lbounds, b.surfaces, depth-1)
-	b.right = newBranch(rbounds, b.surfaces, depth-1)
-	return &b
 }
 
 // Compare the cost of not splitting against splitting at 7 different points along each axis

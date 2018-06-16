@@ -19,6 +19,8 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/surface"
 )
 
+const outFile = "mario.png"
+
 func main() {
 	kill := make(chan os.Signal, 2)
 	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
@@ -46,6 +48,19 @@ func main() {
 	// list := surface.NewList(tree, floor, lamp) // actually faster to separate floor & lamp from tree
 	scene := render.NewScene(888, 600, cam, tree, sky)
 	frame := render.NewFrame(scene)
+	ticker := time.NewTicker(1 * time.Minute)
+
+	go func() {
+		last := uint64(0)
+		for range ticker.C {
+			if s := frame.Samples(); s > last {
+				last = s
+				if err := frame.WritePNG(outFile); err != nil {
+					panic(err)
+				}
+			}
+		}
+	}()
 
 	func() {
 		if *fProfile != "" {
@@ -61,13 +76,15 @@ func main() {
 				kill <- syscall.SIGTERM
 			}()
 		}
+
 		fmt.Println("rendering mario.png (press Ctrl+C to finish)...")
 		frame.Start()
 		<-kill
 		frame.Stop()
+
 	}()
 
-	if err := frame.WritePNG("mario.png"); err != nil {
+	if err := frame.WritePNG(outFile); err != nil {
 		panic(err)
 	}
 }
