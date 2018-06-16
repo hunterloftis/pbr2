@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -34,11 +35,15 @@ func NewSample(w, h int) *Sample {
 func (s *Sample) At(x, y int) (rgb.Energy, int) {
 	i := (y*s.Width + x) * stride
 	c := math.Max(1, s.data[i+count])
+	c2 := int(c)
+	if x == 0 && y == 0 {
+		fmt.Println("count at source:", c2)
+	}
 	return rgb.Energy{
 		X: s.data[i+red] / c,
 		Y: s.data[i+green] / c,
 		Z: s.data[i+blue] / c,
-	}, int(c)
+	}, c2
 }
 
 func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
@@ -47,7 +52,11 @@ func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
 	s.data[i+green] += e.Y
 	s.data[i+blue] += e.Z
 	s.data[i+count] += float64(n)
-	return s.At(x, y)
+	rgb, c := s.At(x, y)
+	if x == 0 && y == 0 {
+		fmt.Println("count before returning:", c)
+	}
+	return rgb, c
 }
 
 func (s *Sample) Merge(other *Sample) {

@@ -86,6 +86,9 @@ func (t *tracer) process() {
 				// n := int(1 + t.rnd.Float64()*branches)
 				rgb := t.branch(r, maxDepth, n)
 				mean, count := s.Add(x, y, rgb, n)
+				if x == 0 && y == 0 {
+					fmt.Println("count once returned:", count, "n:", n)
+				}
 				t.addNoise(x, y, count-n, mean, rgb, n)
 			}
 		}
