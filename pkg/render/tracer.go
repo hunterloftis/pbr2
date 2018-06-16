@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -81,11 +82,11 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				// n := int(1 + t.noiseAt(x, y)*branches)
-				n := int(1 + t.rnd.Float64()*branches)
+				n := int(1 + t.noiseAt(x, y)*branches)
+				// n := int(1 + t.rnd.Float64()*branches)
 				rgb := t.branch(r, maxDepth, n)
 				mean, count := s.Add(x, y, rgb, n)
-				t.addNoise(x, y, count, mean, rgb, n)
+				t.addNoise(x, y, count-n, mean, rgb, n)
 			}
 		}
 		t.out <- s
@@ -96,17 +97,29 @@ func (t *tracer) noiseAt(x, y int) float64 {
 	i := y*t.scene.Width + x
 	v := t.variance[i]
 	sd := math.Sqrt(v)
-	return math.Min(1, sd/255)
+	n := math.Min(1, sd/500)
+	if t.rnd.Float64() < 0.00001 {
+		fmt.Println(n)
+	}
+	return n
 }
 
 func (t *tracer) addNoise(x, y, count int, mean, new rgb.Energy, n int) {
-	if count == 1 {
+	if t.rnd.Float64() < 0.00001 {
+		fmt.Println("count:", count)
+	}
+	if count < 2 {
 		return
 	}
 	i := y*t.scene.Width + x
 	newMean := new.Scaled(1.0 / float64(n))
 	diff := newMean.Minus(mean).Size()
-	t.variance[i] += (diff * diff) / float64(count)
+	for j := 0; j < n; j++ {
+		t.variance[i] += (diff * diff) / float64(count+j)
+	}
+	if t.rnd.Float64() < 0.00001 {
+		fmt.Println("diff:", diff)
+	}
 }
 
 func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {

@@ -62,6 +62,7 @@ func main() {
 				if err := frame.WritePNG(heatFile, frame.Heat()); err != nil {
 					panic(err)
 				}
+				fmt.Println("written")
 			}
 		}
 	}()
