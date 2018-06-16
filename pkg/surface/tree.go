@@ -12,7 +12,8 @@ const (
 	yAxis        = 1
 	zAxis        = 2
 	traversal    = 1.0
-	intersection = 2.0
+	intersection = 8.0
+	bins         = 32
 )
 
 type Tree struct {
@@ -92,6 +93,9 @@ func newBranch(bounds *geom.Bounds, surfaces []render.Surface, depth int) *Branc
 		surfaces: overlaps(bounds, surfaces),
 		bounds:   bounds,
 	}
+	// if len(b.surfaces) > 25000 {
+	// 	fmt.Printf("New Branch: %+v\n\n", b.bounds)
+	// }
 	if depth <= 0 {
 		b.leaf = true
 		return &b
@@ -111,7 +115,7 @@ func newBranch(bounds *geom.Bounds, surfaces []render.Surface, depth int) *Branc
 // Compare the cost of not splitting against splitting at 7 different points along each axis
 func split(ss []render.Surface, bounds *geom.Bounds) (axis int, wall float64, ok bool) {
 	axis, min, max := extents(ss)
-	stride := (max - min) / 8
+	stride := (max - min) / bins
 	lb, rb := bounds.Split(axis, stride)
 	wall, cost := min+stride, sah(ss, lb, rb)
 	for w := min + stride*2; w < max-bias; w += stride {
