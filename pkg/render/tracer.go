@@ -11,8 +11,8 @@ import (
 
 const maxDepth = 7
 const maxWeight = 20
-const branches = 1 // TODO: raise this to 8 once branching is adaptive
-const maxLights = 8
+const branches = 8
+const maxLights = 8 // TODO: limit light sampling
 
 var infinity = math.Inf(1)
 
@@ -43,17 +43,19 @@ type BSDF interface {
 }
 
 type tracer struct {
-	scene  *Scene
-	out    chan *Sample
-	active toggle
-	rnd    *rand.Rand
+	scene    *Scene
+	out      chan *Sample
+	active   toggle
+	rnd      *rand.Rand
+	variance []float64
 }
 
 func newTracer(s *Scene, o chan *Sample) *tracer {
 	return &tracer{
-		scene: s,
-		out:   o,
-		rnd:   rand.New(rand.NewSource(time.Now().UnixNano())),
+		scene:    s,
+		out:      o,
+		rnd:      rand.New(rand.NewSource(time.Now().UnixNano())),
+		variance: make([]float64, s.Height*s.Width),
 	}
 }
 
@@ -68,7 +70,6 @@ func (t *tracer) stop() {
 	t.active.Set(false)
 }
 
-// TODO: instead of creating new samples to be GC'd, try zeroing out all values on a single sample created once, compare performance.
 func (t *tracer) process() {
 	width := t.scene.Width
 	height := t.scene.Height
@@ -80,11 +81,30 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				s.Add(x, y, t.branch(r, maxDepth, branches))
+				n := int(1 + t.noiseAt(x, y)*branches)
+				rgb := t.branch(r, maxDepth, n)
+				mean, count := s.Add(x, y, rgb)
+				t.addNoise(x, y, count, mean, rgb)
 			}
 		}
 		t.out <- s
 	}
+}
+
+func (t *tracer) noiseAt(x, y int) float64 {
+	i := y*t.scene.Width + x
+	v := t.variance[i]
+	sd := math.Sqrt(v)
+	return math.Min(1, sd/255)
+}
+
+func (t *tracer) addNoise(x, y, count int, mean, new rgb.Energy) {
+	if count == 1 {
+		return
+	}
+	i := y*t.scene.Width + x
+	diff := new.Minus(mean).Size()
+	t.variance[i] += (diff * diff) / float64(count)
 }
 
 func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {

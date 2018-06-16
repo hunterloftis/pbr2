@@ -17,6 +17,7 @@ const (
 	minContents  = 8
 )
 
+// TODO: concurrent construction
 type Tree struct {
 	branch
 	lights []render.Object
