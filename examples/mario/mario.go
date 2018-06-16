@@ -41,7 +41,7 @@ func main() {
 	floor := surface.UnitCube(grid).Move(0, -65, 0).Scale(1000, 1, 1000)
 	lamp := surface.UnitSphere(light).Move(50, 50, 50).Scale(10, 10, 10)
 
-	ss := append(mario.SurfaceObjects(), floor, lamp)
+	ss := append(mario.Surfaces(), floor, lamp)
 	tree := surface.NewTree(ss...)
 	// list := surface.NewList(tree, floor, lamp) // actually faster to separate floor & lamp from tree
 	scene := render.NewScene(888, 600, cam, tree, sky)

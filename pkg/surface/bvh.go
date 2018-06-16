@@ -8,11 +8,13 @@ import (
 type BVH struct {
 	surfs  []render.Surface
 	lights []render.Object
+	bounds *geom.Bounds
 }
 
 func NewBVH(ss ...render.Surface) *BVH {
 	b := BVH{
-		surfs: ss,
+		surfs:  ss,
+		bounds: boundsAround(ss),
 	}
 	for _, s := range b.surfs {
 		b.lights = append(b.lights, s.Lights()...)
@@ -32,4 +34,8 @@ func (b *BVH) Intersect(r *geom.Ray, max float64) (obj render.Object, dist float
 
 func (b *BVH) Lights() []render.Object {
 	return b.lights
+}
+
+func (b *BVH) Bounds() *geom.Bounds {
+	return b.bounds
 }

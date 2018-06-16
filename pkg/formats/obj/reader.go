@@ -20,15 +20,6 @@ type Mesh struct {
 	triangles []*surface.Triangle
 }
 
-func (m *Mesh) SurfaceObjects() []surface.SurfaceObject {
-	ss := make([]surface.SurfaceObject, len(m.triangles))
-	for i, t := range m.triangles {
-		ss[i] = t
-	}
-	fmt.Println("Number of surfaces:", len(ss))
-	return ss
-}
-
 func (m *Mesh) Surfaces() []render.Surface {
 	ss := make([]render.Surface, len(m.triangles))
 	for i, t := range m.triangles {

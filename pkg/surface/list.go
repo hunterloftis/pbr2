@@ -8,11 +8,13 @@ import (
 type List struct {
 	surfs  []render.Surface
 	lights []render.Object
+	bounds *geom.Bounds
 }
 
 func NewList(ss ...render.Surface) *List {
 	l := List{
-		surfs: ss,
+		surfs:  ss,
+		bounds: boundsAround(ss),
 	}
 	for _, s := range l.surfs {
 		l.lights = append(l.lights, s.Lights()...)
@@ -32,4 +34,8 @@ func (l *List) Intersect(r *geom.Ray, max float64) (obj render.Object, dist floa
 
 func (l *List) Lights() []render.Object {
 	return l.lights
+}
+
+func (l *List) Bounds() *geom.Bounds {
+	return l.bounds
 }

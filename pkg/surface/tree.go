@@ -15,18 +15,13 @@ const (
 	intersection = 2.0
 )
 
-type SurfaceObject interface {
-	render.Surface
-	render.Object
-}
-
 type Tree struct {
 	Branch
 	lights []render.Object
 }
 
 type Branch struct {
-	surfaces []SurfaceObject
+	surfaces []render.Surface
 	bounds   *geom.Bounds
 	left     *Branch
 	right    *Branch
@@ -35,10 +30,10 @@ type Branch struct {
 	leaf     bool
 }
 
-func NewTree(ss ...SurfaceObject) *Tree {
+func NewTree(ss ...render.Surface) *Tree {
 	maxDepth := int(math.Round(8 + 1.3*math.Log2(float64(len(ss))))) // PBRT "acceleration structures" chapter
 	t := Tree{
-		Branch: *newBranch(boundsAround(ss...), ss, maxDepth),
+		Branch: *newBranch(boundsAround(ss), ss, maxDepth),
 	}
 	for _, s := range t.Branch.surfaces {
 		t.lights = append(t.lights, s.Lights()...)
@@ -88,7 +83,11 @@ func (t *Tree) Lights() []render.Object {
 	return t.lights
 }
 
-func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, depth int) *Branch {
+func (t *Tree) Bounds() *geom.Bounds {
+	return t.bounds
+}
+
+func newBranch(bounds *geom.Bounds, surfaces []render.Surface, depth int) *Branch {
 	b := Branch{
 		surfaces: overlaps(bounds, surfaces),
 		bounds:   bounds,
@@ -110,7 +109,7 @@ func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, depth int) *Branch
 }
 
 // Compare the cost of not splitting against splitting at 7 different points along each axis
-func split(ss []SurfaceObject, bounds *geom.Bounds) (axis int, wall float64, ok bool) {
+func split(ss []render.Surface, bounds *geom.Bounds) (axis int, wall float64, ok bool) {
 	axis, min, max := extents(ss)
 	stride := (max - min) / 8
 	lb, rb := bounds.Split(axis, stride)
@@ -130,7 +129,7 @@ func split(ss []SurfaceObject, bounds *geom.Bounds) (axis int, wall float64, ok 
 
 // Surface Are Heuristic
 // https://medium.com/@bromanz/how-to-create-awesome-accelerators-the-surface-area-heuristic-e14b5dec6160
-func sah(ss []SurfaceObject, aBounds, bBounds *geom.Bounds) float64 {
+func sah(ss []render.Surface, aBounds, bBounds *geom.Bounds) float64 {
 	aSurfaces := overlaps(aBounds, ss)
 	bSurfaces := overlaps(bBounds, ss)
 	a := aBounds.SurfaceArea() * float64(len(aSurfaces)) * intersection
@@ -138,7 +137,7 @@ func sah(ss []SurfaceObject, aBounds, bBounds *geom.Bounds) float64 {
 	return traversal + a + b
 }
 
-func extents(ss []SurfaceObject) (axis int, low, high float64) {
+func extents(ss []render.Surface) (axis int, low, high float64) {
 	min := geom.Vec{math.Inf(1), math.Inf(1), math.Inf(1)}
 	max := geom.Vec{math.Inf(-1), math.Inf(-1), math.Inf(-1)}
 	for _, s := range ss {
@@ -155,23 +154,12 @@ func extents(ss []SurfaceObject) (axis int, low, high float64) {
 	return zAxis, min.Z, max.Z
 }
 
-func overlaps(bounds *geom.Bounds, surfaces []SurfaceObject) []SurfaceObject {
-	matches := make([]SurfaceObject, 0)
+func overlaps(bounds *geom.Bounds, surfaces []render.Surface) []render.Surface {
+	matches := make([]render.Surface, 0)
 	for _, s := range surfaces {
 		if s.Bounds().Overlaps(bounds) {
 			matches = append(matches, s)
 		}
 	}
 	return matches
-}
-
-func boundsAround(oo ...SurfaceObject) *geom.Bounds {
-	if len(oo) == 0 {
-		return geom.NewBounds(geom.Vec{}, geom.Vec{})
-	}
-	Bounds := oo[0].Bounds()
-	for _, s := range oo {
-		Bounds = geom.MergeBounds(Bounds, s.Bounds())
-	}
-	return Bounds
 }

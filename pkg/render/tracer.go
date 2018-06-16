@@ -24,10 +24,10 @@ type Environment interface {
 	At(geom.Dir) rgb.Energy
 }
 
-// TODO: add Bounds() to Surface so SurfaceObject becomes unnecessary
 type Surface interface {
 	Intersect(r *geom.Ray, max float64) (obj Object, dist float64)
 	Lights() []Object
+	Bounds() *geom.Bounds
 }
 
 type Object interface {
