@@ -5,6 +5,7 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/render"
 )
 
+// TODO: construct Bounding Volume Hierarchy
 type BVH struct {
 	surfs  []render.Surface
 	lights []render.Object

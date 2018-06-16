@@ -13,7 +13,8 @@ const (
 	zAxis        = 2
 	traversal    = 1.0
 	intersection = 8.0
-	bins         = 32
+	bins         = 100
+	minContents  = 8
 )
 
 type Tree struct {
@@ -93,10 +94,7 @@ func newBranch(bounds *geom.Bounds, surfaces []render.Surface, depth int) *Branc
 		surfaces: overlaps(bounds, surfaces),
 		bounds:   bounds,
 	}
-	// if len(b.surfaces) > 25000 {
-	// 	fmt.Printf("New Branch: %+v\n\n", b.bounds)
-	// }
-	if depth <= 0 {
+	if depth <= 0 || len(b.surfaces) <= minContents {
 		b.leaf = true
 		return &b
 	}
