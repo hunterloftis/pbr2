@@ -36,6 +36,11 @@ func (b *Bounds) Overlaps(b2 *Bounds) bool {
 	return true
 }
 
+func (b *Bounds) SurfaceArea() float64 {
+	size := b.Max.Minus(b.Min).Abs()
+	return size.X*size.Y*2 + size.Z*size.Y*2 + size.X*size.Z*2
+}
+
 func (b *Bounds) Split(axis int, val float64) (left, right *Bounds) {
 	maxL := b.Max.Array()
 	minR := b.Min.Array()

@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	maxDepth   = 20
-	leafTarget = 10
-	xAxis      = 0
-	yAxis      = 1
-	zAxis      = 2
+	xAxis        = 0
+	yAxis        = 1
+	zAxis        = 2
+	traversal    = 1.0
+	intersection = 2.0
 )
 
 type SurfaceObject interface {
@@ -20,7 +20,6 @@ type SurfaceObject interface {
 	render.Object
 }
 
-// TODO: This is a very simple k-d tree and could probably be heavily optimized.
 type Tree struct {
 	Branch
 	lights []render.Object
@@ -37,8 +36,9 @@ type Branch struct {
 }
 
 func NewTree(ss ...SurfaceObject) *Tree {
+	maxDepth := int(math.Round(8 + 1.3*math.Log2(float64(len(ss))))) // PBRT "acceleration structures" chapter
 	t := Tree{
-		Branch: *newBranch(boundsAround(ss...), ss, 0),
+		Branch: *newBranch(boundsAround(ss...), ss, maxDepth),
 	}
 	for _, s := range t.Branch.surfaces {
 		t.lights = append(t.lights, s.Lights()...)
@@ -93,17 +93,49 @@ func newBranch(bounds *geom.Bounds, surfaces []SurfaceObject, depth int) *Branch
 		surfaces: overlaps(bounds, surfaces),
 		bounds:   bounds,
 	}
-	if len(b.surfaces) <= leafTarget || depth > maxDepth {
+	if depth <= 0 {
 		b.leaf = true
 		return &b
 	}
-	axis, min, max := extents(b.surfaces)
-	b.axis = axis
-	b.wall = (max + min) / 2
+	axis, wall, ok := split(b.surfaces, b.bounds)
+	if !ok {
+		b.leaf = true
+		return &b
+	}
+	b.axis, b.wall = axis, wall
 	lbounds, rbounds := bounds.Split(b.axis, b.wall)
-	b.left = newBranch(lbounds, b.surfaces, depth+1)
-	b.right = newBranch(rbounds, b.surfaces, depth+1)
+	b.left = newBranch(lbounds, b.surfaces, depth-1)
+	b.right = newBranch(rbounds, b.surfaces, depth-1)
 	return &b
+}
+
+// Compare the cost of not splitting against splitting at 7 different points along each axis
+func split(ss []SurfaceObject, bounds *geom.Bounds) (axis int, wall float64, ok bool) {
+	axis, min, max := extents(ss)
+	stride := (max - min) / 8
+	lb, rb := bounds.Split(axis, stride)
+	wall, cost := min+stride, sah(ss, lb, rb)
+	for w := min + stride*2; w < max-bias; w += stride {
+		lb, rb := bounds.Split(axis, w)
+		if c := sah(ss, lb, rb); c < cost {
+			wall, cost = w, c
+		}
+	}
+	baseCost := bounds.SurfaceArea() * float64(len(ss)) * intersection
+	if baseCost <= cost {
+		return 0, 0, false
+	}
+	return axis, wall, true
+}
+
+// Surface Are Heuristic
+// https://medium.com/@bromanz/how-to-create-awesome-accelerators-the-surface-area-heuristic-e14b5dec6160
+func sah(ss []SurfaceObject, aBounds, bBounds *geom.Bounds) float64 {
+	aSurfaces := overlaps(aBounds, ss)
+	bSurfaces := overlaps(bBounds, ss)
+	a := aBounds.SurfaceArea() * float64(len(aSurfaces)) * intersection
+	b := bBounds.SurfaceArea() * float64(len(bSurfaces)) * intersection
+	return traversal + a + b
 }
 
 func extents(ss []SurfaceObject) (axis int, low, high float64) {
