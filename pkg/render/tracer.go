@@ -83,8 +83,8 @@ func (t *tracer) process() {
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
 				n := int(1 + t.noiseAt(x, y)*branches)
 				rgb := t.branch(r, maxDepth, n)
-				mean, count := s.Add(x, y, rgb)
-				t.addNoise(x, y, count, mean, rgb)
+				mean, count := s.Add(x, y, rgb, n)
+				t.addNoise(x, y, count, mean, rgb, n)
 			}
 		}
 		t.out <- s
@@ -98,12 +98,13 @@ func (t *tracer) noiseAt(x, y int) float64 {
 	return math.Min(1, sd/255)
 }
 
-func (t *tracer) addNoise(x, y, count int, mean, new rgb.Energy) {
+func (t *tracer) addNoise(x, y, count int, mean, new rgb.Energy, n int) {
 	if count == 1 {
 		return
 	}
 	i := y*t.scene.Width + x
-	diff := new.Minus(mean).Size()
+	newMean := new.Scaled(1.0 / float64(n))
+	diff := newMean.Minus(mean).Size()
 	t.variance[i] += (diff * diff) / float64(count)
 }
 
@@ -113,7 +114,7 @@ func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
 	for i := 0; i < branches; i++ {
 		energy = energy.Plus(t.trace(ray, depth, obj, dist))
 	}
-	return energy.Scaled(1.0 / float64(branches))
+	return energy //.Scaled(1.0 / float64(branches))
 }
 
 func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.Energy {

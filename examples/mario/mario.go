@@ -20,6 +20,7 @@ import (
 )
 
 const outFile = "mario.png"
+const heatFile = "mario-heat.png"
 
 func main() {
 	kill := make(chan os.Signal, 2)
@@ -55,7 +56,10 @@ func main() {
 		for range ticker.C {
 			if s := frame.Samples(); s > last {
 				last = s
-				if err := frame.WritePNG(outFile); err != nil {
+				if err := frame.WritePNG(outFile, frame.Image()); err != nil {
+					panic(err)
+				}
+				if err := frame.WritePNG(heatFile, frame.Heat()); err != nil {
 					panic(err)
 				}
 			}
@@ -84,7 +88,10 @@ func main() {
 
 	}()
 
-	if err := frame.WritePNG(outFile); err != nil {
+	if err := frame.WritePNG(outFile, frame.Image()); err != nil {
+		panic(err)
+	}
+	if err := frame.WritePNG(heatFile, frame.Heat()); err != nil {
 		panic(err)
 	}
 }

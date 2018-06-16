@@ -2,6 +2,7 @@ package render
 
 import (
 	"image"
+	"image/color"
 	"math"
 
 	"github.com/hunterloftis/pbr2/pkg/rgb"
@@ -40,12 +41,12 @@ func (s *Sample) At(x, y int) (rgb.Energy, int) {
 	}, int(c)
 }
 
-func (s *Sample) Add(x, y int, e rgb.Energy) (rgb.Energy, int) {
+func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
 	i := (y*s.Width + x) * stride
 	s.data[i+red] += e.X
 	s.data[i+green] += e.Y
 	s.data[i+blue] += e.Z
-	s.data[i+count]++
+	s.data[i+count] += float64(n)
 	return s.At(x, y)
 }
 
@@ -63,6 +64,32 @@ func (s *Sample) ToRGBA() *image.RGBA {
 		for x := 0; x < s.Width; x++ {
 			e, _ := s.At(x, y)
 			c := e.ToRGBA()
+			im.SetRGBA(x, y, c)
+		}
+	}
+	return im
+}
+
+func (s *Sample) HeatRGBA() *image.RGBA {
+	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
+	max := 1
+	for y := 0; y < s.Height; y++ {
+		for x := 0; x < s.Width; x++ {
+			if _, count := s.At(x, y); count > max {
+				max = count
+			}
+		}
+	}
+	for y := 0; y < s.Height; y++ {
+		for x := 0; x < s.Width; x++ {
+			_, count := s.At(x, y)
+			bright := uint8(float64(count) / float64(max) * 255)
+			c := color.RGBA{
+				R: bright,
+				G: bright,
+				B: bright,
+				A: 255,
+			}
 			im.SetRGBA(x, y, c)
 		}
 	}

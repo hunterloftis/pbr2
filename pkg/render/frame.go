@@ -54,7 +54,13 @@ func (f *Frame) Image() *image.RGBA {
 	return f.data.ToRGBA()
 }
 
-func (f *Frame) WritePNG(name string) error {
+func (f *Frame) Heat() *image.RGBA {
+	f.active.mu.RLock()
+	defer f.active.mu.RUnlock()
+	return f.data.HeatRGBA()
+}
+
+func (f *Frame) WritePNG(name string, im image.Image) error {
 	f.active.mu.RLock()
 	defer f.active.mu.RUnlock()
 	out, err := os.Create(name)
@@ -62,7 +68,7 @@ func (f *Frame) WritePNG(name string) error {
 		return err
 	}
 	defer out.Close()
-	return png.Encode(out, f.Image())
+	return png.Encode(out, im)
 }
 
 func (f *Frame) Samples() uint64 {
