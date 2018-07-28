@@ -32,6 +32,10 @@ func NewFrame(s *Scene) *Frame {
 	return &f
 }
 
+func (f *Frame) Active() bool {
+	return f.active.State()
+}
+
 func (f *Frame) Start() {
 	if f.active.Set(true) {
 		for _, w := range f.workers {

@@ -22,23 +22,25 @@ import (
 const outFile = "mario.png"
 const heatFile = "mario-heat.png"
 
-// TODO: be able to exit before processing starts
 func main() {
 	kill := make(chan os.Signal, 2)
-	running := false
-	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		<-kill
-		if running {
-			kill <- syscall.SIGTERM
-		}
-		os.Exit(0)
-	}()
-
+	scene := make(chan *render.Scene)
 	fProfile := flag.String("profile", "", "output file for cpu profiling")
+	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
 	flag.Parse()
 
+	go setup(scene)
+
+	select {
+	case s := <-scene:
+		run(s, kill, *fProfile)
+	case <-kill:
+	}
+
+	fmt.Println("done")
+}
+
+func setup(out chan<- *render.Scene) {
 	light := material.Light(9000, 9000, 9000)
 	whitePlastic := material.Plastic(1, 1, 1, 0.07)
 	bluePlastic := material.Plastic(0, 0, 1, 0.01)
@@ -57,52 +59,51 @@ func main() {
 	ss := append(mario.Surfaces(), floor, lamp)
 	tree := surface.NewTree(ss...)
 	scene := render.NewScene(888, 600, cam, tree, sky)
+	out <- scene
+}
+
+func run(scene *render.Scene, kill chan os.Signal, fProfile string) {
 	frame := render.NewFrame(scene)
 	ticker := time.NewTicker(1 * time.Minute)
 
-	go func() {
-		last := uint64(0)
-		for range ticker.C {
+	if fProfile != "" {
+		f, err := os.Create(fProfile)
+		if err != nil {
+			panic(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+		go func() {
+			t := time.NewTimer(2 * time.Minute)
+			<-t.C
+			kill <- syscall.SIGTERM
+		}()
+	}
+
+	fmt.Println("rendering mario.png (press Ctrl+C to finish)...")
+	frame.Start()
+	last := uint64(0)
+	for frame.Active() {
+		select {
+		case <-ticker.C:
 			if s := frame.Samples(); s > last {
 				last = s
-				if err := frame.WritePNG(outFile, frame.Image()); err != nil {
-					panic(err)
-				}
-				if err := frame.WritePNG(heatFile, frame.Heat()); err != nil {
-					panic(err)
-				}
-				fmt.Println("written", last)
+				write(frame)
 			}
+		case <-kill:
+			frame.Stop()
 		}
-	}()
+	}
 
-	func() {
-		if *fProfile != "" {
-			f, err := os.Create(*fProfile)
-			if err != nil {
-				panic(err)
-			}
-			pprof.StartCPUProfile(f)
-			defer pprof.StopCPUProfile()
-			go func() {
-				t := time.NewTimer(2 * time.Minute)
-				<-t.C
-				kill <- syscall.SIGTERM
-			}()
-		}
+	write(frame)
+}
 
-		fmt.Println("rendering mario.png (press Ctrl+C to finish)...")
-		running = true
-		frame.Start()
-		<-kill
-		frame.Stop()
-
-	}()
-
+func write(frame *render.Frame) {
 	if err := frame.WritePNG(outFile, frame.Image()); err != nil {
 		panic(err)
 	}
 	if err := frame.WritePNG(heatFile, frame.Heat()); err != nil {
 		panic(err)
 	}
+	fmt.Print(".")
 }
