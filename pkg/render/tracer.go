@@ -80,8 +80,8 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				max := int(1 + t.local.Noise(x, y)*branches)
-				rgb, n := t.branch(r, maxDepth, max)
+				min := int(t.local.Noise(x, y) * branches)
+				rgb, n := t.branch(r, maxDepth, min)
 				s.Add(x, y, rgb, n)
 			}
 		}
@@ -90,9 +90,9 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) branch(ray *geom.Ray, depth, max int) (energy rgb.Energy, n int) {
+func (t *tracer) branch(ray *geom.Ray, depth, min int) (energy rgb.Energy, n int) {
 	obj, dist := t.scene.Surface.Intersect(ray, infinity)
-	for n < max {
+	for n < min {
 		e, _ := t.trace(ray, depth, obj, dist)
 		energy = energy.Plus(e)
 		n++
@@ -108,11 +108,12 @@ func (t *tracer) branch(ray *geom.Ray, depth, max int) (energy rgb.Energy, n int
 	return energy, n
 }
 
+// TODO: Simplify! This dynamic branching logic has gotten overly complicated. Sketch out a diagram.
 func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) (rgb.Energy, bool) {
 	energy := rgb.Black
 	signal := rgb.White
-	i := 0
 	branch := true
+	i := 0
 
 	for {
 		if obj == nil {
@@ -132,15 +133,15 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) (rgb.
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())
 		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
-		if i == 0 {
-			branch = branch && t.rnd.Float64() > pdf
-		}
 
 		indirect := 1.0
 		if shadow {
 			direct, coverage := t.direct(pt, normal, wo, toTan)
 			energy = energy.Plus(direct.Times(signal))
 			indirect -= coverage
+		}
+		if i == 0 {
+			branch = branch && t.rnd.Float64() > pdf+(1-indirect)
 		}
 		if i++; i > depth {
 			break
