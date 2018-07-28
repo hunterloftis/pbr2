@@ -56,21 +56,20 @@ func (s *Sample) Noise(x0, y0 int) float64 {
 			count++
 		}
 	}
-	mean := sum.Scaled(1 / count)
-	bright := mean.Size()
-	if bright < 1 {
+	mean := sum.Scaled(1 / count).Size()
+	if mean < 1 {
 		return 0
 	}
 	dist := 0.0
 	for y := minY; y <= maxY; y++ {
 		for x := minX; x <= maxX; x++ {
 			energy, _ := s.At(x, y)
-			d := energy.Minus(mean).Size()
+			d := energy.Size() - mean
 			dist += d * d
 		}
 	}
 	sd := math.Sqrt(dist / count)
-	return math.Min(1, sd/bright)
+	return math.Min(1, sd/mean)
 }
 
 func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {

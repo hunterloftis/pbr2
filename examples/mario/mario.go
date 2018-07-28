@@ -52,7 +52,7 @@ func setup(out chan<- *render.Scene) {
 	}
 
 	sky := env.NewGradient(rgb.Black, rgb.Energy{900, 900, 900}, 5)
-	cam := camera.NewStandard().MoveTo(0, 100, 300).LookAt(geom.Vec{}, geom.Vec{})
+	cam := camera.NewStandard().MoveTo(0, 100, 300).LookAt(geom.Origin)
 	floor := surface.UnitCube(grid).Move(0, -65, 0).Scale(1000, 1, 1000)
 	lamp := surface.UnitSphere(light).Move(50, 50, 50).Scale(10, 10, 10)
 
