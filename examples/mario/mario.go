@@ -25,7 +25,16 @@ const heatFile = "mario-heat.png"
 // TODO: be able to exit before processing starts
 func main() {
 	kill := make(chan os.Signal, 2)
+	running := false
 	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-kill
+		if running {
+			kill <- syscall.SIGTERM
+		}
+		os.Exit(0)
+	}()
 
 	fProfile := flag.String("profile", "", "output file for cpu profiling")
 	flag.Parse()
@@ -47,7 +56,6 @@ func main() {
 
 	ss := append(mario.Surfaces(), floor, lamp)
 	tree := surface.NewTree(ss...)
-	// list := surface.NewList(tree, floor, lamp) // actually faster to separate floor & lamp from tree
 	scene := render.NewScene(888, 600, cam, tree, sky)
 	frame := render.NewFrame(scene)
 	ticker := time.NewTicker(1 * time.Minute)
@@ -63,7 +71,7 @@ func main() {
 				if err := frame.WritePNG(heatFile, frame.Heat()); err != nil {
 					panic(err)
 				}
-				fmt.Println("written")
+				fmt.Println("written", last)
 			}
 		}
 	}()
@@ -84,6 +92,7 @@ func main() {
 		}
 
 		fmt.Println("rendering mario.png (press Ctrl+C to finish)...")
+		running = true
 		frame.Start()
 		<-kill
 		frame.Stop()
