@@ -13,7 +13,6 @@ const (
 	green
 	blue
 	count
-	variance
 	stride
 )
 
@@ -42,26 +41,7 @@ func (s *Sample) At(x, y int) (rgb.Energy, int) {
 	}, int(c)
 }
 
-// https://en.wikipedia.org/wiki/Signal-to-noise_ratio#Alternative_definition
-func (s *Sample) Noise(x, y int) float64 {
-	v := s.variation(x, y)
-	f := s.firefly(x, y)
-	return (v + f) * 0.5
-}
-
-func (s *Sample) variation(x, y int) float64 {
-	mean, n := s.At(x, y)
-	bright := mean.Size()
-	if bright < 1 || n < 2 {
-		return 0
-	}
-	i := (y*s.Width + x) * stride
-	v := s.data[i+variance] / float64(n)
-	sd := math.Sqrt(v)
-	return math.Min(1, sd/bright)
-}
-
-func (s *Sample) firefly(x0, y0 int) float64 {
+func (s *Sample) Noise(x0, y0 int) float64 {
 	sum := rgb.Black
 	count := 0.0
 	minY := int(math.Max(0, float64(y0-1)))
@@ -91,18 +71,12 @@ func (s *Sample) firefly(x0, y0 int) float64 {
 	return math.Min(1, sd/mean)
 }
 
-func (s *Sample) Add(x, y int, e rgb.Energy, n int, prev rgb.Energy) (rgb.Energy, int) {
+func (s *Sample) Add(x, y int, e rgb.Energy, n int) {
 	i := (y*s.Width + x) * stride
 	s.data[i+red] += e.X
 	s.data[i+green] += e.Y
 	s.data[i+blue] += e.Z
 	s.data[i+count] += float64(n)
-
-	if !prev.Zero() {
-		d := e.Minus(prev).Size()
-		s.data[i+variance] += d * d * float64(n)
-	}
-	return s.At(x, y) // TODO: does this need to return anything, or does this calculation just slow things down?
 }
 
 // http://www.dspguide.com/ch2/2.htm

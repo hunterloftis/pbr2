@@ -77,13 +77,12 @@ func (t *tracer) process() {
 		s := NewSample(width, height)
 		for y := 0; y < height; y++ {
 			for x := 0; x < width; x++ {
-				prev, _ := t.local.At(x, y)
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				n := int(1 + t.local.Noise(x, y)*branches)
-				rgb := t.branch(r, maxDepth, n)
-				s.Add(x, y, rgb, n, prev)
+				max := int(1 + t.local.Noise(x, y)*branches)
+				rgb, n := t.branch(r, maxDepth, max)
+				s.Add(x, y, rgb, n)
 			}
 		}
 		t.local.Merge(s)
@@ -91,28 +90,40 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
+func (t *tracer) branch(ray *geom.Ray, depth, max int) (energy rgb.Energy, n int) {
 	obj, dist := t.scene.Surface.Intersect(ray, infinity)
-	energy := rgb.Black
-	for i := 0; i < branches; i++ {
-		energy = energy.Plus(t.trace(ray, depth, obj, dist))
+	for n < max {
+		e, _ := t.trace(ray, depth, obj, dist)
+		energy = energy.Plus(e)
+		n++
 	}
-	return energy
+	for n < branches {
+		e, ok := t.trace(ray, depth, obj, dist)
+		energy = energy.Plus(e)
+		n++
+		if !ok {
+			break
+		}
+	}
+	return energy, n
 }
 
-func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.Energy {
+func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) (rgb.Energy, bool) {
 	energy := rgb.Black
 	signal := rgb.White
 	i := 0
+	branch := true
 
 	for {
 		if obj == nil {
 			env := t.scene.Env.At(ray.Dir).Times(signal)
 			energy = energy.Plus(env)
+			branch = branch && i > 0
 			break
 		}
 		if l := obj.Light(); !l.Zero() {
 			energy = energy.Plus(l.Times(signal))
+			branch = branch && i > 0
 			break
 		}
 
@@ -121,6 +132,9 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.E
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())
 		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
+		if i == 0 {
+			branch = branch && t.rnd.Float64() > pdf
+		}
 
 		indirect := 1.0
 		if shadow {
@@ -147,7 +161,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.E
 		ray = geom.NewRay(pt, bounce)
 		obj, dist = t.scene.Surface.Intersect(ray, infinity)
 	}
-	return energy
+	return energy, branch
 }
 
 // TODO: pretty long arg list...
