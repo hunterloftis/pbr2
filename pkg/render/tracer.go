@@ -77,12 +77,13 @@ func (t *tracer) process() {
 		s := NewSample(width, height)
 		for y := 0; y < height; y++ {
 			for x := 0; x < width; x++ {
+				prev, _ := t.local.At(x, y)
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
 				n := int(1 + t.local.Noise(x, y)*branches)
 				rgb := t.branch(r, maxDepth, n)
-				s.Add(x, y, rgb, n)
+				s.Add(x, y, rgb, n, prev)
 			}
 		}
 		t.local.Merge(s)
