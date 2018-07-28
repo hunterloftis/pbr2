@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var Origin = Vec{0, 0, 0}
+
 // Vec holds x, y, z values.
 type Vec struct {
 	X, Y, Z float64

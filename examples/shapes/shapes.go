@@ -36,7 +36,8 @@ func main() {
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
 
 	sky := env.NewFlat(40, 50, 60)
-	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Vec{}, geom.Vec{0, -0.025, 0.2})
+	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Origin)
+	cam.Focus = 0.8546962721
 	surf := surface.NewTree(
 		surface.UnitCube(grid).Move(0, -0.55, 0).Scale(1000, 1, 1000),
 		surface.UnitCube(redPlastic).Rotate(0, -0.25*math.Pi, 0).Scale(0.1, 0.1, 0.1),
@@ -70,10 +71,10 @@ func main() {
 		fmt.Println("rendering shapes.png (press Ctrl+C to finish)...")
 		frame.Start()
 		<-kill
-		frame.Stop() // TODO: instead of stopping immediately, do a graceful stop (so each frame can finish rendering what it's working on)?
+		frame.Stop()
 	}()
 
-	if err := frame.WritePNG("shapes.png"); err != nil {
+	if err := frame.WritePNG("shapes.png", frame.Image()); err != nil {
 		panic(err)
 	}
 }

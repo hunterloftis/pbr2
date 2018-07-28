@@ -31,7 +31,7 @@ func main() {
 	<-kill
 	frame.Stop()
 
-	if err := frame.WritePNG("hello.png"); err != nil {
+	if err := frame.WritePNG("hello.png", frame.Image()); err != nil {
 		panic(err)
 	}
 }
