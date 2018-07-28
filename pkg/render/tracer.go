@@ -80,7 +80,7 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				n := t.adapt(x, y)
+				n := int(1 + t.local.Noise(x, y)*branches)
 				rgb := t.branch(r, maxDepth, n)
 				s.Add(x, y, rgb, n)
 			}
@@ -88,14 +88,6 @@ func (t *tracer) process() {
 		t.local.Merge(s)
 		t.out <- s
 	}
-}
-
-// https://en.wikipedia.org/wiki/Signal-to-noise_ratio#Alternative_definition
-// TODO: consider using a 3x3 kernel to find noise levels instead of tracking variance per-pixel
-func (t *tracer) adapt(x, y int) int {
-	n := t.local.Noise(x, y)
-	b := math.Min(1, n)
-	return int(1 + b*branches)
 }
 
 func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {

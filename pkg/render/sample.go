@@ -13,7 +13,6 @@ const (
 	green
 	blue
 	count
-	variance
 	stride
 )
 
@@ -42,19 +41,36 @@ func (s *Sample) At(x, y int) (rgb.Energy, int) {
 	}, int(c)
 }
 
-func (s *Sample) StdDeviation(x, y int) float64 {
-	i := (y*s.Width + x) * stride
-	v := s.data[i+variance]
-	return math.Sqrt(v)
-}
-
-func (s *Sample) Noise(x, y int) float64 {
-	energy, _ := s.At(x, y)
-	m := energy.Mean()
-	if m < 1 {
+// https://en.wikipedia.org/wiki/Signal-to-noise_ratio#Alternative_definition
+func (s *Sample) Noise(x0, y0 int) float64 {
+	sum := rgb.Black
+	count := 0.0
+	minY := int(math.Max(0, float64(y0-1)))
+	maxY := int(math.Min(float64(s.Height-1), float64(y0+1)))
+	minX := int(math.Max(0, float64(x0-1)))
+	maxX := int(math.Min(float64(s.Width-1), float64(x0+1)))
+	for y := minY; y <= maxY; y++ {
+		for x := minX; x <= maxX; x++ {
+			energy, _ := s.At(x, y)
+			sum = sum.Plus(energy)
+			count++
+		}
+	}
+	mean := sum.Scaled(1 / count)
+	bright := mean.Size()
+	if bright < 1 {
 		return 0
 	}
-	return s.StdDeviation(x, y) / m
+	dist := 0.0
+	for y := minY; y <= maxY; y++ {
+		for x := minX; x <= maxX; x++ {
+			energy, _ := s.At(x, y)
+			d := energy.Minus(mean).Size()
+			dist += d * d
+		}
+	}
+	sd := math.Sqrt(dist / count)
+	return math.Min(1, sd/bright)
 }
 
 func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
@@ -68,22 +84,11 @@ func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
 
 // http://www.dspguide.com/ch2/2.htm
 func (s *Sample) Merge(other *Sample) {
-	for y := 0; y < s.Height; y++ {
-		for x := 0; x < s.Width; x++ {
-			i := (y*s.Width + x) * stride
-			energy := rgb.Energy{
-				X: other.data[i+red],
-				Y: other.data[i+green],
-				Z: other.data[i+blue],
-			}
-			n := int(other.data[i+count])
-			mean, _ := s.At(x, y)
-			newMean, count := s.Add(x, y, energy, n)
-			if count > 1 {
-				diff := newMean.Minus(mean).Size()
-				s.data[i+variance] += (diff * diff) / float64(count)
-			}
-		}
+	if len(s.data) != len(other.data) {
+		panic("Cannot merge samples of different sizes")
+	}
+	for i, _ := range s.data {
+		s.data[i] += other.data[i]
 	}
 }
 
@@ -115,33 +120,6 @@ func (s *Sample) HeatRGBA() *image.RGBA {
 		for x := 0; x < s.Width; x++ {
 			_, count := s.At(x, y)
 			bright := uint8(float64(count) / float64(max) * 255)
-			c := color.RGBA{
-				R: bright,
-				G: bright,
-				B: bright,
-				A: 255,
-			}
-			im.SetRGBA(x, y, c)
-		}
-	}
-	return im
-}
-
-// TODO: refactor all these RGBA() functions
-func (s *Sample) NoiseRGBA() *image.RGBA {
-	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
-	max := 0.0
-	for y := 0; y < s.Height; y++ {
-		for x := 0; x < s.Width; x++ {
-			if n := s.Noise(x, y); n > max {
-				max = n
-			}
-		}
-	}
-	for y := 0; y < s.Height; y++ {
-		for x := 0; x < s.Width; x++ {
-			n := s.Noise(x, y)
-			bright := uint8(n / max * 255)
 			c := color.RGBA{
 				R: bright,
 				G: bright,

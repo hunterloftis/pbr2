@@ -21,7 +21,6 @@ import (
 
 const outFile = "mario.png"
 const heatFile = "mario-heat.png"
-const noiseFile = "mario-noise.png"
 
 // TODO: be able to exit before processing starts
 func main() {
@@ -95,9 +94,6 @@ func main() {
 		panic(err)
 	}
 	if err := frame.WritePNG(heatFile, frame.Heat()); err != nil {
-		panic(err)
-	}
-	if err := frame.WritePNG(noiseFile, frame.Noise()); err != nil {
 		panic(err)
 	}
 }
