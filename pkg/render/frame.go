@@ -60,6 +60,12 @@ func (f *Frame) Heat() *image.RGBA {
 	return f.data.HeatRGBA()
 }
 
+func (f *Frame) Noise() *image.RGBA {
+	f.active.mu.RLock()
+	defer f.active.mu.RUnlock()
+	return f.data.NoiseRGBA()
+}
+
 func (f *Frame) WritePNG(name string, im image.Image) error {
 	f.active.mu.RLock()
 	defer f.active.mu.RUnlock()

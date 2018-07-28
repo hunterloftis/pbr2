@@ -10,7 +10,7 @@ import (
 )
 
 const maxDepth = 7
-const maxWeight = 20
+const maxWeight = 10
 const branches = 8
 const maxLights = 8 // TODO: limit light sampling
 
@@ -90,14 +90,11 @@ func (t *tracer) process() {
 	}
 }
 
+// https://en.wikipedia.org/wiki/Signal-to-noise_ratio#Alternative_definition
 func (t *tracer) adapt(x, y int) int {
-	energy, _ := t.local.At(x, y)
-	m := energy.Mean()
-	if m < 1 {
-		return 1
-	}
-	n := math.Min(1, t.local.Noise(x, y)/m)
-	return int(1 + n*branches)
+	n := t.local.Noise(x, y)
+	b := math.Min(1, n)
+	return int(1 + b*branches)
 }
 
 func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {

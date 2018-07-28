@@ -42,11 +42,19 @@ func (s *Sample) At(x, y int) (rgb.Energy, int) {
 	}, int(c)
 }
 
-func (s *Sample) Noise(x, y int) float64 {
+func (s *Sample) StdDeviation(x, y int) float64 {
 	i := (y*s.Width + x) * stride
 	v := s.data[i+variance]
-	sd := math.Sqrt(v)
-	return sd
+	return math.Sqrt(v)
+}
+
+func (s *Sample) Noise(x, y int) float64 {
+	energy, _ := s.At(x, y)
+	m := energy.Mean()
+	if m < 1 {
+		return 0
+	}
+	return s.StdDeviation(x, y) / m
 }
 
 func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
@@ -58,6 +66,7 @@ func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
 	return s.At(x, y)
 }
 
+// http://www.dspguide.com/ch2/2.htm
 func (s *Sample) Merge(other *Sample) {
 	for y := 0; y < s.Height; y++ {
 		for x := 0; x < s.Width; x++ {
@@ -67,11 +76,13 @@ func (s *Sample) Merge(other *Sample) {
 				Y: other.data[i+green],
 				Z: other.data[i+blue],
 			}
-			count := int(other.data[i+count])
+			n := int(other.data[i+count])
 			mean, _ := s.At(x, y)
-			newMean, count := s.Add(x, y, energy, count)
-			diff := newMean.Minus(mean).Size()
-			s.data[i+variance] += (diff * diff) / float64(count)
+			newMean, count := s.Add(x, y, energy, n)
+			if count > 1 {
+				diff := newMean.Minus(mean).Size()
+				s.data[i+variance] += (diff * diff) / float64(count)
+			}
 		}
 	}
 }
@@ -104,6 +115,33 @@ func (s *Sample) HeatRGBA() *image.RGBA {
 		for x := 0; x < s.Width; x++ {
 			_, count := s.At(x, y)
 			bright := uint8(float64(count) / float64(max) * 255)
+			c := color.RGBA{
+				R: bright,
+				G: bright,
+				B: bright,
+				A: 255,
+			}
+			im.SetRGBA(x, y, c)
+		}
+	}
+	return im
+}
+
+// TODO: refactor all these RGBA() functions
+func (s *Sample) NoiseRGBA() *image.RGBA {
+	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
+	max := 0.0
+	for y := 0; y < s.Height; y++ {
+		for x := 0; x < s.Width; x++ {
+			if n := s.Noise(x, y); n > max {
+				max = n
+			}
+		}
+	}
+	for y := 0; y < s.Height; y++ {
+		for x := 0; x < s.Width; x++ {
+			n := s.Noise(x, y)
+			bright := uint8(n / max * 255)
 			c := color.RGBA{
 				R: bright,
 				G: bright,
