@@ -59,25 +59,21 @@ func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
 }
 
 func (s *Sample) Merge(other *Sample) {
-	for i, _ := range s.data {
-		s.data[i] += other.data[i]
-	}
-	return // TODO: remove, testing
 	for y := 0; y < s.Height; y++ {
 		for x := 0; x < s.Width; x++ {
-			mean, count := other.At(x, y)
-			s.MergeAt(x, y, mean, count)
+			i := (y*s.Width + x) * stride
+			energy := rgb.Energy{
+				X: other.data[i+red],
+				Y: other.data[i+green],
+				Z: other.data[i+blue],
+			}
+			count := int(other.data[i+count])
+			mean, _ := s.At(x, y)
+			newMean, count := s.Add(x, y, energy, count)
+			diff := newMean.Minus(mean).Size()
+			s.data[i+variance] += (diff * diff) / float64(count)
 		}
 	}
-}
-
-func (s *Sample) MergeAt(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
-	mean, _ := s.At(x, y)
-	newMean, count := s.Add(x, y, e, n)
-	diff := newMean.Minus(mean).Size()
-	i := (y*s.Width + x) * stride
-	s.data[i+variance] += (diff * diff) / float64(count)
-	return newMean, count
 }
 
 // TODO: optional blur around super-bright pixels

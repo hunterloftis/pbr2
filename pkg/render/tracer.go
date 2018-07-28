@@ -80,9 +80,7 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				adapt := math.Min(1, t.local.Noise(x, y)/255)
-				adapt = t.rnd.Float64() // TODO: remove, testing
-				n := int(1 + adapt*branches)
+				n := t.adapt(x, y)
 				rgb := t.branch(r, maxDepth, n)
 				s.Add(x, y, rgb, n)
 			}
@@ -90,6 +88,16 @@ func (t *tracer) process() {
 		t.local.Merge(s)
 		t.out <- s
 	}
+}
+
+func (t *tracer) adapt(x, y int) int {
+	energy, _ := t.local.At(x, y)
+	m := energy.Mean()
+	if m < 1 {
+		return 1
+	}
+	n := math.Min(1, t.local.Noise(x, y)/m)
+	return int(1 + n*branches)
 }
 
 func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
