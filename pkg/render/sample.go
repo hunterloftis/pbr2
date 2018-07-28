@@ -1,7 +1,6 @@
 package render
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -14,6 +13,7 @@ const (
 	green
 	blue
 	count
+	variance
 	stride
 )
 
@@ -35,15 +35,18 @@ func NewSample(w, h int) *Sample {
 func (s *Sample) At(x, y int) (rgb.Energy, int) {
 	i := (y*s.Width + x) * stride
 	c := math.Max(1, s.data[i+count])
-	c2 := int(c)
-	if x == 0 && y == 0 {
-		fmt.Println("count at source:", c2)
-	}
 	return rgb.Energy{
 		X: s.data[i+red] / c,
 		Y: s.data[i+green] / c,
 		Z: s.data[i+blue] / c,
-	}, c2
+	}, int(c)
+}
+
+func (s *Sample) Noise(x, y int) float64 {
+	i := (y*s.Width + x) * stride
+	v := s.data[i+variance]
+	sd := math.Sqrt(v)
+	return sd
 }
 
 func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
@@ -52,17 +55,25 @@ func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
 	s.data[i+green] += e.Y
 	s.data[i+blue] += e.Z
 	s.data[i+count] += float64(n)
-	rgb, c := s.At(x, y)
-	if x == 0 && y == 0 {
-		fmt.Println("count before returning:", c)
-	}
-	return rgb, c
+	return s.At(x, y)
 }
 
 func (s *Sample) Merge(other *Sample) {
-	for i, _ := range s.data {
-		s.data[i] += other.data[i]
+	for y := 0; y < s.Height; y++ {
+		for x := 0; x < s.Width; x++ {
+			mean, count := other.At(x, y)
+			s.MergeAt(x, y, mean, count)
+		}
 	}
+}
+
+func (s *Sample) MergeAt(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
+	mean, _ := s.At(x, y)
+	newMean, count := s.Add(x, y, e, n)
+	diff := newMean.Minus(mean).Size()
+	i := (y*s.Width + x) * stride
+	s.data[i+variance] += (diff * diff) / float64(count)
+	return newMean, count
 }
 
 // TODO: optional blur around super-bright pixels

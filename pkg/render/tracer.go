@@ -1,7 +1,6 @@
 package render
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -44,13 +43,11 @@ type BSDF interface {
 }
 
 type tracer struct {
-	scene    *Scene
-	out      chan *Sample
-	active   toggle
-	rnd      *rand.Rand
-	mean     []rgb.Energy
-	count    []int
-	variance []float64
+	scene  *Scene
+	out    chan *Sample
+	active toggle
+	rnd    *rand.Rand
+	local  *Sample
 }
 
 func newTracer(s *Scene, o chan *Sample) *tracer {
@@ -58,7 +55,7 @@ func newTracer(s *Scene, o chan *Sample) *tracer {
 		scene: s,
 		out:   o,
 		rnd:   rand.New(rand.NewSource(time.Now().UnixNano())),
-		stats: newStats(s.Width, s.Height),
+		local: NewSample(s.Width, s.Height),
 	}
 }
 
@@ -83,42 +80,14 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				n := int(1 + t.stats.Noise(x, y)*branches)
+				adapt := math.Min(1, t.local.Noise(x, y)/255)
+				n := int(1 + adapt*branches)
 				rgb := t.branch(r, maxDepth, n)
 				s.Add(x, y, rgb, n)
-				t.stats.Add(x, y, rgb, n)
 			}
 		}
+		t.local.Merge(s)
 		t.out <- s
-	}
-}
-
-func (t *tracer) noiseAt(x, y int) float64 {
-	i := y*t.scene.Width + x
-	v := t.variance[i]
-	sd := math.Sqrt(v)
-	n := math.Min(1, sd/500)
-	if t.rnd.Float64() < 0.00001 {
-		fmt.Println(n)
-	}
-	return n
-}
-
-func (t *tracer) addNoise(x, y, count int, mean, new rgb.Energy, n int) {
-	if t.rnd.Float64() < 0.00001 {
-		fmt.Println("count:", count)
-	}
-	if count < 2 {
-		return
-	}
-	i := y*t.scene.Width + x
-	newMean := new.Scaled(1.0 / float64(n))
-	diff := newMean.Minus(mean).Size()
-	for j := 0; j < n; j++ {
-		t.variance[i] += (diff * diff) / float64(count+j)
-	}
-	if t.rnd.Float64() < 0.00001 {
-		fmt.Println("diff:", diff)
 	}
 }
 
@@ -128,7 +97,7 @@ func (t *tracer) branch(ray *geom.Ray, depth, branches int) rgb.Energy {
 	for i := 0; i < branches; i++ {
 		energy = energy.Plus(t.trace(ray, depth, obj, dist))
 	}
-	return energy //.Scaled(1.0 / float64(branches))
+	return energy
 }
 
 func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) rgb.Energy {

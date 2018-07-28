@@ -22,6 +22,7 @@ import (
 const outFile = "mario.png"
 const heatFile = "mario-heat.png"
 
+// TODO: be able to exit before processing starts
 func main() {
 	kill := make(chan os.Signal, 2)
 	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
@@ -76,7 +77,7 @@ func main() {
 			pprof.StartCPUProfile(f)
 			defer pprof.StopCPUProfile()
 			go func() {
-				t := time.NewTimer(30 * time.Second)
+				t := time.NewTimer(2 * time.Minute)
 				<-t.C
 				kill <- syscall.SIGTERM
 			}()
