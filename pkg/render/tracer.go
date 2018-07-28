@@ -91,6 +91,7 @@ func (t *tracer) process() {
 }
 
 // https://en.wikipedia.org/wiki/Signal-to-noise_ratio#Alternative_definition
+// TODO: consider using a 3x3 kernel to find noise levels instead of tracking variance per-pixel
 func (t *tracer) adapt(x, y int) int {
 	n := t.local.Noise(x, y)
 	b := math.Min(1, n)
