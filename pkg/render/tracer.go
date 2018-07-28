@@ -81,6 +81,7 @@ func (t *tracer) process() {
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
 				adapt := math.Min(1, t.local.Noise(x, y)/255)
+				adapt = t.rnd.Float64() // TODO: remove, testing
 				n := int(1 + adapt*branches)
 				rgb := t.branch(r, maxDepth, n)
 				s.Add(x, y, rgb, n)

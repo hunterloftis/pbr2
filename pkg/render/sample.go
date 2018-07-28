@@ -59,6 +59,10 @@ func (s *Sample) Add(x, y int, e rgb.Energy, n int) (rgb.Energy, int) {
 }
 
 func (s *Sample) Merge(other *Sample) {
+	for i, _ := range s.data {
+		s.data[i] += other.data[i]
+	}
+	return // TODO: remove, testing
 	for y := 0; y < s.Height; y++ {
 		for x := 0; x < s.Width; x++ {
 			mean, count := other.At(x, y)
