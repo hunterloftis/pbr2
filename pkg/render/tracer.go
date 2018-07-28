@@ -48,19 +48,20 @@ type tracer struct {
 	out      chan *Sample
 	active   toggle
 	rnd      *rand.Rand
+	mean     []rgb.Energy
+	count    []int
 	variance []float64
 }
 
 func newTracer(s *Scene, o chan *Sample) *tracer {
 	return &tracer{
-		scene:    s,
-		out:      o,
-		rnd:      rand.New(rand.NewSource(time.Now().UnixNano())),
-		variance: make([]float64, s.Height*s.Width),
+		scene: s,
+		out:   o,
+		rnd:   rand.New(rand.NewSource(time.Now().UnixNano())),
+		stats: newStats(s.Width, s.Height),
 	}
 }
 
-// TODO: move for w.active.State() loop here and compare performance (persistent goroutine vs a new one every loop and a synchronous process() func)
 func (t *tracer) start() {
 	if t.active.Set(true) {
 		go t.process()
@@ -82,14 +83,10 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				n := int(1 + t.noiseAt(x, y)*branches)
-				// n := int(1 + t.rnd.Float64()*branches)
+				n := int(1 + t.stats.Noise(x, y)*branches)
 				rgb := t.branch(r, maxDepth, n)
-				mean, count := s.Add(x, y, rgb, n)
-				if x == 0 && y == 0 {
-					fmt.Println("count once returned:", count, "n:", n)
-				}
-				t.addNoise(x, y, count-n, mean, rgb, n)
+				s.Add(x, y, rgb, n)
+				t.stats.Add(x, y, rgb, n)
 			}
 		}
 		t.out <- s
