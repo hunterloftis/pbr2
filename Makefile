@@ -10,3 +10,9 @@ mario_profile:
 	go tool pprof --pdf ./mario ./cpu.pprof > cpu.pdf
 	open cpu.pdf
 	
+sponza_profile:
+	go build ./examples/sponza
+	./sponza -profile cpu.pprof
+	go tool pprof --pdf ./sponza ./cpu.pprof > cpu.pdf
+	open cpu.pdf
+	

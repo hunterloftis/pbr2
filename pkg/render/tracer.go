@@ -9,10 +9,10 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
-const maxDepth = 7
+const maxDepth = 6
 const maxWeight = 10
-const branches = 8
-const maxLights = 8 // TODO: limit light sampling
+const branches = 4
+const maxLights = 4 // TODO: limit light sampling
 
 var infinity = math.Inf(1)
 
@@ -170,6 +170,9 @@ func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (ener
 	lights := t.scene.Surface.Lights()
 
 	// TODO: limit by maxLights
+	if len(lights) > 1 {
+		panic("implement")
+	}
 	for _, l := range lights {
 		ray, solid := l.Bounds().ShadowRay(pt, normal, t.rnd)
 		if solid <= 0 {
