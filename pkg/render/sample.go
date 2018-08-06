@@ -3,7 +3,9 @@ package render
 import (
 	"image"
 	"image/color"
+	"image/png"
 	"math"
+	"os"
 
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
@@ -91,7 +93,7 @@ func (s *Sample) Merge(other *Sample) {
 
 // TODO: optional blur around super-bright pixels
 // (essentially a gaussian blur that ignores light < some threshold)
-func (s *Sample) ToRGBA() *image.RGBA {
+func (s *Sample) Image() *image.RGBA {
 	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
 	for y := 0; y < s.Height; y++ {
 		for x := 0; x < s.Width; x++ {
@@ -103,7 +105,7 @@ func (s *Sample) ToRGBA() *image.RGBA {
 	return im
 }
 
-func (s *Sample) HeatRGBA() *image.RGBA {
+func (s *Sample) HeatImage() *image.RGBA {
 	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
 	max := 1
 	for y := 0; y < s.Height; y++ {
@@ -127,4 +129,13 @@ func (s *Sample) HeatRGBA() *image.RGBA {
 		}
 	}
 	return im
+}
+
+func (s *Sample) WritePNG(name string, im image.Image) error {
+	out, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	return png.Encode(out, im)
 }

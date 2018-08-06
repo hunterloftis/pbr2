@@ -39,3 +39,7 @@ func (l *List) Lights() []render.Object {
 func (l *List) Bounds() *geom.Bounds {
 	return l.bounds
 }
+
+func (l *List) Surfaces() []render.Surface {
+	return l.surfs
+}

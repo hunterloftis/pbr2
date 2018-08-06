@@ -1,18 +1,24 @@
 package render
 
+// TODO: why does this exist? It should be a hidden part of Frame
+
 type Scene struct {
-	Width, Height int
-	Camera        Camera
-	Env           Environment
-	Surface       Surface
+	Camera  Camera
+	Env     Environment
+	Surface Surface
 }
 
-func NewScene(w, h int, c Camera, s Surface, e Environment) *Scene {
+func NewScene(c Camera, s Surface, e Environment) *Scene {
 	return &Scene{
-		Width:   w,
-		Height:  h,
 		Env:     e,
 		Surface: s,
 		Camera:  c,
 	}
+}
+
+// TODO: pass bounce & direct through
+func (s *Scene) Render(width, height, bounce, direct int) *Frame {
+	f := NewFrame(s, width, height)
+	f.Start()
+	return f
 }

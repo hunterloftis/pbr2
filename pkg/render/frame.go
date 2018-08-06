@@ -1,11 +1,7 @@
 package render
 
 import (
-	"image"
-	"image/png"
-	"os"
 	"runtime"
-	"sync/atomic"
 )
 
 type Frame struct {
@@ -14,19 +10,20 @@ type Frame struct {
 	workers []*tracer
 	in      chan *Sample
 	active  toggle
-	samples uint64
+	samples int
+	cursor  int
 }
 
-func NewFrame(s *Scene) *Frame {
+func NewFrame(s *Scene, w, h int) *Frame {
 	workers := runtime.NumCPU()
 	f := Frame{
 		scene:   s,
-		data:    NewSample(s.Width, s.Height),
+		data:    NewSample(w, h),
 		workers: make([]*tracer, workers),
 		in:      make(chan *Sample, workers*2),
 	}
 	for w := 0; w < workers; w++ {
-		f.workers[w] = newTracer(f.scene, f.in)
+		f.workers[w] = newTracer(f.scene, f.in, w, h)
 	}
 	go f.process()
 	return &f
@@ -52,36 +49,27 @@ func (f *Frame) Stop() {
 	}
 }
 
-func (f *Frame) Image() *image.RGBA {
-	f.active.mu.RLock()
-	defer f.active.mu.RUnlock()
-	return f.data.ToRGBA()
-}
-
-func (f *Frame) Heat() *image.RGBA {
-	f.active.mu.RLock()
-	defer f.active.mu.RUnlock()
-	return f.data.HeatRGBA()
-}
-
-func (f *Frame) WritePNG(name string, im image.Image) error {
-	f.active.mu.RLock()
-	defer f.active.mu.RUnlock()
-	out, err := os.Create(name)
-	if err != nil {
-		return err
+func (f *Frame) Next() (*Sample, bool) {
+	f.active.mu.Lock()
+	defer f.active.mu.Unlock()
+	if f.cursor >= f.samples {
+		return f.data, false
 	}
-	defer out.Close()
-	return png.Encode(out, im)
+	f.cursor = f.samples
+	return f.data, true
 }
 
-func (f *Frame) Samples() uint64 {
-	return atomic.LoadUint64(&f.samples)
+func (f *Frame) Samples() int {
+	f.active.mu.RLock()
+	defer f.active.mu.RUnlock()
+	return f.samples
 }
 
 func (f *Frame) process() {
 	for s := range f.in {
+		f.active.mu.Lock()
 		f.data.Merge(s)
-		atomic.AddUint64(&f.samples, 1)
+		f.samples++
+		f.active.mu.Unlock()
 	}
 }

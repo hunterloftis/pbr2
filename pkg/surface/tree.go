@@ -12,9 +12,9 @@ const (
 	yAxis        = 1
 	zAxis        = 2
 	traversal    = 1.0
-	intersection = 16.0
-	bins         = 20
-	minContents  = 5
+	intersection = 8.0
+	bins         = 5
+	minContents  = 8
 )
 
 // TODO: concurrent construction
@@ -34,7 +34,7 @@ type branch struct {
 }
 
 func NewTree(ss ...render.Surface) *Tree {
-	maxDepth := int(2 * math.Round(8+1.3*math.Log2(float64(len(ss))))) // PBRT "acceleration structures" chapter
+	maxDepth := int(5 * math.Round(8+1.3*math.Log2(float64(len(ss))))) // PBRT "acceleration structures" chapter
 	// maxDepth := int(math.Round(8 + 1.3*math.Log2(float64(len(ss))))) // PBRT "acceleration structures" chapter
 	t := Tree{
 		branch: *newBranch(boundsAround(ss), ss, maxDepth),

@@ -7,11 +7,11 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/geom"
 )
 
-// Standard generates rays from a simulated physical camera into a Scene.
+// SLR generates rays from a simulated physical camera into a Scene.
 // The rays produced are determined by position,
 // orientation, sensor type, focus, exposure, and lens selection.
 // TODO: Bloom filter: https://en.wikipedia.org/wiki/Bloom_(shader_effect)
-type Standard struct {
+type SLR struct {
 	Width  float64
 	Height float64
 	Lens   float64
@@ -24,9 +24,9 @@ type Standard struct {
 	target     geom.Vec
 }
 
-// NewStandard constructs a new camera with 35mm sensor full-frame / 50mm lens defaults.
-func NewStandard() *Standard {
-	s := &Standard{
+// NewSLR constructs a new camera with 35mm sensor full-frame / 50mm lens defaults.
+func NewSLR() *SLR {
+	s := &SLR{
 		Width:    0.036, // 36mm (full frame sensor width)
 		Height:   0.024, // 24mm (full frame sensor height)
 		Lens:     0.050, // 50mm focal length
@@ -40,20 +40,20 @@ func NewStandard() *Standard {
 }
 
 // LookAt orients a Camera to face a target.
-func (s *Standard) LookAt(target geom.Vec) *Standard {
+func (s *SLR) LookAt(target geom.Vec) *SLR {
 	s.target = target
 	s.transform()
 	return s
 }
 
 // MoveTo moves a Camera to a position given by x, y, and z coordinates.
-func (s *Standard) MoveTo(x, y, z float64) *Standard {
-	s.position = geom.Vec{x, y, z}
+func (s *SLR) MoveTo(pos geom.Vec) *SLR {
+	s.position = pos
 	s.transform()
 	return s
 }
 
-func (s *Standard) Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray {
+func (s *SLR) Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray {
 	u := x / width
 	v := y / height
 	aSense := s.Width / s.Height
@@ -75,12 +75,12 @@ func (s *Standard) Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray {
 	return s.trans.MultRay(ray)
 }
 
-func (s *Standard) transform() {
+func (s *SLR) transform() {
 	s.trans = geom.LookMatrix(s.position, s.target)
 	s.targetDist = s.target.Minus(s.position).Len()
 }
 
-func (s *Standard) sensorPoint(u, v float64) geom.Vec {
+func (s *SLR) sensorPoint(u, v float64) geom.Vec {
 	focusDist := s.targetDist * s.Focus
 	z := 1 / ((1 / s.Lens) - (1 / focusDist))
 	x := (u - 0.5) * s.Width
@@ -89,7 +89,7 @@ func (s *Standard) sensorPoint(u, v float64) geom.Vec {
 }
 
 // https://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
-func (s *Standard) aperturePoint(rnd *rand.Rand) geom.Vec {
+func (s *SLR) aperturePoint(rnd *rand.Rand) geom.Vec {
 	d := s.Lens / s.FStop
 	t := 2 * math.Pi * rnd.Float64()
 	r := math.Sqrt(rnd.Float64()) * d * 0.5

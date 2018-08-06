@@ -50,12 +50,12 @@ type tracer struct {
 	local  *Sample
 }
 
-func newTracer(s *Scene, o chan *Sample) *tracer {
+func newTracer(s *Scene, o chan *Sample, w, h int) *tracer {
 	return &tracer{
 		scene: s,
 		out:   o,
 		rnd:   rand.New(rand.NewSource(time.Now().UnixNano())),
-		local: NewSample(s.Width, s.Height),
+		local: NewSample(w, h),
 	}
 }
 
@@ -70,8 +70,8 @@ func (t *tracer) stop() {
 }
 
 func (t *tracer) process() {
-	width := t.scene.Width
-	height := t.scene.Height
+	width := t.local.Width
+	height := t.local.Height
 	camera := t.scene.Camera
 	for t.active.State() {
 		s := NewSample(width, height)
