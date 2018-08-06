@@ -37,13 +37,13 @@ func run(o *Options) error {
 	environment := render.Environment(env.NewGradient(rgb.Black, *o.Ambient, 3))
 
 	o.SetDefaults(bounds)
-	camera.MoveTo(*o.Camera).LookAt(*o.Target)
-	camera.Lens = o.Lens
+	camera.MoveTo(*o.From).LookAt(*o.To)
+	camera.Lens = o.Lens / 1000
 	camera.FStop = o.FStop
 	camera.Focus = o.Focus
 
 	if o.Verbose || o.Info {
-		printInfo(bounds, len(surfaces))
+		printInfo(bounds, len(surfaces), camera)
 		if o.Info {
 			return nil
 		}
@@ -59,8 +59,8 @@ func run(o *Options) error {
 	if o.Floor {
 		floor := surface.UnitCube(material.Plastic(0, 0, 0, 1))
 		dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
-		floor.Move(bounds.Center.X, bounds.Min.Y-dims.Y*0.25, bounds.Center.Z)
-		floor.Scale(dims.X, dims.Y*0.5, dims.Z)
+		floor.Move(bounds.Center.X, bounds.Min.Y-dims.Y*0.25, bounds.Center.Z) // TODO: use Vec
+		floor.Scale(dims.X, dims.Y*0.5, dims.Z)                                // TODO: use Vec
 		surfaces = append(surfaces, floor)
 	}
 

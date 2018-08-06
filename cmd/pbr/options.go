@@ -26,9 +26,9 @@ type Options struct {
 	Heat    string `help:"output heatmap as .png"`
 	Profile bool   `help:"record performance into profile.pprof"`
 
-	Camera *geom.Vec `arg:"-c" help:"camera location"`
-	Target *geom.Vec `arg:"-l" help:"camera look point"`
-	Focus  float64   `help:"camera focus ratio (default: 1.0)"`
+	From  *geom.Vec `help:"camera location"`
+	To    *geom.Vec `help:"camera look point"`
+	Focus float64   `help:"camera focus ratio (default: 1.0)"`
 
 	Lens   float64 `help:"camera focal length in mm"`
 	FStop  float64 `help:"camera f-stop"`
@@ -54,6 +54,7 @@ func options() *Options {
 		Time:    math.Inf(1),
 		Lens:    50,
 		FStop:   4,
+		Focus:   1,
 		Expose:  1,
 	}
 	arg.MustParse(c)

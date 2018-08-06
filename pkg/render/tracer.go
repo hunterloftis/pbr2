@@ -80,9 +80,8 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				min := int(t.local.Noise(x, y) * branches)
-				rgb, n := t.branch(r, maxDepth, min)
-				s.Add(x, y, rgb, n)
+				samples := t.trace(r, maxDepth) // TODO: locally-defined max depth
+				s.Add(x, y, samples)
 			}
 		}
 		t.local.Merge(s)
@@ -90,15 +89,26 @@ func (t *tracer) process() {
 	}
 }
 
+func (t *tracer) trace(ray *geom.Ray, depth int) []rgb.Energy {
+	obj, dist := t.scene.Surface.Intersect(ray, infinity)
+	if obj == nil {
+		e := t.scene.Env.At(ray.Dir)
+		return []rgb.Energy{rgb.Black}
+		return []rgb.Energy{e}
+	}
+	_ = dist
+	return []rgb.Energy{rgb.Energy{255, 255, 255}}
+}
+
 func (t *tracer) branch(ray *geom.Ray, depth, min int) (energy rgb.Energy, n int) {
 	obj, dist := t.scene.Surface.Intersect(ray, infinity)
 	for n < min {
-		e, _ := t.trace(ray, depth, obj, dist)
+		e, _ := t.trace2(ray, depth, obj, dist)
 		energy = energy.Plus(e)
 		n++
 	}
 	for n < branches {
-		e, ok := t.trace(ray, depth, obj, dist)
+		e, ok := t.trace2(ray, depth, obj, dist)
 		energy = energy.Plus(e)
 		n++
 		if !ok {
@@ -109,7 +119,7 @@ func (t *tracer) branch(ray *geom.Ray, depth, min int) (energy rgb.Energy, n int
 }
 
 // TODO: Simplify! This dynamic branching logic has gotten overly complicated. Sketch out a diagram.
-func (t *tracer) trace(ray *geom.Ray, depth int, obj Object, dist float64) (rgb.Energy, bool) {
+func (t *tracer) trace2(ray *geom.Ray, depth int, obj Object, dist float64) (rgb.Energy, bool) {
 	energy := rgb.Black
 	signal := rgb.White
 	branch := true

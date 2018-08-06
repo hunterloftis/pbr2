@@ -15,4 +15,7 @@ sponza_profile:
 	./sponza -profile cpu.pprof
 	go tool pprof --pdf ./sponza ./cpu.pprof > cpu.pdf
 	open cpu.pdf
-	
+
+mario-sculpture:
+	go build ./cmd/pbr
+	./pbr fixtures/models/mario/mario-sculpture.obj -width 500 -height 400 -from 150,150,150 -to 0,0,0 -v

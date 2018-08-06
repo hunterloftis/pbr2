@@ -14,16 +14,16 @@ type Frame struct {
 	cursor  int
 }
 
-func NewFrame(s *Scene, w, h int) *Frame {
+func NewFrame(s *Scene, width, height int) *Frame {
 	workers := runtime.NumCPU()
 	f := Frame{
 		scene:   s,
-		data:    NewSample(w, h),
+		data:    NewSample(width, height),
 		workers: make([]*tracer, workers),
 		in:      make(chan *Sample, workers*2),
 	}
 	for w := 0; w < workers; w++ {
-		f.workers[w] = newTracer(f.scene, f.in, w, h)
+		f.workers[w] = newTracer(f.scene, f.in, width, height)
 	}
 	go f.process()
 	return &f
