@@ -49,7 +49,7 @@ func (f *Frame) Stop() {
 	}
 }
 
-func (f *Frame) Next() (*Sample, bool) {
+func (f *Frame) Sample() (*Sample, bool) {
 	f.active.mu.Lock()
 	defer f.active.mu.Unlock()
 	if f.cursor >= f.samples {

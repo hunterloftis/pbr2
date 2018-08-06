@@ -71,18 +71,24 @@ func run(o *Options) error {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
+	start := time.Now().UnixNano()
 	printStart()
 
-	for {
+	for frame.Active() {
 		select {
 		case <-kill:
-			return nil
+			frame.Stop()
 		case <-ticker.C:
-			if sample, ok := frame.Next(); ok {
+			if sample, ok := frame.Sample(); ok {
 				if err := writePNGs(o, sample); err != nil {
 					return err
 				}
 			}
 		}
 	}
+
+	sample, _ := frame.Sample()
+	printDone(sample, start, time.Now().UnixNano())
+
+	return nil
 }
