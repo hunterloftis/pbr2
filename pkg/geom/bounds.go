@@ -96,7 +96,8 @@ func (b *Bounds) ShadowRay(origin Vec, normal Dir, rnd *rand.Rand) (*Ray, float6
 	diff, _ := point.Minus(origin).Unit()
 	ray := NewRay(origin, diff) // TODO: this should be a convenience method
 	dist := b.Center.Minus(origin).Len()
-	cos := ray.Dir.Dot(normal)
-	solidAngle := cos * (b.Radius * b.Radius) / (2 * dist * dist) // cosine-weighted ratio of disc surface area to hemisphere surface area
+	// cos := ray.Dir.Dot(normal)
+	// solidAngle := cos * (b.Radius * b.Radius) / (2 * dist * dist) // cosine-weighted ratio of disc surface area to hemisphere surface area
+	solidAngle := (b.Radius * b.Radius) / (2 * dist * dist)
 	return ray, solidAngle
 }
