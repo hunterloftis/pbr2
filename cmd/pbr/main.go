@@ -64,6 +64,9 @@ func run(o *Options) error {
 		surfaces = append(surfaces, floor)
 	}
 
+	sun := surface.UnitSphere(material.Light(9000, 9000, 9000)).Move(100, 50, 50).Scale(5, 5, 5)
+	surfaces = append(surfaces, sun)
+
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
 	frame := scene.Render(o.Width, o.Height, o.Bounce, o.Direct)
