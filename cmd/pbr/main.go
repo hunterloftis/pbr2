@@ -64,8 +64,9 @@ func run(o *Options) error {
 		surfaces = append(surfaces, floor)
 	}
 
-	sun := surface.UnitSphere(material.Light(9000, 9000, 9000)).Move(25, 50, -100).Scale(5, 5, 5)
-	surfaces = append(surfaces, sun)
+	sun1 := surface.UnitSphere(material.Light(70000, 10000, 5000)).Move(100, 50, 0).Scale(5, 5, 5)
+	sun2 := surface.UnitSphere(material.Light(5000, 10000, 70000)).Move(-100, 50, 0).Scale(5, 5, 5)
+	surfaces = append(surfaces, sun1, sun2)
 
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
@@ -75,6 +76,7 @@ func run(o *Options) error {
 	defer ticker.Stop()
 
 	start := time.Now().UnixNano()
+	max := 0
 	printStart()
 
 	for frame.Active() {
@@ -82,7 +84,8 @@ func run(o *Options) error {
 		case <-kill:
 			frame.Stop()
 		case <-ticker.C:
-			if sample, ok := frame.Sample(); ok {
+			if sample, n := frame.Sample(); n > max {
+				max = n
 				if err := writePNGs(o, sample); err != nil {
 					return err
 				}

@@ -11,7 +11,6 @@ type Frame struct {
 	in      chan *Sample
 	active  toggle
 	samples int
-	cursor  int
 }
 
 func NewFrame(s *Scene, width, height int) *Frame {
@@ -49,14 +48,10 @@ func (f *Frame) Stop() {
 	}
 }
 
-func (f *Frame) Sample() (*Sample, bool) {
+func (f *Frame) Sample() (*Sample, int) {
 	f.active.mu.Lock()
 	defer f.active.mu.Unlock()
-	if f.cursor >= f.samples {
-		return f.data, false
-	}
-	f.cursor = f.samples
-	return f.data, true
+	return f.data, f.samples
 }
 
 func (f *Frame) Samples() int {

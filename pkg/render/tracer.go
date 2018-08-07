@@ -117,15 +117,18 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 
 		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
 
+		// https://blog.yiningkarlli.com/2013/04/importance-sampled-direct-lighting.html
+		// TODO: figure out what this means - https://spie.org/publications/fg11_p04_solid_angle_and_projected?SSO=1
+		// Ditto: http://sjbrown.co.uk/2011/04/16/projected-solid-angle-is-projected/
 		if shadow {
 			dir, light, coverage := t.direct(pt, normal)
 			wiDirect := toTan.MultDir(dir)
 			if coverage > 0 {
-				weight := 200 * coverage / math.Pi // TODO: fix solidangle so arbitrary multiplier isn't needed
-				reflectance := bsdf.Eval(wiDirect, wo).Scaled(weight)
+				area := 2 * math.Pi * coverage // TODO: is this the right scale? 1 -> 2pi to cover the hemisphere?
+				reflectance := bsdf.Eval(wiDirect, wo).Scaled(area)
 				e := light.Times(reflectance).Times(signal)
 				energy = energy.Plus(e)
-				indirect -= weight
+				indirect -= coverage
 			}
 		}
 

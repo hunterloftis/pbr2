@@ -87,17 +87,19 @@ func (b *Bounds) Contains(p Vec) bool {
 // chooses a random point within that disc,
 // and returns a Ray from the origin to the random point.
 // https://marine.rutgers.edu/dmcs/ms552/2009/solidangle.pdf
-func (b *Bounds) ShadowRay(origin Vec, normal Dir, rnd *rand.Rand) (*Ray, float64) {
-	forward, _ := origin.Minus(b.Center).Unit()
-	x, y := RandPointInCircle(b.Radius, rnd) // TODO: push center back along "forward" axis, away from origin
+func (b *Bounds) ShadowRay(pt Vec, normal Dir, rnd *rand.Rand) (*Ray, float64) {
+	forward, _ := pt.Minus(b.Center).Unit()
+	x, y := RandPointInCircle(b.Radius, rnd) // TODO: push center back along "forward" axis, away from pt
 	right, _ := forward.Cross(Up)
 	up, _ := right.Cross(forward)
 	point := b.Center.Plus(right.Scaled(x)).Plus(up.Scaled(y))
-	diff, _ := point.Minus(origin).Unit()
-	ray := NewRay(origin, diff) // TODO: this should be a convenience method
-	dist := b.Center.Minus(origin).Len()
-	// cos := ray.Dir.Dot(normal)
-	// solidAngle := cos * (b.Radius * b.Radius) / (2 * dist * dist) // cosine-weighted ratio of disc surface area to hemisphere surface area
-	solidAngle := (b.Radius * b.Radius) / (2 * dist * dist)
-	return ray, solidAngle
+	diff, _ := point.Minus(pt).Unit()
+	ray := NewRay(pt, diff) // TODO: this should be a convenience method
+
+	// https://en.wikipedia.org/wiki/Solid_angle#Sun_and_Moon
+	dist := b.Center.Minus(pt).Len()
+	theta := math.Atan2(b.Radius, dist)
+	coverage := math.Max(0, math.Min(1, 1-math.Cos(theta)))
+
+	return ray, coverage
 }
