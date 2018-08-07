@@ -108,19 +108,25 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 		normal, bsdf := obj.At(pt, ray.Dir, t.rnd)
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())
-		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
-
-		direct, coverage := rgb.Black, 0.0
-		if shadow {
-			direct, coverage = t.direct(pt, normal, wo, toTan)
-			energy = energy.Plus(direct.Times(signal))
-		}
-		indirect := 1 - coverage
-		indirect = 0.0
+		indirect := 1.0
 
 		if !ray.Dir.Enters(normal) {
 			transmittance := beers(dist, obj.Transmit())
 			signal = signal.Times(transmittance)
+		}
+
+		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
+
+		if shadow {
+			dir, light, coverage := t.direct(pt, normal)
+			wiDirect := toTan.MultDir(dir)
+			if coverage > 0 {
+				weight := coverage / math.Pi           // TODO: is Pi the maximum a solid angle can be?
+				reflectance := bsdf.Eval(wiDirect, wo) //.Scaled(weight)
+				e := light.Times(reflectance).Times(signal)
+				energy = energy.Plus(e)
+				indirect -= weight
+			}
 		}
 
 		weight := math.Min(maxWeight, indirect/pdf)
@@ -138,32 +144,25 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 	return energy
 }
 
-func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy rgb.Energy, coverage float64) {
+func (t *tracer) direct(pt geom.Vec, normal geom.Dir) (wi geom.Dir, energy rgb.Energy, coverage float64) {
 	lights := t.scene.Surface.Lights()
 	if len(lights) < 1 {
-		return rgb.Black, 0
+		return geom.Up, rgb.Black, 0
 	}
 	i := int(math.Floor(t.rnd.Float64() * float64(len(lights)))) // TODO: more elegant "select random element?"
 	l := lights[i]
 
 	ray, coverage := l.Bounds().ShadowRay(pt, normal, t.rnd)
 	if coverage <= 0 {
-		return rgb.Black, 0
+		return geom.Up, rgb.Black, 0
 	}
 
-	obj, dist := t.scene.Surface.Intersect(ray, infinity)
+	obj, _ := t.scene.Surface.Intersect(ray, infinity)
 	if obj == nil {
-		return rgb.Black, 0
+		return geom.Up, rgb.Black, 0
 	}
 
-	_, bsdf := obj.At(ray.Moved(dist), ray.Dir, t.rnd)
-	wi := toTan.MultDir(ray.Dir)
-	weight := coverage / math.Pi
-	reflectance := bsdf.Eval(wi, wo).Scaled(weight)
-	energy = obj.Light().Times(reflectance)
-
-	return obj.Light().Scaled(coverage), coverage
-	// return energy, coverage
+	return ray.Dir, obj.Light(), coverage
 }
 
 // Beer's Law.
