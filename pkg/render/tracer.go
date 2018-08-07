@@ -121,7 +121,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 			dir, light, coverage := t.direct(pt, normal)
 			wiDirect := toTan.MultDir(dir)
 			if coverage > 0 {
-				weight := 100 * coverage / math.Pi // TODO: fix solidangle so arbitrary multiplier isn't needed
+				weight := 200 * coverage / math.Pi // TODO: fix solidangle so arbitrary multiplier isn't needed
 				reflectance := bsdf.Eval(wiDirect, wo).Scaled(weight)
 				e := light.Times(reflectance).Times(signal)
 				energy = energy.Plus(e)
