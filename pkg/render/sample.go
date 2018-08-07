@@ -73,14 +73,12 @@ func (s *Sample) Noise(x0, y0 int) float64 {
 	return math.Min(1, sd/mean)
 }
 
-func (s *Sample) Add(x, y int, ee []rgb.Energy) {
+func (s *Sample) Add(x, y int, e rgb.Energy) {
 	i := (y*s.Width + x) * stride
-	for _, e := range ee {
-		s.data[i+red] += e.X
-		s.data[i+green] += e.Y
-		s.data[i+blue] += e.Z
-		s.data[i+count]++
-	}
+	s.data[i+red] += e.X
+	s.data[i+green] += e.Y
+	s.data[i+blue] += e.Z
+	s.data[i+count]++
 }
 
 // http://www.dspguide.com/ch2/2.htm

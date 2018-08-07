@@ -26,7 +26,7 @@ func run(o *Options) error {
 	kill := make(chan os.Signal, 2)
 	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
 
-	mesh, err := obj.ReadFile(o.Scene, false)
+	mesh, err := obj.ReadFile(o.Scene, true)
 	if err != nil {
 		return err
 	}

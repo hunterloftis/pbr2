@@ -11,8 +11,9 @@ import (
 
 const maxDepth = 6
 const maxWeight = 10
-const branches = 4
-const maxLights = 4 // TODO: limit light sampling
+
+// const maxBranches = 1
+// const maxLights = 4 // TODO: limit light sampling
 
 var infinity = math.Inf(1)
 
@@ -80,8 +81,8 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				samples := t.trace(r, maxDepth) // TODO: locally-defined max depth
-				s.Add(x, y, samples)
+				energy := t.trace(r, maxDepth) // TODO: locally-defined max depth
+				s.Add(x, y, energy)
 			}
 		}
 		t.local.Merge(s)
@@ -89,52 +90,20 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(ray *geom.Ray, depth int) []rgb.Energy {
-	obj, dist := t.scene.Surface.Intersect(ray, infinity)
-	if obj == nil {
-		e := t.scene.Env.At(ray.Dir)
-		return []rgb.Energy{rgb.Black}
-		return []rgb.Energy{e}
-	}
-	_ = dist
-	return []rgb.Energy{rgb.Energy{255, 255, 255}}
-}
-
-func (t *tracer) branch(ray *geom.Ray, depth, min int) (energy rgb.Energy, n int) {
-	obj, dist := t.scene.Surface.Intersect(ray, infinity)
-	for n < min {
-		e, _ := t.trace2(ray, depth, obj, dist)
-		energy = energy.Plus(e)
-		n++
-	}
-	for n < branches {
-		e, ok := t.trace2(ray, depth, obj, dist)
-		energy = energy.Plus(e)
-		n++
-		if !ok {
-			break
-		}
-	}
-	return energy, n
-}
-
-// TODO: Simplify! This dynamic branching logic has gotten overly complicated. Sketch out a diagram.
-func (t *tracer) trace2(ray *geom.Ray, depth int, obj Object, dist float64) (rgb.Energy, bool) {
+func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 	energy := rgb.Black
 	signal := rgb.White
-	branch := true
-	i := 0
 
-	for {
+	for d := 0; d < depth; d++ {
+		obj, dist := t.scene.Surface.Intersect(ray, infinity)
+
 		if obj == nil {
 			env := t.scene.Env.At(ray.Dir).Times(signal)
 			energy = energy.Plus(env)
-			branch = branch && i > 0
 			break
 		}
 		if l := obj.Light(); !l.Zero() {
 			energy = energy.Plus(l.Times(signal))
-			branch = branch && i > 0
 			break
 		}
 
@@ -144,63 +113,162 @@ func (t *tracer) trace2(ray *geom.Ray, depth int, obj Object, dist float64) (rgb
 		wo := toTan.MultDir(ray.Dir.Inv())
 		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
 
-		indirect := 1.0
+		direct, coverage := rgb.Black, 0.0
 		if shadow {
-			direct, coverage := t.direct(pt, normal, wo, toTan)
+			direct, coverage = t.direct(pt, normal, wo, toTan)
 			energy = energy.Plus(direct.Times(signal))
-			indirect -= coverage
 		}
-		if i == 0 {
-			branch = branch && t.rnd.Float64() > pdf+(1-indirect)
-		}
-		if i++; i > depth {
-			break
-		}
+		indirect := 1 - coverage
 
 		if !ray.Dir.Enters(normal) {
 			transmittance := beers(dist, obj.Transmit())
 			signal = signal.Times(transmittance)
 		}
+
 		weight := math.Min(maxWeight, indirect/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		bounce := fromTan.MultDir(wi)
 		signal = signal.Times(reflectance).RandomGain(t.rnd)
+
 		if signal.Zero() {
 			break
 		}
 
 		ray = geom.NewRay(pt, bounce)
-		obj, dist = t.scene.Surface.Intersect(ray, infinity)
 	}
-	return energy, branch
+
+	return energy
 }
+
+// func (t *tracer) trace(ray *geom.Ray, depth int) []rgb.Energy {
+// 	obj, dist := t.scene.Surface.Intersect(ray, infinity)
+// 	if obj == nil {
+// 		e := t.scene.Env.At(ray.Dir)
+// 		return []rgb.Energy{e}
+// 	}
+// 	if l := obj.Light(); !l.Zero() {
+// 		return []rgb.Energy{l}
+// 	}
+
+// 	energy := []rgb.Energy{}
+// 	pt := ray.Moved(dist)
+// 	normal, bsdf := obj.At(pt, ray.Dir, t.rnd)
+// 	toTan, fromTan := geom.Tangent(normal)
+// 	wo := toTan.MultDir(ray.Dir.Inv())
+// 	wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
+
+// 	direct, coverage := rgb.Black, 0.0
+// 	if shadow {
+// 		direct, coverage = t.direct(pt, normal, wo, toTan)
+// 	}
+
+// 	for b := 0; b < maxBranches; b++ {
+// 		indirect := t.indirect().Scaled(1 - coverage)
+// 		energy = append(energy, direct.Plus(indirect))
+// 	}
+// 	return []rgb.Energy{rgb.Energy{255, 255, 255}}
+// }
+
+// func (t *tracer) branch(ray *geom.Ray, depth, min int) (energy rgb.Energy, n int) {
+// 	obj, dist := t.scene.Surface.Intersect(ray, infinity)
+// 	for n < min {
+// 		e, _ := t.trace2(ray, depth, obj, dist)
+// 		energy = energy.Plus(e)
+// 		n++
+// 	}
+// 	for n < branches {
+// 		e, ok := t.trace2(ray, depth, obj, dist)
+// 		energy = energy.Plus(e)
+// 		n++
+// 		if !ok {
+// 			break
+// 		}
+// 	}
+// 	return energy, n
+// }
+
+// TODO: Simplify! This dynamic branching logic has gotten overly complicated. Sketch out a diagram.
+// func (t *tracer) trace2(ray *geom.Ray, depth int, obj Object, dist float64) (rgb.Energy, bool) {
+// 	energy := rgb.Black
+// 	signal := rgb.White
+// 	branch := true
+// 	i := 0
+
+// 	for {
+// 		if obj == nil {
+// 			env := t.scene.Env.At(ray.Dir).Times(signal)
+// 			energy = energy.Plus(env)
+// 			branch = branch && i > 0
+// 			break
+// 		}
+// 		if l := obj.Light(); !l.Zero() {
+// 			energy = energy.Plus(l.Times(signal))
+// 			branch = branch && i > 0
+// 			break
+// 		}
+
+// 		pt := ray.Moved(dist)
+// 		normal, bsdf := obj.At(pt, ray.Dir, t.rnd)
+// 		toTan, fromTan := geom.Tangent(normal)
+// 		wo := toTan.MultDir(ray.Dir.Inv())
+// 		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
+
+// 		indirect := 1.0
+// 		if shadow {
+// 			direct, coverage := t.direct(pt, normal, wo, toTan)
+// 			energy = energy.Plus(direct.Times(signal))
+// 			indirect -= coverage
+// 		}
+// 		if i == 0 {
+// 			branch = branch && t.rnd.Float64() > pdf+(1-indirect)
+// 		}
+// 		if i++; i > depth {
+// 			break
+// 		}
+
+// 		if !ray.Dir.Enters(normal) {
+// 			transmittance := beers(dist, obj.Transmit())
+// 			signal = signal.Times(transmittance)
+// 		}
+// 		weight := math.Min(maxWeight, indirect/pdf)
+// 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+// 		bounce := fromTan.MultDir(wi)
+// 		signal = signal.Times(reflectance).RandomGain(t.rnd)
+// 		if signal.Zero() {
+// 			break
+// 		}
+
+// 		ray = geom.NewRay(pt, bounce)
+// 		obj, dist = t.scene.Surface.Intersect(ray, infinity)
+// 	}
+// 	return energy, branch
+// }
 
 // TODO: pretty long arg list...
 func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (energy rgb.Energy, coverage float64) {
 	lights := t.scene.Surface.Lights()
+	if len(lights) < 1 {
+		return rgb.Black, 0
+	}
+	i := int(math.Floor(t.rnd.Float64() * float64(len(lights)))) // TODO: more elegant "select random element?"
+	l := lights[i]
 
-	// TODO: limit by maxLights
-	if len(lights) > 1 {
-		panic("implement")
+	ray, coverage := l.Bounds().ShadowRay(pt, normal, t.rnd)
+	if coverage <= 0 {
+		return rgb.Black, 0
 	}
-	for _, l := range lights {
-		ray, solid := l.Bounds().ShadowRay(pt, normal, t.rnd)
-		if solid <= 0 {
-			continue
-		}
-		coverage += solid
-		obj, dist := t.scene.Surface.Intersect(ray, infinity)
-		if obj == nil {
-			continue
-		}
-		pt := ray.Moved(dist)
-		_, bsdf := obj.At(pt, ray.Dir, t.rnd)
-		wi := toTan.MultDir(ray.Dir)
-		weight := solid / math.Pi
-		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
-		light := obj.Light().Times(reflectance)
-		energy = energy.Plus(light)
+
+	obj, dist := t.scene.Surface.Intersect(ray, infinity)
+	if obj == nil {
+		return rgb.Black, 0
 	}
+
+	_, bsdf := obj.At(ray.Moved(dist), ray.Dir, t.rnd)
+	wi := toTan.MultDir(ray.Dir)
+	weight := coverage / math.Pi
+	reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+	energy = obj.Light().Times(reflectance)
+
 	return energy, coverage
 }
 
