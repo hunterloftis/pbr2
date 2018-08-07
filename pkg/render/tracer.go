@@ -162,7 +162,8 @@ func (t *tracer) direct(pt geom.Vec, normal, wo geom.Dir, toTan *geom.Mat) (ener
 	reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 	energy = obj.Light().Times(reflectance)
 
-	return energy, coverage
+	return obj.Light().Scaled(coverage), coverage
+	// return energy, coverage
 }
 
 // Beer's Law.
