@@ -57,14 +57,14 @@ func run(o *Options) error {
 	}
 
 	if o.Floor {
-		floor := surface.UnitCube(material.Plastic(0, 0, 0, 1))
+		floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
 		dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
 		floor.Move(bounds.Center.X, bounds.Min.Y-dims.Y*0.25, bounds.Center.Z) // TODO: use Vec
 		floor.Scale(dims.X, dims.Y*0.5, dims.Z)                                // TODO: use Vec
 		surfaces = append(surfaces, floor)
 	}
 
-	sun := surface.UnitSphere(material.Light(9000, 9000, 9000)).Move(100, 50, 50).Scale(5, 5, 5)
+	sun := surface.UnitSphere(material.Light(9000, 9000, 9000)).Move(25, 50, -100).Scale(5, 5, 5)
 	surfaces = append(surfaces, sun)
 
 	tree := surface.NewTree(surfaces...)

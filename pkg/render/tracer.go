@@ -78,7 +78,7 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				energy := t.trace(r, 1) // TODO: locally-defined max depth
+				energy := t.trace(r, maxDepth) // TODO: locally-defined max depth
 				s.Add(x, y, energy)
 			}
 		}
@@ -122,9 +122,6 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 			wiDirect := toTan.MultDir(dir)
 			if coverage > 0 {
 				weight := 100 * coverage / math.Pi // TODO: fix solidangle so arbitrary multiplier isn't needed
-				// if t.rnd.Float64() < 0.01 {
-				// 	fmt.Println(coverage)
-				// }
 				reflectance := bsdf.Eval(wiDirect, wo).Scaled(weight)
 				e := light.Times(reflectance).Times(signal)
 				energy = energy.Plus(e)
