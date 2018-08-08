@@ -139,3 +139,14 @@ func (s *Sample) WritePNG(name string, im image.Image) error {
 	defer out.Close()
 	return png.Encode(out, im)
 }
+
+func (s *Sample) Total() int {
+	total := 0
+	for y := 0; y < s.Height; y++ {
+		for x := 0; x < s.Width; x++ {
+			_, n := s.At(x, y)
+			total += n
+		}
+	}
+	return total
+}

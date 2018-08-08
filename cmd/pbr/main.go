@@ -2,9 +2,6 @@ package main
 
 import (
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
@@ -23,9 +20,6 @@ func main() {
 }
 
 func run(o *Options) error {
-	kill := make(chan os.Signal, 2)
-	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
-
 	mesh, err := obj.ReadFile(o.Scene, true)
 	if err != nil {
 		return err
@@ -64,37 +58,8 @@ func run(o *Options) error {
 		surfaces = append(surfaces, floor)
 	}
 
-	sun1 := surface.UnitSphere(material.Light(70000, 10000, 5000)).Move(100, 50, 0).Scale(5, 5, 5)
-	sun2 := surface.UnitSphere(material.Light(5000, 10000, 70000)).Move(-100, 50, 0).Scale(5, 5, 5)
-	surfaces = append(surfaces, sun1, sun2)
-
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
-	frame := scene.Render(o.Width, o.Height, o.Bounce, o.Direct)
-	defer frame.Stop()
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
 
-	start := time.Now().UnixNano()
-	max := 0
-	printStart()
-
-	for frame.Active() {
-		select {
-		case <-kill:
-			frame.Stop()
-		case <-ticker.C:
-			if sample, n := frame.Sample(); n > max {
-				max = n
-				if err := writePNGs(o, sample); err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	sample, _ := frame.Sample()
-	printDone(sample, start, time.Now().UnixNano())
-
-	return nil
+	return render.Iterative(scene, o.Out, o.Width, o.Height, o.Bounce)
 }

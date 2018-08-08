@@ -2,21 +2,26 @@ package render
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
-func Iterative(scene *Scene, file string, width, height int) error {
+func Iterative(scene *Scene, file string, width, height, depth int) error {
 	kill := make(chan os.Signal, 2)
 	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
 
-	frame := scene.Render(width, height, 6)
+	frame := scene.Render(width, height, depth)
 	defer frame.Stop()
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
+	start := time.Now().UnixNano()
 	max := 0
 	fmt.Printf("\nRendering %v (Ctrl+C to end)", file)
 
@@ -35,6 +40,13 @@ func Iterative(scene *Scene, file string, width, height int) error {
 		}
 	}
 
-	fmt.Println("done")
+	stop := time.Now().UnixNano()
+	sample, _ := frame.Sample()
+	total := sample.Total()
+	p := message.NewPrinter(language.English)
+	secs := float64(stop-start) / 1e9
+	sps := math.Round(float64(total) / secs)
+	p.Printf("\n%v samples in %.1f seconds (%.0f samples/sec)\n", total, secs, sps)
+
 	return nil
 }
