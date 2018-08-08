@@ -67,7 +67,13 @@ func options() *Options {
 }
 
 func (o *Options) SetDefaults(b *geom.Bounds) {
-
+	if o.From == nil {
+		f := b.Max.Scaled(2)
+		o.From = &f
+	}
+	if o.To == nil {
+		o.To = &b.Center
+	}
 }
 
 func (o *Options) Version() string {

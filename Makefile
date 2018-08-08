@@ -19,3 +19,11 @@ sponza_profile:
 mario-sculpture:
 	go build ./cmd/pbr
 	./pbr fixtures/models/mario/mario-sculpture.obj -width 500 -height 400 -from 200,200,200 -to 0,0,0 -ambient 50,50,50 -v --floor
+
+sponza:
+	go build ./cmd/pbr
+	./pbr fixtures/models/sponza/sponza.obj -width 500 -height 400 -ambient 1000,1000,1000 -v
+
+house:
+	go build ./cmd/pbr
+	./pbr 'fixtures/models/house/house interior.obj' -width 500 -height 400 -ambient 1000,1000,1000 -v

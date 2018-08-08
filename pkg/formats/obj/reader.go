@@ -129,7 +129,7 @@ func Read(r io.Reader, dir string) *surface.List {
 			}
 			triangles = append(triangles, tris...)
 		case library:
-			libs = append(libs, args...)
+			libs = append(libs, strings.Join(args, " "))
 		case material:
 			mat = newMaterial(args, mats)
 		}
