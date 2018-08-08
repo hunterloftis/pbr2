@@ -16,8 +16,8 @@ func NewScene(c Camera, s Surface, e Environment) *Scene {
 	}
 }
 
-// TODO: pass bounce & direct through
-func (s *Scene) Render(width, height, bounce, direct int) *Frame {
+// TODO: pass bounce through
+func (s *Scene) Render(width, height, bounce int) *Frame {
 	f := NewFrame(s, width, height)
 	f.Start()
 	return f
