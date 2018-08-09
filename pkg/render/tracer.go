@@ -119,7 +119,9 @@ func (t *tracer) trace(ray *geom.Ray, depth int, debug bool) rgb.Energy {
 		indirect := 1.0
 
 		if !ray.Dir.Enters(normal) {
-			return rgb.Energy{1000, 0, 0}
+			// return rgb.Energy{1000, 0, 0}
+			ray = geom.NewRay(pt, ray.Dir)
+			continue
 			transmittance := beers(dist, obj.Transmit())
 			signal = signal.Times(transmittance)
 		}
