@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
@@ -15,23 +13,19 @@ import (
 )
 
 func main() {
-	cam := camera.NewStandard()
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
+	}
+}
+
+func run() error {
+	cam := camera.NewSLR()
 	ball := surface.UnitSphere(material.Gold(0.05)).Move(0, 0, -5)
 	floor := surface.UnitCube(material.Plastic(1, 1, 1, 0.1)).Move(0, -1, -5).Scale(100, 1, 100)
 	light := surface.UnitSphere(material.Halogen(1000)).Move(1, -0.375, -5).Scale(0.25, 0.25, 0.25)
 	surf := surface.NewList(ball, floor, light)
 	env := env.NewGradient(rgb.Black, rgb.Energy{750, 750, 750}, 7)
-	scene := render.NewScene(640, 360, cam, surf, env)
-	frame := render.NewFrame(scene)
-	kill := make(chan os.Signal, 2)
+	scene := render.NewScene(cam, surf, env)
 
-	fmt.Println("rendering hello.png (press Ctrl+C to finish)...")
-	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
-	frame.Start()
-	<-kill
-	frame.Stop()
-
-	if err := frame.WritePNG("hello.png", frame.Image()); err != nil {
-		panic(err)
-	}
+	return render.Iterative(scene, "hello.png", 800, 450, 8, true)
 }

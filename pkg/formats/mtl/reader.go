@@ -14,6 +14,8 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
+	_ "github.com/ftrvxmtrx/tga"
+
 	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )

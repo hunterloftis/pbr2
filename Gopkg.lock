@@ -14,6 +14,12 @@
   revision = "e80c3b7ed292b052c7083b6fd7154a8422c33f65"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/ftrvxmtrx/tga"
+  packages = ["."]
+  revision = "bd8e8d5be13a2bda61c29a47ca41ecc8f20ee731"
+
+[[projects]]
   name = "golang.org/x/text"
   packages = [
     "feature/plural",
@@ -35,6 +41,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4e22fa3b7aff615f394d53966dc92272a500d0a7ff544c9751d93acce967647b"
+  inputs-digest = "d4cc758c65bbd1bd35a54febc4d581841b7bbc9bd2f6e81fa475f948cf27db2f"
   solver-name = "gps-cdcl"
   solver-version = 1

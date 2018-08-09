@@ -1,104 +1,47 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
-	"os/signal"
-	"runtime/pprof"
-	"syscall"
-	"time"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
 	"github.com/hunterloftis/pbr2/pkg/formats/obj"
 	"github.com/hunterloftis/pbr2/pkg/geom"
+	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 	"github.com/hunterloftis/pbr2/pkg/surface"
 )
 
-const outFile = "sponza.png"
-const heatFile = "sponza-heat.png"
-
 func main() {
-	kill := make(chan os.Signal, 2)
-	scene := make(chan *render.Scene)
-	fProfile := flag.String("profile", "", "output file for cpu profiling")
-	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
-	flag.Parse()
-
-	go setup(scene)
-
-	select {
-	case s := <-scene:
-		run(s, kill, *fProfile)
-	case <-kill:
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
 	}
-
-	fmt.Println("done")
 }
 
-func setup(out chan<- *render.Scene) {
-	sponza, err := obj.ReadFile("fixtures/models/sponza/sponza.obj", false)
+func run() error {
+	mesh, err := obj.ReadFile("./fixtures/models/sponza/sponza.obj", true)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	sky := env.NewGradient(rgb.Energy{100, 100, 100}, rgb.Energy{10000, 10000, 10000}, 3)
-	cam := camera.NewStandard().MoveTo(0, 7000, 4000).LookAt(geom.Vec{-10, 2, 0})
-	// floor := surface.UnitCube(grid).Move(0, -65, 0).Scale(1000, 1, 1000)
-	// lamp := surface.UnitSphere(light).Move(50, 50, 50).Scale(10, 10, 10)
+	surfaces := mesh.Surfaces()
+	bounds := mesh.Bounds()
+	camera := camera.NewSLR()
+	environment := render.Environment(env.NewGradient(rgb.Black, rgb.Energy{100, 100, 100}, 3))
 
-	ss := append(sponza.Surfaces())
-	// tree := surface.NewTree(ss...)
-	list := surface.NewList(ss...)
-	scene := render.NewScene(888, 600, cam, list, sky)
-	out <- scene
-}
+	camera.MoveTo(geom.Vec{1000, 100, -38}).LookAt(geom.Vec{900, 100, -38})
+	floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
+	dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
+	floor.Move(bounds.Center.X, bounds.Min.Y-dims.Y*0.25, bounds.Center.Z) // TODO: use Vec
+	floor.Scale(dims.X, dims.Y*0.5, dims.Z)                                // TODO: use Vec
+	surfaces = append(surfaces, floor)
 
-func run(scene *render.Scene, kill chan os.Signal, fProfile string) {
-	frame := render.NewFrame(scene)
-	ticker := time.NewTicker(1 * time.Minute)
+	sun := surface.UnitSphere(material.Light(70000, 70000, 70000)).Move(-80, 1200, -38).Scale(150, 150, 150)
+	surfaces = append(surfaces, sun)
+	tree := surface.NewTree(surfaces...)
+	scene := render.NewScene(camera, tree, environment)
 
-	if fProfile != "" {
-		f, err := os.Create(fProfile)
-		if err != nil {
-			panic(err)
-		}
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
-		go func() {
-			t := time.NewTimer(2 * time.Minute)
-			<-t.C
-			kill <- syscall.SIGTERM
-		}()
-	}
-
-	fmt.Println("rendering sponza.png (press Ctrl+C to finish)...")
-	frame.Start()
-	last := uint64(0)
-	for frame.Active() {
-		select {
-		case <-ticker.C:
-			if s := frame.Samples(); s > last {
-				last = s
-				write(frame)
-			}
-		case <-kill:
-			frame.Stop()
-		}
-	}
-
-	write(frame)
-}
-
-func write(frame *render.Frame) {
-	if err := frame.WritePNG(outFile, frame.Image()); err != nil {
-		panic(err)
-	}
-	if err := frame.WritePNG(heatFile, frame.Heat()); err != nil {
-		panic(err)
-	}
-	fmt.Print(".")
+	return render.Iterative(scene, "sponza.png", 800, 450, 8, true)
 }
