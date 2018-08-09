@@ -12,11 +12,11 @@ import (
 	"golang.org/x/text/message"
 )
 
-func Iterative(scene *Scene, file string, width, height, depth int) error {
+func Iterative(scene *Scene, file string, width, height, depth int, direct bool) error {
 	kill := make(chan os.Signal, 2)
 	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
 
-	frame := scene.Render(width, height, depth)
+	frame := scene.Render(width, height, depth, direct)
 	defer frame.Stop()
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()

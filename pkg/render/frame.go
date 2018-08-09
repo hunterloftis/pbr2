@@ -13,7 +13,7 @@ type Frame struct {
 	samples int
 }
 
-func NewFrame(s *Scene, width, height int) *Frame {
+func NewFrame(s *Scene, width, height, bounce int, direct bool) *Frame {
 	workers := runtime.NumCPU()
 	f := Frame{
 		scene:   s,
@@ -22,7 +22,7 @@ func NewFrame(s *Scene, width, height int) *Frame {
 		in:      make(chan *Sample, workers*2),
 	}
 	for w := 0; w < workers; w++ {
-		f.workers[w] = newTracer(f.scene, f.in, width, height)
+		f.workers[w] = newTracer(f.scene, f.in, width, height, bounce, direct)
 	}
 	go f.process()
 	return &f

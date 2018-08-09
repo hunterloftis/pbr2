@@ -28,34 +28,34 @@ type Options struct {
 
 	From  *geom.Vec `help:"camera location"`
 	To    *geom.Vec `help:"camera look point"`
-	Focus float64   `help:"camera focus ratio (default: 1.0)"`
+	Focus float64   `help:"camera focus ratio"`
 
 	Lens   float64 `help:"camera focal length in mm"`
 	FStop  float64 `help:"camera f-stop"`
 	Expose float64 `help:"exposure multiplier"`
 
-	Ambient *rgb.Energy `help:"the ambient light color"`
-	Env     string      `arg:"-e" help:"environment as a panoramic hdr radiosity map (.hdr file)"`
-	Rad     float64     `help:"exposure of the hdr (radiosity) environment map"`
-	Floor   bool        `help:"create a floor underneath the scene mesh"`
-	Bounce  int         `arg:"-b" help:"number of light bounces (depth)"`
-	Direct  int         `arg:"-d" help:"maximum number of direct rays to cast"`
+	Ambient  *rgb.Energy `help:"the ambient light color"`
+	Env      string      `arg:"-e" help:"environment as a panoramic hdr radiosity map (.hdr file)"`
+	Rad      float64     `help:"exposure of the hdr (radiosity) environment map"`
+	Floor    bool        `help:"create a floor underneath the scene mesh"`
+	Bounce   int         `arg:"-b" help:"number of indirect light bounces"`
+	Indirect bool        `help:"indirect lighting only (no direct shadow rays)"`
 }
 
 func options() *Options {
 	c := &Options{
-		Width:   800,
-		Height:  450,
-		Ambient: &rgb.Energy{600, 600, 600},
-		Rad:     100,
-		Bounce:  8,
-		Direct:  2,
-		Frames:  math.Inf(1),
-		Time:    math.Inf(1),
-		Lens:    50,
-		FStop:   4,
-		Focus:   1,
-		Expose:  1,
+		Width:    800,
+		Height:   450,
+		Ambient:  &rgb.Energy{600, 600, 600},
+		Rad:      100,
+		Bounce:   6,
+		Indirect: false,
+		Frames:   math.Inf(1),
+		Time:     math.Inf(1),
+		Lens:     50,
+		FStop:    4,
+		Focus:    1,
+		Expose:   1,
 	}
 	arg.MustParse(c)
 	if c.Out == "" && !c.Info {
@@ -68,7 +68,8 @@ func options() *Options {
 
 func (o *Options) SetDefaults(b *geom.Bounds) {
 	if o.From == nil {
-		f := b.Max.Scaled(2)
+		off := b.Max.Minus(b.Min).By(geom.Vec{2, 1, 2})
+		f := b.Max.Plus(off)
 		o.From = &f
 	}
 	if o.To == nil {

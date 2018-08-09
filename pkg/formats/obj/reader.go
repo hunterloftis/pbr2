@@ -17,6 +17,8 @@ import (
 )
 
 // TODO: make robust
+// TODO: rename "formats" -> "format"
+
 func ReadFile(filename string, recursive bool) (*surface.List, error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -67,14 +69,24 @@ type tablegroup struct {
 }
 
 func (t *tablegroup) vert(i int) geom.Vec {
+	if i < 1 {
+		// fmt.Println("i:", i, "len(t.vv):", len(t.vv))
+		return t.vv[len(t.vv)+i]
+	}
 	return t.vv[i-1]
 }
 
 func (t *tablegroup) norm(i int) geom.Dir {
+	if i < 1 {
+		return t.nn[len(t.nn)+i]
+	}
 	return t.nn[i-1]
 }
 
 func (t *tablegroup) tex(i int) geom.Vec {
+	if i < 1 {
+		return t.tt[len(t.tt)+i]
+	}
 	return t.tt[i-1]
 }
 

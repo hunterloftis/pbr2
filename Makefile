@@ -30,4 +30,8 @@ house:
 
 lambo:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo/lambo.obj -width 640 -height 480 -ambient 1000,1000,1000 -to=-0.2,0.5,0.4 -from=-5,2,-5 -v
+	./pbr fixtures/models/lambo/lambo.obj -width 640 -height 480 -ambient 1000,1000,1000 -to=-0.2,0.5,0.4 -from=-5,2,-5 -v --indirect
+
+skull:
+	go build ./cmd/pbr
+	./pbr fixtures/models/simple/skull.obj -width 640 -height 480 -v

@@ -20,7 +20,7 @@ func main() {
 }
 
 func run(o *Options) error {
-	mesh, err := obj.ReadFile(o.Scene, true)
+	mesh, err := obj.ReadFile(o.Scene, false)
 	if err != nil {
 		return err
 	}
@@ -61,5 +61,5 @@ func run(o *Options) error {
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
 
-	return render.Iterative(scene, o.Out, o.Width, o.Height, o.Bounce)
+	return render.Iterative(scene, o.Out, o.Width, o.Height, o.Bounce, !o.Indirect)
 }

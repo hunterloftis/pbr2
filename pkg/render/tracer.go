@@ -46,14 +46,18 @@ type tracer struct {
 	active toggle
 	rnd    *rand.Rand
 	local  *Sample
+	bounce int
+	direct bool
 }
 
-func newTracer(s *Scene, o chan *Sample, w, h int) *tracer {
+func newTracer(s *Scene, o chan *Sample, w, h, bounce int, direct bool) *tracer {
 	return &tracer{
-		scene: s,
-		out:   o,
-		rnd:   rand.New(rand.NewSource(time.Now().UnixNano())),
-		local: NewSample(w, h),
+		scene:  s,
+		out:    o,
+		rnd:    rand.New(rand.NewSource(time.Now().UnixNano())),
+		local:  NewSample(w, h),
+		bounce: bounce,
+		direct: direct,
 	}
 }
 
@@ -78,7 +82,7 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				energy := t.trace(r, maxDepth) // TODO: locally-defined max depth
+				energy := t.trace(r, t.bounce) // TODO: locally-defined max depth
 				s.Add(x, y, energy)
 			}
 		}
@@ -117,11 +121,8 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 
 		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
 
-		// https://blog.yiningkarlli.com/2013/04/importance-sampled-direct-lighting.html
-		// TODO: figure out what this means - https://spie.org/publications/fg11_p04_solid_angle_and_projected?SSO=1
-		// Ditto: http://sjbrown.co.uk/2011/04/16/projected-solid-angle-is-projected/
-		if shadow {
-			dir, light, coverage := t.direct(pt, normal)
+		if t.direct && shadow {
+			dir, light, coverage := t.shadow(pt, normal)
 			wiDirect := toTan.MultDir(dir)
 			if coverage > 0 {
 				reflectance := bsdf.Eval(wiDirect, wo).Scaled(coverage)
@@ -146,7 +147,8 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 	return energy
 }
 
-func (t *tracer) direct(pt geom.Vec, normal geom.Dir) (wi geom.Dir, energy rgb.Energy, coverage float64) {
+// https://blog.yiningkarlli.com/2013/04/importance-sampled-direct-lighting.html
+func (t *tracer) shadow(pt geom.Vec, normal geom.Dir) (wi geom.Dir, energy rgb.Energy, coverage float64) {
 	lights := t.scene.Surface.Lights()
 	if len(lights) < 1 {
 		return geom.Up, rgb.Black, 0
