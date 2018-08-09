@@ -14,7 +14,6 @@ type Triangle struct {
 	Normals [3]geom.Dir
 	Texture [3]geom.Vec
 	Mat     Material
-	Pos     *geom.Mat // TODO: implement transformations
 	edge1   geom.Vec
 	edge2   geom.Vec
 	bounds  *geom.Bounds

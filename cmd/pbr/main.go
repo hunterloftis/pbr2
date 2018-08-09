@@ -20,7 +20,7 @@ func main() {
 }
 
 func run(o *Options) error {
-	mesh, err := obj.ReadFile(o.Scene, false)
+	mesh, err := obj.ReadFile(o.Scene, true)
 	if err != nil {
 		return err
 	}

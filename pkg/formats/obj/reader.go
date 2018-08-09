@@ -18,6 +18,7 @@ import (
 
 // TODO: make robust
 // TODO: rename "formats" -> "format"
+// TODO: support smoothing groups (s)
 
 func ReadFile(filename string, recursive bool) (*surface.List, error) {
 	f, err := os.Open(filename)

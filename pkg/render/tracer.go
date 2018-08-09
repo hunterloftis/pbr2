@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
-const maxDepth = 6
 const maxWeight = 10
 
 var infinity = math.Inf(1)
@@ -82,7 +82,7 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				energy := t.trace(r, t.bounce) // TODO: locally-defined max depth
+				energy := t.trace(r, t.bounce, false)
 				s.Add(x, y, energy)
 			}
 		}
@@ -91,13 +91,17 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
+func (t *tracer) trace(ray *geom.Ray, depth int, debug bool) rgb.Energy {
 	energy := rgb.Black
 	signal := rgb.White
 
 	for d := 0; d < depth; d++ {
 		obj, dist := t.scene.Surface.Intersect(ray, infinity)
 
+		if debug {
+			fmt.Printf("%+v\n", obj)
+			panic("ok")
+		}
 		if obj == nil {
 			env := t.scene.Env.At(ray.Dir).Times(signal)
 			energy = energy.Plus(env)

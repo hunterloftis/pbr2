@@ -30,7 +30,7 @@ house:
 
 lambo:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo/lambo.obj -width 640 -height 480 -ambient 1000,1000,1000 -to=-0.2,0.5,0.4 -from=-5,2,-5 -v --indirect
+	./pbr fixtures/models/lambo/lambo.obj -width 800 -height 500 -ambient 1000,1000,1000 -to=-0.2,0.5,0.4 -from=-5,2,-5 -v --indirect
 
 skull:
 	go build ./cmd/pbr
@@ -43,3 +43,23 @@ lucy:
 falcon:
 	go build ./cmd/pbr
 	./pbr fixtures/models/simple/falcon.obj -width 800 -height 400 -v -to=-86,-18,-2681 -from=800,200,-3000
+
+moses:
+	go build ./cmd/pbr
+	./pbr fixtures/models/moses/model.obj -width 480 -height 640 -v
+
+gopher:
+	go build ./cmd/pbr
+	./pbr fixtures/models/gopher/gopher.obj -width 480 -height 640 -v
+
+cesar:
+	go build ./cmd/pbr
+	./pbr fixtures/models/simple/cesar.obj -width 500 -height 500 -v
+
+chair:
+	go build ./cmd/pbr
+	./pbr fixtures/models/simple/chair.obj -width 480 -height 640 -v
+
+destroyer:
+	go build ./cmd/pbr
+	./pbr fixtures/models/simple/destroyer.obj -width 1000 -height 400 -v
