@@ -1,7 +1,6 @@
 package render
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -82,7 +81,7 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				energy := t.trace(r, t.bounce, false)
+				energy := t.trace(r, t.bounce)
 				s.Add(x, y, energy)
 			}
 		}
@@ -91,17 +90,13 @@ func (t *tracer) process() {
 	}
 }
 
-func (t *tracer) trace(ray *geom.Ray, depth int, debug bool) rgb.Energy {
+func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 	energy := rgb.Black
 	signal := rgb.White
 
 	for d := 0; d < depth; d++ {
 		obj, dist := t.scene.Surface.Intersect(ray, infinity)
 
-		if debug {
-			fmt.Printf("%+v\n", obj)
-			panic("ok")
-		}
 		if obj == nil {
 			env := t.scene.Env.At(ray.Dir).Times(signal)
 			energy = energy.Plus(env)
@@ -114,17 +109,20 @@ func (t *tracer) trace(ray *geom.Ray, depth int, debug bool) rgb.Energy {
 
 		pt := ray.Moved(dist)
 		normal, bsdf := obj.At(pt, ray.Dir, t.rnd)
+
+		if !ray.Dir.Enters(normal) {
+			t := obj.Transmit()
+			if t.Zero() {
+				ray = geom.NewRay(pt, ray.Dir)
+				continue
+			}
+			transmittance := beers(dist, t)
+			signal = signal.Times(transmittance)
+		}
+
 		toTan, fromTan := geom.Tangent(normal)
 		wo := toTan.MultDir(ray.Dir.Inv())
 		indirect := 1.0
-
-		if !ray.Dir.Enters(normal) {
-			// return rgb.Energy{1000, 0, 0}
-			ray = geom.NewRay(pt, ray.Dir)
-			continue
-			transmittance := beers(dist, obj.Transmit())
-			signal = signal.Times(transmittance)
-		}
 
 		wi, pdf, shadow := bsdf.Sample(wo, t.rnd)
 
