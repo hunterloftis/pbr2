@@ -58,7 +58,7 @@ cesar:
 
 chair:
 	go build ./cmd/pbr
-	./pbr fixtures/models/simple/chair.obj -width 480 -height 640 -v
+	./pbr fixtures/models/simple/chair.obj -width 480 -height 640 -v -from=40,300,-400
 
 destroyer:
 	go build ./cmd/pbr

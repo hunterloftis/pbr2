@@ -200,8 +200,6 @@ func newTriangles(args []string, table *tablegroup, mat *Material) ([]render.Sur
 		fields := strings.Split(arg, "/")
 		if i, err := parseInt(fields[0]); err == nil {
 			verts = append(verts, table.vert(i))
-		} else {
-			return nil, err // TODO: wrap error
 		}
 		if len(fields) < 2 {
 			continue
