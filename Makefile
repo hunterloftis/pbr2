@@ -35,3 +35,7 @@ lambo:
 skull:
 	go build ./cmd/pbr
 	./pbr fixtures/models/simple/skull.obj -width 640 -height 480 -v
+
+lucy:
+	go build ./cmd/pbr
+	./pbr fixtures/models/simple/lucy.obj -width 480 -height 640 -v

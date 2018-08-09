@@ -200,8 +200,14 @@ func newTriangles(args []string, table *tablegroup, mat *Material) ([]render.Sur
 		if i, err := parseInt(fields[0]); err == nil {
 			verts = append(verts, table.vert(i))
 		}
+		if len(fields) < 2 {
+			continue
+		}
 		if i, err := parseInt(fields[1]); err == nil {
 			texes = append(texes, table.tex(i))
+		}
+		if len(fields) < 3 {
+			continue
 		}
 		if i, err := parseInt(fields[2]); err == nil {
 			norms = append(norms, table.norm(i))
