@@ -124,8 +124,7 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 			dir, light, coverage := t.direct(pt, normal)
 			wiDirect := toTan.MultDir(dir)
 			if coverage > 0 {
-				area := 2 * math.Pi * coverage // TODO: is this the right scale? 1 -> 2pi to cover the hemisphere?
-				reflectance := bsdf.Eval(wiDirect, wo).Scaled(area)
+				reflectance := bsdf.Eval(wiDirect, wo).Scaled(coverage)
 				e := light.Times(reflectance).Times(signal)
 				energy = energy.Plus(e)
 				indirect -= coverage

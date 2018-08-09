@@ -1,14 +1,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"math"
 	"os"
-	"os/signal"
-	"runtime/pprof"
-	"syscall"
-	"time"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
@@ -19,24 +14,25 @@ import (
 )
 
 func main() {
-	kill := make(chan os.Signal, 2)
-	signal.Notify(kill, os.Interrupt, syscall.SIGTERM)
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
+	}
+}
 
-	fProfile := flag.String("profile", "", "output file for cpu profiling")
-	flag.Parse()
-
-	light := material.Light(1700, 1700, 1700)
-	redPlastic := material.Plastic(1, 0, 0, 0.01)
+func run() error {
+	light := material.Light(1200, 1200, 1200)
+	redPlastic := material.Plastic(1, 0.05, 0.05, 0.01)
 	whitePlastic := material.Plastic(1, 1, 1, 0.07)
-	bluePlastic := material.Plastic(0, 0, 1, 0.01)
-	greenPlastic := material.Plastic(0, 1, 0, 0.01)
+	bluePlastic := material.Plastic(0.05, 0.05, 1, 0.01)
+	greenPlastic := material.Plastic(0.05, 1, 0.05, 0.01)
 	gold := material.Gold(0.05)
 	glass := material.Glass(0.0001)
 	tealGlass := material.ColoredGlass(0, 1, 0.1, 0.00001)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
 
-	sky := env.NewFlat(40, 50, 60)
-	cam := camera.NewStandard().MoveTo(-0.6, 0.12, 0.8).LookAt(geom.Origin)
+	sky := env.NewFlat(50, 60, 70)
+	cam := camera.NewSLR()
+	cam.MoveTo(geom.Vec{-0.6, 0.12, 0.8}).LookAt(geom.Origin)
 	cam.Focus = 0.8546962721
 	surf := surface.NewTree(
 		surface.UnitCube(grid).Move(0, -0.55, 0).Scale(1000, 1, 1000),
@@ -50,31 +46,7 @@ func main() {
 		surface.UnitSphere(greenPlastic).Move(0, -0.025, 0.2).Scale(0.1, 0.05, 0.1),
 		surface.UnitSphere(gold).Move(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2),
 	)
+	scene := render.NewScene(cam, surf, sky)
 
-	scene := render.NewScene(888, 600, cam, surf, sky)
-	frame := render.NewFrame(scene)
-
-	func() {
-		if *fProfile != "" {
-			f, err := os.Create(*fProfile)
-			if err != nil {
-				panic(err)
-			}
-			pprof.StartCPUProfile(f)
-			defer pprof.StopCPUProfile()
-			go func() {
-				t := time.NewTimer(10 * time.Second)
-				<-t.C
-				kill <- syscall.SIGTERM
-			}()
-		}
-		fmt.Println("rendering shapes.png (press Ctrl+C to finish)...")
-		frame.Start()
-		<-kill
-		frame.Stop()
-	}()
-
-	if err := frame.WritePNG("shapes.png", frame.Image()); err != nil {
-		panic(err)
-	}
+	return render.Iterative(scene, "shapes.png", 888, 600, 6)
 }
