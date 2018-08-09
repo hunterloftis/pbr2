@@ -48,5 +48,5 @@ func run() error {
 	)
 	scene := render.NewScene(cam, surf, sky)
 
-	return render.Iterative(scene, "shapes.png", 888, 600, 6)
+	return render.Iterative(scene, "shapes.png", 888, 600, 6, true)
 }
