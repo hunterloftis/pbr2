@@ -113,8 +113,13 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 		if !ray.Dir.Enters(normal) {
 			t := obj.Transmit()
 			if t.Zero() {
-				ray = geom.NewRay(pt, ray.Dir)
-				continue
+				if d == 0 {
+					normal = normal.Inv() // TODO: remove debug hack
+				} else {
+					ray = geom.NewRay(pt, ray.Dir)
+					continue
+				}
+
 			}
 			transmittance := beers(dist, t)
 			signal = signal.Times(transmittance)
