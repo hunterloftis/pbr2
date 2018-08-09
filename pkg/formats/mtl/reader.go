@@ -70,6 +70,12 @@ func Read(r io.Reader, dir string) map[string]*material.Mapped {
 
 		switch key {
 		case newMaterial:
+			if strings.Contains(current, "Glass") {
+				fmt.Println("\n\nCurrent", current)
+				fmt.Printf("%+v", lib[current].Base)
+				fmt.Println("\nGlass:")
+				fmt.Printf("%+v", material.Glass(0))
+			}
 			current = args[0]
 			lib[current] = material.NewMapped(&material.Uniform{
 				Color:       rgb.White,
@@ -80,7 +86,7 @@ func Read(r io.Reader, dir string) map[string]*material.Mapped {
 			str := strings.Join(args, ",")
 			lib[current].Base.Color, _ = rgb.ParseEnergy(str)
 		case colorMap:
-			f := filepath.Join(dir, args[0])
+			f := filepath.Join(dir, strings.Join(args, " "))
 			lib[current].Color = readTexture(f)
 		case transmit:
 			if t, err := strconv.ParseFloat(args[0], 64); err == nil {
