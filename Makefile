@@ -39,3 +39,7 @@ skull:
 lucy:
 	go build ./cmd/pbr
 	./pbr fixtures/models/simple/lucy.obj -width 480 -height 640 -v
+
+falcon:
+	go build ./cmd/pbr
+	./pbr fixtures/models/simple/falcon.obj -width 800 -height 400 -v -to=-86,-18,-2681 -from=800,200,-3000
