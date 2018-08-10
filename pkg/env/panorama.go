@@ -1,6 +1,7 @@
 package env
 
 import (
+	"errors"
 	"math"
 	"os"
 
@@ -31,17 +32,6 @@ func (p *Pano) At(dir geom.Dir) rgb.Energy {
 		Z: float64(p.data[i+2]),
 	}
 	return energy.Scaled(p.Expose).Limit(maxEnergy)
-
-	// u := 1 + math.Atan2(dir.X, -dir.Z)/math.Pi
-	// v := math.Acos(dir.Y) / math.Pi
-	// x := int(u * float64(s.env.width))
-	// y := int(v * float64(s.env.height))
-	// index := ((y*s.env.width + x) * 3) % len(s.env.data)
-	// r := float64(s.env.data[index])
-	// g := float64(s.env.data[index+1])
-	// b := float64(s.env.data[index+2])
-	// e := rgb.Energy(geom.Vector3{r, g, b}.Scaled(s.env.expose))
-	// return e.Limit(maxEnvEnergy)
 }
 
 func ReadFile(filename string, expose float64) (*Pano, error) {
@@ -53,6 +43,9 @@ func ReadFile(filename string, expose float64) (*Pano, error) {
 	width, height, data, err := rgbe.Decode(f)
 	if err != nil {
 		return nil, err
+	}
+	if width/height != 2 {
+		return nil, errors.New("Unsupported HDRI dimensions (need 2:1 aspect ratio)")
 	}
 	p := Pano{
 		Expose: expose,
