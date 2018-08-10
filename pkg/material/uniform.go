@@ -23,7 +23,7 @@ type Uniform struct {
 func (un *Uniform) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
 	if cos > 0 {
 		if un.Transmission == 0 {
-			return bsdf.Ignore{}
+			return bsdf.Ignore{} // TODO: doesn't seem to be working, have similar code in the trace() fn
 		}
 		return bsdf.Transmit{
 			Specular:   un.Specularity,

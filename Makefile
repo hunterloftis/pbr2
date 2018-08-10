@@ -8,7 +8,7 @@ house:
 
 lambo:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo/lambo.obj -width 1280 -height 720 -env fixtures/envmaps/282.hdr -rad 2000 -to=-0.2,0.5,0.4 -from=-5,2,-5 -v --indirect -bounce 8
+	./pbr fixtures/models/lambo/lambo.obj -width 1280 -height 720 -env fixtures/envmaps/282.hdr -rad 2500 -to=-0.2,0.5,0.4 -from=-5,2,-5 -v --indirect -bounce 8
 
 skull:
 	go build ./cmd/pbr
