@@ -44,7 +44,7 @@ func run(o *Options) error {
 	}
 
 	if o.Env != "" {
-		environment, err = env.ReadFile(o.Env)
+		environment, err = env.ReadFile(o.Env, o.Rad)
 		if err != nil {
 			return err
 		}
