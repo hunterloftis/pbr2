@@ -17,3 +17,11 @@ func Halogen(brightness float64) *Uniform {
 		Emission: brightness,
 	}
 }
+
+func Daylight(brightness float64) *Uniform {
+	c, _ := rgb.Energy{255, 255, 251}.Compressed(1)
+	return &Uniform{
+		Color:    c,
+		Emission: brightness,
+	}
+}

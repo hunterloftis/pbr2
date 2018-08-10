@@ -29,19 +29,20 @@ func run() error {
 	surfaces := mesh.Surfaces()
 	bounds := mesh.Bounds()
 	camera := camera.NewSLR()
-	environment := render.Environment(env.NewGradient(rgb.Black, rgb.Energy{100, 100, 100}, 3))
+	environment := render.Environment(env.NewGradient(rgb.Black, rgb.Energy{1000, 1000, 1000}, 3))
 
-	camera.MoveTo(geom.Vec{1000, 100, -38}).LookAt(geom.Vec{900, 100, -38})
+	camera.MoveTo(geom.Vec{1150, 600, -140}).LookAt(geom.Vec{1100, 590, -130})
+	camera.Lens = 0.028
 	floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
 	dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
 	floor.Move(bounds.Center.X, bounds.Min.Y-dims.Y*0.25, bounds.Center.Z) // TODO: use Vec
 	floor.Scale(dims.X, dims.Y*0.5, dims.Z)                                // TODO: use Vec
 	surfaces = append(surfaces, floor)
 
-	sun := surface.UnitSphere(material.Light(70000, 70000, 70000)).Move(-80, 1200, -38).Scale(150, 150, 150)
+	sun := surface.UnitSphere(material.Daylight(800000)).Move(1300, 5000, -600).Scale(400, 400, 400)
 	surfaces = append(surfaces, sun)
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
 
-	return render.Iterative(scene, "sponza.png", 800, 450, 8, true)
+	return render.Iterative(scene, "sponza.png", 1920, 1080, 8, true)
 }
