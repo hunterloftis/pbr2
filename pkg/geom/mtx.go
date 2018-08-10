@@ -106,7 +106,6 @@ func Tangent(normal Dir) (to, from *Mtx) {
 }
 
 // Mult multiplies by another matrix4
-// TODO: a and b might be flipped here
 func (a *Mtx) Mult(b *Mtx) *Mtx {
 	m := Mtx{}
 	for i := 0; i < 4; i++ {

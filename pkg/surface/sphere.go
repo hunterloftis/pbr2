@@ -10,34 +10,33 @@ import (
 )
 
 // Sphere describes a 3d sphere
-// TODO: make all of these private, this is accessed through interfaces anyway
 type Sphere struct {
-	Pos    *geom.Mtx
-	Mat    Material
+	mtx    *geom.Mtx
+	mat    Material
 	bounds *geom.Bounds
 }
 
 // UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with a given material and optional transforms.
 func UnitSphere(m ...Material) *Sphere {
 	s := &Sphere{
-		Pos: geom.Identity(),
-		Mat: &DefaultMaterial{},
+		mtx: geom.Identity(),
+		mat: &DefaultMaterial{},
 	}
 	if len(m) > 0 {
-		s.Mat = m[0]
+		s.mat = m[0]
 	}
 	return s.transform(geom.Identity())
 }
 
 // TODO: unify with cube.transform AABB calc
 func (s *Sphere) transform(t *geom.Mtx) *Sphere {
-	s.Pos = s.Pos.Mult(t)
-	min := s.Pos.MultPoint(geom.Vec{})
-	max := s.Pos.MultPoint(geom.Vec{})
+	s.mtx = s.mtx.Mult(t)
+	min := s.mtx.MultPoint(geom.Vec{})
+	max := s.mtx.MultPoint(geom.Vec{})
 	for x := -0.5; x <= 0.5; x += 1 {
 		for y := -0.5; y <= 0.5; y += 1 {
 			for z := -0.5; z <= 0.5; z += 1 {
-				pt := s.Pos.MultPoint(geom.Vec{x, y, z})
+				pt := s.mtx.MultPoint(geom.Vec{x, y, z})
 				min = min.Min(pt)
 				max = max.Max(pt)
 			}
@@ -60,7 +59,7 @@ func (s *Sphere) Rotate(v geom.Vec) *Sphere {
 }
 
 func (s *Sphere) Center() geom.Vec {
-	return s.Pos.MultPoint(geom.Vec{})
+	return s.mtx.MultPoint(geom.Vec{})
 }
 
 func (s *Sphere) Bounds() *geom.Bounds {
@@ -74,7 +73,7 @@ func (s *Sphere) Intersect(ray *geom.Ray, max float64) (obj render.Object, dist 
 	if ok, near, _ := s.bounds.Check(ray); !ok || near >= max {
 		return nil, 0
 	}
-	i := s.Pos.Inverse()
+	i := s.mtx.Inverse()
 	r := i.MultRay(ray)
 	op := geom.Vec{}.Minus(r.Origin)
 	b := op.Dot(geom.Vec(r.Dir))
@@ -85,14 +84,14 @@ func (s *Sphere) Intersect(ray *geom.Ray, max float64) (obj render.Object, dist 
 	root := math.Sqrt(det)
 	t1 := b - root
 	if t1 > 0 {
-		dist := s.Pos.MultDist(r.Dir.Scaled(t1)).Len()
+		dist := s.mtx.MultDist(r.Dir.Scaled(t1)).Len()
 		if dist > bias {
 			return s, dist
 		}
 	}
 	t2 := b + root
 	if t2 > 0 {
-		dist := s.Pos.MultDist(r.Dir.Scaled(t2)).Len()
+		dist := s.mtx.MultDist(r.Dir.Scaled(t2)).Len()
 		if dist > bias {
 			return s, dist
 		}
@@ -102,23 +101,23 @@ func (s *Sphere) Intersect(ray *geom.Ray, max float64) (obj render.Object, dist 
 
 // At returns the surface normal given a point on the surface.
 func (s *Sphere) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
-	i := s.Pos.Inverse()
+	i := s.mtx.Inverse()
 	p := i.MultPoint(pt)
 	pu, _ := p.Unit()
-	n := s.Pos.MultDir(pu)
-	return n, s.Mat.At(0, 0, in.Dot(n), rnd)
+	n := s.mtx.MultDir(pu)
+	return n, s.mat.At(0, 0, in.Dot(n), rnd)
 }
 
 func (s *Sphere) Light() rgb.Energy {
-	return s.Mat.Light()
+	return s.mat.Light()
 }
 
 func (s *Sphere) Transmit() rgb.Energy {
-	return s.Mat.Transmit()
+	return s.mat.Transmit()
 }
 
 func (s *Sphere) Lights() []render.Object {
-	if !s.Mat.Light().Zero() {
+	if !s.mat.Light().Zero() {
 		return []render.Object{s}
 	}
 	return nil

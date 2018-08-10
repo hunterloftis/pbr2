@@ -5,7 +5,7 @@ import (
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
-	"github.com/hunterloftis/pbr2/pkg/formats/obj"
+	"github.com/hunterloftis/pbr2/pkg/format/obj"
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"

@@ -28,7 +28,6 @@ func MergeBounds(a, b *Bounds) *Bounds {
 	return NewBounds(a.Min.Min(b.Min), a.Max.Max(b.Max))
 }
 
-// TODO: should these receivers be pointers?
 func (b *Bounds) Overlaps(b2 *Bounds) bool {
 	if b.Min.X > b2.Max.X || b.Max.X < b2.Min.X || b.Min.Y > b2.Max.Y || b.Max.Y < b2.Min.Y || b.Min.Z > b2.Max.Z || b.Max.Z < b2.Min.Z {
 		return false

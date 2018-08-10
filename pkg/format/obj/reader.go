@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hunterloftis/pbr2/pkg/formats/mtl"
+	"github.com/hunterloftis/pbr2/pkg/format/mtl"
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"
@@ -17,7 +17,6 @@ import (
 )
 
 // TODO: make robust
-// TODO: rename "formats" -> "format"
 // TODO: support smoothing groups (s)
 
 func ReadFile(filename string, recursive bool) (*surface.List, error) {
