@@ -9,9 +9,14 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
-const maxWeight = 10
+const (
+	maxWeight = 10
+	maxEnergy = 5000
+)
 
-var infinity = math.Inf(1)
+var (
+	infinity = math.Inf(1)
+)
 
 type Camera interface {
 	Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray
@@ -81,7 +86,7 @@ func (t *tracer) process() {
 				rx := float64(x) + t.rnd.Float64()
 				ry := float64(y) + t.rnd.Float64()
 				r := camera.Ray(rx, ry, float64(width), float64(height), t.rnd)
-				energy := t.trace(r, t.bounce)
+				energy := t.trace(r, t.bounce).Limit(maxEnergy)
 				s.Add(x, y, energy)
 			}
 		}
