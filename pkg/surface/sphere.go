@@ -47,16 +47,16 @@ func (s *Sphere) transform(t *geom.Mtx) *Sphere {
 	return s
 }
 
-func (s *Sphere) Move(x, y, z float64) *Sphere {
-	return s.transform(geom.Trans(x, y, z))
+func (s *Sphere) Move(v geom.Vec) *Sphere {
+	return s.transform(geom.Trans(v))
 }
 
-func (s *Sphere) Scale(x, y, z float64) *Sphere {
-	return s.transform(geom.Scale(x, y, z))
+func (s *Sphere) Scale(v geom.Vec) *Sphere {
+	return s.transform(geom.Scale(v))
 }
 
-func (s *Sphere) Rotate(x, y, z float64) *Sphere {
-	return s.transform(geom.Rot(geom.Vec{x, y, z}))
+func (s *Sphere) Rotate(v geom.Vec) *Sphere {
+	return s.transform(geom.Rot(v))
 }
 
 func (s *Sphere) Center() geom.Vec {

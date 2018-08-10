@@ -52,25 +52,25 @@ func LookMatrix(o Vec, to Vec) *Mtx {
 		r.Z, u.Z, f.Z, 0,
 		0, 0, 0, 1,
 	)
-	return Trans(o.X, o.Y, o.Z).Mult(orient)
+	return Trans(o).Mult(orient)
 }
 
 // Trans creates a new translation matrix
-func Trans(x, y, z float64) *Mtx {
+func Trans(v Vec) *Mtx {
 	return NewMat(
-		1, 0, 0, x,
-		0, 1, 0, y,
-		0, 0, 1, z,
+		1, 0, 0, v.X,
+		0, 1, 0, v.Y,
+		0, 0, 1, v.Z,
 		0, 0, 0, 1,
 	)
 }
 
 // Scale creates a new scaling matrix
-func Scale(x, y, z float64) *Mtx {
+func Scale(v Vec) *Mtx {
 	return NewMat(
-		x, 0, 0, 0,
-		0, y, 0, 0,
-		0, 0, z, 0,
+		v.X, 0, 0, 0,
+		0, v.Y, 0, 0,
+		0, 0, v.Z, 0,
 		0, 0, 0, 1,
 	)
 }
