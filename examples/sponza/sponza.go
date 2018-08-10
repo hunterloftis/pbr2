@@ -29,9 +29,9 @@ func run() error {
 	surfaces := mesh.Surfaces()
 	bounds := mesh.Bounds()
 	camera := camera.NewSLR()
-	environment := render.Environment(env.NewGradient(rgb.Black, rgb.Energy{1000, 1000, 1000}, 3))
+	environment := render.Environment(env.NewGradient(rgb.Black, rgb.Energy{4000, 4000, 4000}, 3))
 
-	camera.MoveTo(geom.Vec{1150, 600, -140}).LookAt(geom.Vec{1100, 590, -130})
+	camera.MoveTo(geom.Vec{1140, 620, -160}).LookAt(geom.Vec{1090, 608, -150})
 	camera.Lens = 0.028
 	floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
 	dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
@@ -44,5 +44,5 @@ func run() error {
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
 
-	return render.Iterative(scene, "sponza.png", 1920, 1080, 8, true)
+	return render.Iterative(scene, "sponza.png", 1280, 720, 8, true)
 }
