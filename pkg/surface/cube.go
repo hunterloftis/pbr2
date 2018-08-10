@@ -11,19 +11,19 @@ import (
 
 // Cube describes the orientation and material of a unit cube
 type Cube struct {
-	Pos    *geom.Mat
-	Mat    Material
+	mtx    *geom.Mtx
+	mat    Material
 	bounds *geom.Bounds
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with material and optional transforms.
 func UnitCube(m ...Material) *Cube {
 	c := &Cube{
-		Pos: geom.Identity(),
-		Mat: &DefaultMaterial{},
+		mtx: geom.Identity(),
+		mat: &DefaultMaterial{},
 	}
 	if len(m) > 0 {
-		c.Mat = m[0]
+		c.mat = m[0]
 	}
 	return c.transform(geom.Identity())
 }
@@ -32,7 +32,7 @@ func (c *Cube) Intersect(ray *geom.Ray, max float64) (obj render.Object, dist fl
 	if ok, near, _ := c.bounds.Check(ray); !ok || near >= max {
 		return nil, 0
 	}
-	inv := c.Pos.Inverse() // global to local transform
+	inv := c.mtx.Inverse() // global to local transform
 	r := inv.MultRay(ray)  // translate ray into local space
 	tmin := 0.0
 	tmax := math.Inf(1)
@@ -53,12 +53,14 @@ func (c *Cube) Intersect(ray *geom.Ray, max float64) (obj render.Object, dist fl
 		}
 	}
 	if tmin > 0 {
-		if dist := c.Pos.MultDist(r.Dir.Scaled(tmin)).Len(); dist >= bias {
+		dist := c.mtx.MultDist(r.Dir.Scaled(tmin)).Len()
+		if dist >= bias && dist < max {
 			return c, dist
 		}
 	}
 	if tmax > 0 {
-		if dist := c.Pos.MultDist(r.Dir.Scaled(tmax)).Len(); dist >= bias {
+		dist := c.mtx.MultDist(r.Dir.Scaled(tmax)).Len()
+		if dist >= bias && dist < max {
 			return c, dist
 		}
 	}
@@ -68,7 +70,7 @@ func (c *Cube) Intersect(ray *geom.Ray, max float64) (obj render.Object, dist fl
 // At returns the normal geom.Vec at this point on the Surface
 func (c *Cube) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
 	normal = geom.Dir{}
-	i := c.Pos.Inverse()  // global to local transform
+	i := c.mtx.Inverse()  // global to local transform
 	p1 := i.MultPoint(pt) // translate point into local space
 	abs := p1.Abs()
 	u, v := 0.0, 0.0
@@ -86,8 +88,8 @@ func (c *Cube) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, bs
 		u = p1.X + 0.5
 		v = p1.Y + 0.5
 	}
-	n := c.Pos.MultDir(normal)
-	return n, c.Mat.At(u, v, in.Dot(n), rnd)
+	n := c.mtx.MultDir(normal)
+	return n, c.mat.At(u, v, in.Dot(n), rnd)
 }
 
 func (c *Cube) Bounds() *geom.Bounds {
@@ -95,35 +97,18 @@ func (c *Cube) Bounds() *geom.Bounds {
 }
 
 func (c *Cube) Lights() []render.Object {
-	if !c.Mat.Light().Zero() {
+	if !c.mat.Light().Zero() {
 		return []render.Object{c}
 	}
 	return nil
 }
 
 func (c *Cube) Light() rgb.Energy {
-	return c.Mat.Light()
+	return c.mat.Light()
 }
 
 func (c *Cube) Transmit() rgb.Energy {
-	return c.Mat.Transmit()
-}
-
-func (c *Cube) transform(m *geom.Mat) *Cube {
-	c.Pos = c.Pos.Mult(m)
-	min := c.Pos.MultPoint(geom.Vec{})
-	max := c.Pos.MultPoint(geom.Vec{})
-	for x := -0.5; x <= 0.5; x += 1 {
-		for y := -0.5; y <= 0.5; y += 1 {
-			for z := -0.5; z <= 0.5; z += 1 {
-				pt := c.Pos.MultPoint(geom.Vec{x, y, z})
-				min = min.Min(pt)
-				max = max.Max(pt)
-			}
-		}
-	}
-	c.bounds = geom.NewBounds(min, max)
-	return c
+	return c.mat.Transmit()
 }
 
 func (c *Cube) Move(x, y, z float64) *Cube {
@@ -139,5 +124,22 @@ func (c *Cube) Rotate(x, y, z float64) *Cube {
 }
 
 func (c *Cube) Center() geom.Vec {
-	return c.Pos.MultPoint(geom.Vec{})
+	return c.mtx.MultPoint(geom.Vec{})
+}
+
+func (c *Cube) transform(m *geom.Mtx) *Cube {
+	c.mtx = c.mtx.Mult(m)
+	min := c.mtx.MultPoint(geom.Vec{})
+	max := c.mtx.MultPoint(geom.Vec{})
+	for x := -0.5; x <= 0.5; x += 1 {
+		for y := -0.5; y <= 0.5; y += 1 {
+			for z := -0.5; z <= 0.5; z += 1 {
+				pt := c.mtx.MultPoint(geom.Vec{x, y, z})
+				min = min.Min(pt)
+				max = max.Max(pt)
+			}
+		}
+	}
+	c.bounds = geom.NewBounds(min, max)
+	return c
 }

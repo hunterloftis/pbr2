@@ -19,7 +19,7 @@ type SLR struct {
 	Focus  float64
 
 	targetDist float64
-	trans      *geom.Mat
+	trans      *geom.Mtx
 	position   geom.Vec
 	target     geom.Vec
 }

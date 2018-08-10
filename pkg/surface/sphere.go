@@ -12,7 +12,7 @@ import (
 // Sphere describes a 3d sphere
 // TODO: make all of these private, this is accessed through interfaces anyway
 type Sphere struct {
-	Pos    *geom.Mat
+	Pos    *geom.Mtx
 	Mat    Material
 	bounds *geom.Bounds
 }
@@ -30,7 +30,7 @@ func UnitSphere(m ...Material) *Sphere {
 }
 
 // TODO: unify with cube.transform AABB calc
-func (s *Sphere) transform(t *geom.Mat) *Sphere {
+func (s *Sphere) transform(t *geom.Mtx) *Sphere {
 	s.Pos = s.Pos.Mult(t)
 	min := s.Pos.MultPoint(geom.Vec{})
 	max := s.Pos.MultPoint(geom.Vec{})

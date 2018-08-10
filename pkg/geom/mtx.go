@@ -6,17 +6,17 @@ import (
 
 var yAxis = Dir{0, 1, 0}
 
-// Mat handles matrix data and operations
+// Mtx handles matrix data and operations
 // Column-major (as in math and Direct3D)
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
-type Mat struct {
+type Mtx struct {
 	el  [4][4]float64
-	inv *Mat
+	inv *Mtx
 }
 
 // NewMat constructs a new matrix
-func NewMat(a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4 float64) *Mat {
-	m := Mat{
+func NewMat(a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4 float64) *Mtx {
+	m := Mtx{
 		el: [4][4]float64{
 			[4]float64{a1, b1, c1, d1},
 			[4]float64{a2, b2, c2, d2},
@@ -28,7 +28,7 @@ func NewMat(a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4 float
 }
 
 // Identity creates a new identity matrix
-func Identity() *Mat {
+func Identity() *Mtx {
 	return NewMat(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -42,7 +42,7 @@ func Identity() *Mat {
 // https://www.3dgep.com/understanding-the-view-matrix/#Look_At_Camera
 // http://www.codinglabs.net/article_world_view_projection_matrix.aspx
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
-func LookMatrix(o Vec, to Vec) *Mat {
+func LookMatrix(o Vec, to Vec) *Mtx {
 	f, _ := o.Minus(to).Unit() // forward
 	r, _ := yAxis.Cross(f)     // right
 	u, _ := f.Cross(r)         // up
@@ -56,7 +56,7 @@ func LookMatrix(o Vec, to Vec) *Mat {
 }
 
 // Trans creates a new translation matrix
-func Trans(x, y, z float64) *Mat {
+func Trans(x, y, z float64) *Mtx {
 	return NewMat(
 		1, 0, 0, x,
 		0, 1, 0, y,
@@ -66,7 +66,7 @@ func Trans(x, y, z float64) *Mat {
 }
 
 // Scale creates a new scaling matrix
-func Scale(x, y, z float64) *Mat {
+func Scale(x, y, z float64) *Mtx {
 	return NewMat(
 		x, 0, 0, 0,
 		0, y, 0, 0,
@@ -77,7 +77,7 @@ func Scale(x, y, z float64) *Mat {
 
 // Rot creates a rotation matrix from an angle-axis Vector representation
 // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/
-func Rot(v Vec) *Mat {
+func Rot(v Vec) *Mtx {
 	a := v.Len()
 	c := math.Cos(a)
 	s := math.Sin(a)
@@ -94,7 +94,7 @@ func Rot(v Vec) *Mat {
 
 // Tangent creates a matrix that translates from world space to tangent space
 // and a corresponding matrix that translates from tangent space to world space.
-func Tangent(normal Dir) (to, from *Mat) {
+func Tangent(normal Dir) (to, from *Mtx) {
 	angle := math.Acos(normal.Dot(Up))
 	axis, ok := normal.Cross(Up)
 	if !ok {
@@ -107,8 +107,8 @@ func Tangent(normal Dir) (to, from *Mat) {
 
 // Mult multiplies by another matrix4
 // TODO: a and b might be flipped here
-func (a *Mat) Mult(b *Mat) *Mat {
-	m := Mat{}
+func (a *Mtx) Mult(b *Mtx) *Mtx {
+	m := Mtx{}
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			for k := 0; k < 4; k++ {
@@ -120,7 +120,7 @@ func (a *Mat) Mult(b *Mat) *Mat {
 }
 
 // Equals tests whether two Matrices have equal values
-func (a *Mat) Equals(b *Mat) bool {
+func (a *Mtx) Equals(b *Mtx) bool {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			if a.el[i][j] != b.el[i][j] {
@@ -132,7 +132,7 @@ func (a *Mat) Equals(b *Mat) bool {
 }
 
 // MultPoint multiplies this matrix4 by a vector, including translation
-func (a *Mat) MultPoint(v Vec) (result Vec) {
+func (a *Mtx) MultPoint(v Vec) (result Vec) {
 	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0] + a.el[3][0]
 	result.Y = v.X*a.el[0][1] + v.Y*a.el[1][1] + v.Z*a.el[2][1] + a.el[3][1]
 	result.Z = v.X*a.el[0][2] + v.Y*a.el[1][2] + v.Z*a.el[2][2] + a.el[3][2]
@@ -141,7 +141,7 @@ func (a *Mat) MultPoint(v Vec) (result Vec) {
 }
 
 // MultDist multiplies this matrix4 by a vector, excluding translation
-func (a *Mat) MultDist(v Vec) (result Vec) {
+func (a *Mtx) MultDist(v Vec) (result Vec) {
 	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0]
 	result.Y = v.X*a.el[0][1] + v.Y*a.el[1][1] + v.Z*a.el[2][1]
 	result.Z = v.X*a.el[0][2] + v.Y*a.el[1][2] + v.Z*a.el[2][2]
@@ -149,21 +149,21 @@ func (a *Mat) MultDist(v Vec) (result Vec) {
 }
 
 // MultDir multiplies this matrix4 by a direction, renormalizing the result
-func (a *Mat) MultDir(v Dir) (result Dir) {
+func (a *Mtx) MultDir(v Dir) (result Dir) {
 	dir, _ := a.MultDist(Vec(v)).Unit()
 	return dir
 }
 
 // MultRay multiplies this matrix by a ray
 // https://gamedev.stackexchange.com/questions/72440/the-correct-way-to-transform-a-ray-with-a-matrix
-func (a *Mat) MultRay(r *Ray) *Ray {
+func (a *Mtx) MultRay(r *Ray) *Ray {
 	return NewRay(a.MultPoint(r.Origin), a.MultDir(r.Dir))
 }
 
 // Inverse returns the inverse of this matrix
 // https://www.gamedev.net/forums/topic/648190-algorithm-for-4x4-matrix-inverse/
 // https://stackoverflow.com/questions/1148309/inverting-a-4x4-matrix
-func (a *Mat) Inverse() *Mat {
+func (a *Mtx) Inverse() *Mtx {
 	if a.inv != nil {
 		return a.inv
 	}
@@ -195,12 +195,12 @@ func (a *Mat) Inverse() *Mat {
 	return i
 }
 
-func (a *Mat) At(col, row int) float64 {
+func (a *Mtx) At(col, row int) float64 {
 	return a.el[col-1][row-1]
 }
 
-func (a *Mat) Transpose() *Mat {
-	m := &Mat{}
+func (a *Mtx) Transpose() *Mtx {
+	m := &Mtx{}
 	for col := 0; col < 4; col++ {
 		for row := 0; row < 4; row++ {
 			m.el[row][col] = a.el[col][row]
