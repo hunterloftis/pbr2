@@ -34,12 +34,14 @@ func run() error {
 	camera.MoveTo(geom.Vec{200, 200, 200}).LookAt(geom.Vec{0, 0, 0})
 	floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
 	dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
-	floor.Move(bounds.Center.X, bounds.Min.Y-dims.Y*0.25, bounds.Center.Z) // TODO: use Vec
-	floor.Scale(dims.X, dims.Y*0.5, dims.Z)                                // TODO: use Vec
+	floor.Shift(geom.Vec{bounds.Center.X, bounds.Min.Y - dims.Y*0.25, bounds.Center.Z})
+	floor.Scale(geom.Vec{dims.X, dims.Y * 0.5, dims.Z})
 	surfaces = append(surfaces, floor)
 
-	red := surface.UnitSphere(material.Light(70000, 10000, 5000)).Move(100, 50, 0).Scale(5, 5, 5)
-	blue := surface.UnitSphere(material.Light(5000, 10000, 70000)).Move(-100, 50, 0).Scale(5, 5, 5)
+	red := surface.UnitSphere(material.Light(70000, 10000, 5000))
+	red.Shift(geom.Vec{100, 50, 0}).Scale(geom.Vec{5, 5, 5})
+	blue := surface.UnitSphere(material.Light(5000, 10000, 70000))
+	blue.Shift(geom.Vec{-100, 50, 0}).Scale(geom.Vec{5, 5, 5})
 	surfaces = append(surfaces, red, blue)
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)

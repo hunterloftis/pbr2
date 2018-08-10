@@ -47,8 +47,8 @@ func (s *Sphere) transform(t *geom.Mtx) *Sphere {
 	return s
 }
 
-func (s *Sphere) Move(v geom.Vec) *Sphere {
-	return s.transform(geom.Trans(v))
+func (s *Sphere) Shift(v geom.Vec) *Sphere {
+	return s.transform(geom.Shift(v))
 }
 
 func (s *Sphere) Scale(v geom.Vec) *Sphere {
@@ -56,7 +56,7 @@ func (s *Sphere) Scale(v geom.Vec) *Sphere {
 }
 
 func (s *Sphere) Rotate(v geom.Vec) *Sphere {
-	return s.transform(geom.Rot(v))
+	return s.transform(geom.Rotate(v))
 }
 
 func (s *Sphere) Center() geom.Vec {

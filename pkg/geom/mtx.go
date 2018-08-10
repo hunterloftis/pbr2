@@ -52,11 +52,11 @@ func LookMatrix(o Vec, to Vec) *Mtx {
 		r.Z, u.Z, f.Z, 0,
 		0, 0, 0, 1,
 	)
-	return Trans(o).Mult(orient)
+	return Shift(o).Mult(orient)
 }
 
-// Trans creates a new translation matrix
-func Trans(v Vec) *Mtx {
+// Shift creates a new translation matrix
+func Shift(v Vec) *Mtx {
 	return NewMat(
 		1, 0, 0, v.X,
 		0, 1, 0, v.Y,
@@ -75,9 +75,9 @@ func Scale(v Vec) *Mtx {
 	)
 }
 
-// Rot creates a rotation matrix from an angle-axis Vector representation
+// Rotate creates a rotation matrix from an angle-axis Vector representation
 // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/
-func Rot(v Vec) *Mtx {
+func Rotate(v Vec) *Mtx {
 	a := v.Len()
 	c := math.Cos(a)
 	s := math.Sin(a)
@@ -101,7 +101,7 @@ func Tangent(normal Dir) (to, from *Mtx) {
 		return Identity(), Identity()
 	}
 	angleAxis := axis.Scaled(angle)
-	m := Rot(angleAxis)
+	m := Rotate(angleAxis)
 	return m, m.Inverse()
 }
 

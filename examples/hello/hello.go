@@ -6,6 +6,7 @@ import (
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
+	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
@@ -20,9 +21,12 @@ func main() {
 
 func run() error {
 	cam := camera.NewSLR()
-	ball := surface.UnitSphere(material.Gold(0.05)).Move(0, 0, -5)
-	floor := surface.UnitCube(material.Plastic(1, 1, 1, 0.1)).Move(0, -1, -5).Scale(100, 1, 100)
-	light := surface.UnitSphere(material.Halogen(1000)).Move(1, -0.375, -5).Scale(0.25, 0.25, 0.25)
+	ball := surface.UnitSphere(material.Gold(0.05))
+	ball.Shift(geom.Vec{0, 0, -5})
+	floor := surface.UnitCube(material.Plastic(1, 1, 1, 0.1))
+	floor.Shift(geom.Vec{0, -1, -5}).Scale(geom.Vec{100, 1, 100})
+	light := surface.UnitSphere(material.Halogen(1000))
+	light.Shift(geom.Vec{1, -0.375, -5}).Scale(geom.Vec{0.25, 0.25, 0.25})
 	surf := surface.NewList(ball, floor, light)
 	env := env.NewGradient(rgb.Black, rgb.Energy{750, 750, 750}, 7)
 	scene := render.NewScene(cam, surf, env)

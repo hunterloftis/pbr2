@@ -111,8 +111,8 @@ func (c *Cube) Transmit() rgb.Energy {
 	return c.mat.Transmit()
 }
 
-func (c *Cube) Move(v geom.Vec) *Cube {
-	return c.transform(geom.Trans(v))
+func (c *Cube) Shift(v geom.Vec) *Cube {
+	return c.transform(geom.Shift(v))
 }
 
 func (c *Cube) Scale(v geom.Vec) *Cube {
@@ -120,7 +120,7 @@ func (c *Cube) Scale(v geom.Vec) *Cube {
 }
 
 func (c *Cube) Rotate(v geom.Vec) *Cube {
-	return c.transform(geom.Rot(v))
+	return c.transform(geom.Rotate(v))
 }
 
 func (c *Cube) Center() geom.Vec {

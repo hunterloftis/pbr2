@@ -35,11 +35,12 @@ func run() error {
 	camera.Lens = 0.028
 	floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
 	dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
-	floor.Move(bounds.Center.X, bounds.Min.Y-dims.Y*0.25, bounds.Center.Z) // TODO: use Vec
-	floor.Scale(dims.X, dims.Y*0.5, dims.Z)                                // TODO: use Vec
+	floor.Shift(geom.Vec{bounds.Center.X, bounds.Min.Y - dims.Y*0.25, bounds.Center.Z})
+	floor.Scale(geom.Vec{dims.X, dims.Y * 0.5, dims.Z})
 	surfaces = append(surfaces, floor)
 
-	sun := surface.UnitSphere(material.Daylight(800000)).Move(1300, 5000, -600).Scale(400, 400, 400)
+	sun := surface.UnitSphere(material.Daylight(800000))
+	sun.Shift(geom.Vec{1300, 5000, -600}).Scale(geom.Vec{400, 400, 400})
 	surfaces = append(surfaces, sun)
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)

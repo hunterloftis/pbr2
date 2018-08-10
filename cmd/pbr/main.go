@@ -6,6 +6,7 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
 	"github.com/hunterloftis/pbr2/pkg/formats/obj"
+	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
@@ -53,8 +54,8 @@ func run(o *Options) error {
 	if o.Floor {
 		floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
 		dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
-		floor.Move(bounds.Center.X, bounds.Min.Y-dims.Y*0.25, bounds.Center.Z) // TODO: use Vec
-		floor.Scale(dims.X, dims.Y*0.5, dims.Z)                                // TODO: use Vec
+		floor.Shift(geom.Vec{bounds.Center.X, bounds.Min.Y - dims.Y*0.25, bounds.Center.Z})
+		floor.Scale(geom.Vec{dims.X, dims.Y * 0.5, dims.Z})
 		surfaces = append(surfaces, floor)
 	}
 
