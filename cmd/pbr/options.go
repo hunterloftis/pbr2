@@ -46,7 +46,7 @@ func options() *Options {
 	c := &Options{
 		Width:    800,
 		Height:   450,
-		Ambient:  &rgb.Energy{600, 600, 600},
+		Ambient:  &rgb.Energy{1000, 1000, 1000},
 		Rad:      100,
 		Bounce:   6,
 		Indirect: false,

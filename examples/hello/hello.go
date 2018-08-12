@@ -31,5 +31,5 @@ func run() error {
 	env := env.NewGradient(rgb.Black, rgb.Energy{750, 750, 750}, 7)
 	scene := render.NewScene(cam, surf, env)
 
-	return render.Iterative(scene, "hello.png", 800, 450, 8, true)
+	return render.Iterative(scene, "hello.png", 640, 360, 8, true)
 }

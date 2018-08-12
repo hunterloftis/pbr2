@@ -27,7 +27,7 @@ func run() error {
 	greenPlastic := material.Plastic(0.05, 1, 0.05, 0.01)
 	gold := material.Gold(0.05)
 	glass := material.Glass(0.0001)
-	tealGlass := material.ColoredGlass(0, 1, 0.1, 0.00001)
+	tealGlass := material.ColoredGlass(0, 1, 1, 0.00001)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)
 
 	sky := env.NewFlat(50, 60, 70)
@@ -48,5 +48,5 @@ func run() error {
 	)
 	scene := render.NewScene(cam, surf, sky)
 
-	return render.Iterative(scene, "shapes.png", 888, 600, 6, true)
+	return render.Iterative(scene, "shapes.png", 1280, 720, 6, true)
 }

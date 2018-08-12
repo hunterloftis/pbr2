@@ -11,7 +11,7 @@ import (
 
 const (
 	maxWeight = 10
-	maxEnergy = 5000
+	maxEnergy = 2000
 )
 
 var (
@@ -117,10 +117,10 @@ func (t *tracer) trace(ray *geom.Ray, depth int) rgb.Energy {
 
 		if !ray.Dir.Enters(normal) {
 			t := obj.Transmit()
-			if t.Zero() {
-				ray = geom.NewRay(pt, ray.Dir)
-				continue
-			}
+			// if t.Zero() {	// TODO: should this be removed again now that the triangle distance bug is fixed?
+			// 	ray = geom.NewRay(pt, ray.Dir)
+			// 	continue
+			// }
 			transmittance := beers(dist, t)
 			signal = signal.Times(transmittance)
 		}

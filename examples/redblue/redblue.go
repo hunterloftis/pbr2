@@ -10,7 +10,6 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/material"
 	"github.com/hunterloftis/pbr2/pkg/render"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
 	"github.com/hunterloftis/pbr2/pkg/surface"
 )
 
@@ -29,22 +28,22 @@ func run() error {
 	surfaces := mesh.Surfaces()
 	bounds := mesh.Bounds()
 	camera := camera.NewSLR()
-	environment := render.Environment(env.NewGradient(rgb.Black, rgb.Energy{100, 100, 100}, 3))
+	environment := render.Environment(env.NewFlat(0, 0, 0))
 
-	camera.MoveTo(geom.Vec{200, 200, 200}).LookAt(geom.Vec{0, 0, 0})
+	camera.MoveTo(geom.Vec{100, 100, 400}).LookAt(geom.Vec{0, 0, 0})
 	floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
 	dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
 	floor.Shift(geom.Vec{bounds.Center.X, bounds.Min.Y - dims.Y*0.25, bounds.Center.Z})
 	floor.Scale(geom.Vec{dims.X, dims.Y * 0.5, dims.Z})
 	surfaces = append(surfaces, floor)
 
-	red := surface.UnitSphere(material.Light(70000, 10000, 5000))
-	red.Shift(geom.Vec{100, 50, 0}).Scale(geom.Vec{5, 5, 5})
-	blue := surface.UnitSphere(material.Light(5000, 10000, 70000))
-	blue.Shift(geom.Vec{-100, 50, 0}).Scale(geom.Vec{5, 5, 5})
+	red := surface.UnitSphere(material.Light(200000, 10000, 10000))
+	red.Shift(geom.Vec{-100, 0, 0}).Scale(geom.Vec{10, 10, 10})
+	blue := surface.UnitSphere(material.Light(10000, 10000, 200000))
+	blue.Shift(geom.Vec{100, 0, 0}).Scale(geom.Vec{10, 10, 10})
 	surfaces = append(surfaces, red, blue)
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
 
-	return render.Iterative(scene, "redblue.png", 500, 400, 6, true)
+	return render.Iterative(scene, "redblue.png", 1280, 720, 6, true)
 }

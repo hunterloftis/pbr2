@@ -1,4 +1,18 @@
-mario-sculpture:
+.PHONY: hello redblue shapes
+
+hello:
+	go run ./examples/hello/hello.go
+
+redblue:
+	go run ./examples/redblue/redblue.go
+
+shapes:
+	go run ./examples/shapes/shapes.go
+
+sponza:
+	go run ./examples/sponza/sponza.go
+
+mario:
 	go build ./cmd/pbr
 	./pbr fixtures/models/mario/mario-sculpture.obj -width 500 -height 400 -from 200,200,200 -to 0,0,0 -ambient 50,50,50 -v --floor
 
@@ -41,3 +55,28 @@ chair:
 destroyer:
 	go build ./cmd/pbr
 	./pbr fixtures/models/simple/destroyer.obj -width 1000 -height 400 -v
+
+legobricks:
+	go build ./cmd/pbr
+	./pbr fixtures/models/legobricks/LegoBricks3.obj -from 12,4,12 -to 0,1.5,0
+
+legoplane:
+	go build ./cmd/pbr
+	./pbr fixtures/models/legoplane/LEGO.Creator_Plane.obj -from 700,250,1100 -floor
+
+glassbowl:
+	go build ./cmd/pbr
+	./pbr fixtures/models/glassbowl/Glass\ Bowl\ with\ Cloth\ Towel.obj -from 6,4,6 -floor
+
+glass:
+	go build ./cmd/pbr
+	./pbr fixtures/models/glass/glass-obj.obj -floor -env fixtures/envmaps/ennis.hdr -from 700,100,500
+
+toilet:
+	go build ./cmd/pbr
+	./pbr fixtures/models/toilet/Toilet.obj -floor -width 320 -height 640 -from 0,200,150
+
+gopher:
+	go build ./cmd/pbr
+	./pbr fixtures/models/gopher/gopher.obj -floor
+	
