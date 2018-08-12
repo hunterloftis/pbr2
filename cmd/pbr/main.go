@@ -29,7 +29,7 @@ func run(o *Options) error {
 	if o.Scale != nil {
 		mesh.Scale(*o.Scale)
 	}
-	surfaces, bounds := mesh.Surfaces()
+	bounds, surfaces := mesh.Bounds()
 	camera := camera.NewSLR()
 	environment := render.Environment(env.NewGradient(rgb.Black, *o.Ambient, 3))
 
