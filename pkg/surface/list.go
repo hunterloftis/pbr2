@@ -14,7 +14,7 @@ type List struct {
 func NewList(ss ...render.Surface) *List {
 	l := List{
 		surfs:  ss,
-		bounds: boundsAround(ss),
+		bounds: BoundsAround(ss),
 	}
 	for _, s := range l.surfs {
 		l.lights = append(l.lights, s.Lights()...)

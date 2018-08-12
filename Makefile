@@ -58,19 +58,19 @@ legobricks:
 
 legoplane:
 	go build ./cmd/pbr
-	./pbr fixtures/models/legoplane/LEGO.Creator_Plane.obj -from 700,250,1100 -floor 1.1 -floorcolor 0.25,0.25,0.2 -floorrough 0.3 -ambient 1200,1200,1100
+	./pbr fixtures/models/legoplane/LEGO.Creator_Plane.obj -from 700,250,1100 -floor 1.1 -floorcolor 0.25,0.25,0.2 -floorrough 0.9 -ambient 1200,1200,1100
 
 glassbowl:
 	go build ./cmd/pbr
-	./pbr fixtures/models/glassbowl/Glass\ Bowl\ with\ Cloth\ Towel.obj -from 6,4,6 -floor
+	./pbr fixtures/models/glassbowl/Glass\ Bowl\ with\ Cloth\ Towel.obj -from 6,4,6
 
 glass:
 	go build ./cmd/pbr
-	./pbr fixtures/models/glass/glass-obj.obj -floor -env fixtures/envmaps/ennis.hdr -from 700,100,500
+	./pbr fixtures/models/glass/glass-obj.obj -floor 1.5 -env fixtures/envmaps/ennis.hdr -from 840,120,600 -lens 80 -fstop 1.4 -focus 0.7
 
 toilet:
 	go build ./cmd/pbr
-	./pbr fixtures/models/toilet/Toilet.obj -floor -width 320 -height 640 -from 0,200,150
+	./pbr fixtures/models/toilet/Toilet.obj -floor 10 -width 320 -height 640 -from 0,200,150
 
 gopher:
 	go build ./cmd/pbr

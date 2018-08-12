@@ -10,7 +10,7 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
-const maxEnergy = 100000
+const maxEnergy = 500000
 
 type Pano struct {
 	Expose float64

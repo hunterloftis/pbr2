@@ -9,7 +9,7 @@ import (
 // Applying bias provides more robust processing of geometry.
 const bias = 1e-12
 
-func boundsAround(ss []render.Surface) *geom.Bounds {
+func BoundsAround(ss []render.Surface) *geom.Bounds {
 	if len(ss) == 0 {
 		return geom.NewBounds(geom.Vec{}, geom.Vec{})
 	}

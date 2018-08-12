@@ -15,7 +15,7 @@ type BVH struct {
 func NewBVH(ss ...render.Surface) *BVH {
 	b := BVH{
 		surfs:  ss,
-		bounds: boundsAround(ss),
+		bounds: BoundsAround(ss),
 	}
 	for _, s := range b.surfs {
 		b.lights = append(b.lights, s.Lights()...)

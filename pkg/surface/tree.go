@@ -29,7 +29,7 @@ type branch struct {
 func NewTree(ss ...render.Surface) *Tree {
 	maxDepth := 12
 	t := Tree{
-		branch: *newBranch(boundsAround(ss), ss, maxDepth),
+		branch: *newBranch(BoundsAround(ss), ss, maxDepth),
 	}
 	for _, s := range t.branch.surfaces {
 		t.lights = append(t.lights, s.Lights()...)

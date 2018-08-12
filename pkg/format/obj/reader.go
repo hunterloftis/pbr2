@@ -12,14 +12,13 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/format/mtl"
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/material"
-	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/surface"
 )
 
 // TODO: make robust
 // TODO: support smoothing groups (s)
 
-func ReadFile(filename string, recursive bool) (*surface.List, error) {
+func ReadFile(filename string, recursive bool) (*Mesh, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open scene %v, %v", filename, err)
@@ -32,18 +31,15 @@ func ReadFile(filename string, recursive bool) (*surface.List, error) {
 	return mesh, nil
 }
 
-func ReadMaterials(mesh *surface.List) {
+func ReadMaterials(mesh *Mesh) {
 	lib := make(map[string]*material.Mapped)
-	ss := mesh.Surfaces()
-	for _, s := range ss {
-		if t, ok := s.(*surface.Triangle); ok {
-			if m, ok := t.Mat.(*Material); ok {
-				if lib[m.Name] == nil {
-					readLibraries(lib, m.Files)
-				}
-				if lib[m.Name] != nil {
-					t.Mat = lib[m.Name]
-				}
+	for _, t := range mesh.Triangles {
+		if m, ok := t.Mat.(*Material); ok {
+			if lib[m.Name] == nil {
+				readLibraries(lib, m.Files)
+			}
+			if lib[m.Name] != nil {
+				t.Mat = lib[m.Name]
 			}
 		}
 	}
@@ -90,7 +86,7 @@ func (t *tablegroup) tex(i int) geom.Vec {
 	return t.tt[i-1]
 }
 
-func Read(r io.Reader, dir string) *surface.List {
+func Read(r io.Reader, dir string) *Mesh {
 	const (
 		vertex   = "v"
 		normal   = "vn"
@@ -100,7 +96,8 @@ func Read(r io.Reader, dir string) *surface.List {
 		material = "usemtl"
 	)
 
-	triangles := make([]render.Surface, 0)
+	mesh := NewMesh()
+	// triangles := make([]*surface.Triangle, 0)
 	table := &tablegroup{}
 	mat := &Material{}
 	mats := make(map[string]*Material)
@@ -139,7 +136,7 @@ func Read(r io.Reader, dir string) *surface.List {
 			if err != nil {
 				panic(err)
 			}
-			triangles = append(triangles, tris...)
+			mesh.Triangles = append(mesh.Triangles, tris...)
 		case library:
 			libs = append(libs, strings.Join(args, " "))
 		case material:
@@ -155,7 +152,7 @@ func Read(r io.Reader, dir string) *surface.List {
 		fmt.Println(mat)
 	}
 
-	return surface.NewList(triangles...)
+	return mesh
 }
 
 func newVert(args []string) (geom.Vec, error) {
@@ -187,7 +184,7 @@ func newMaterial(args []string, mats map[string]*Material) *Material {
 	return mats[name]
 }
 
-func newTriangles(args []string, table *tablegroup, mat *Material) ([]render.Surface, error) {
+func newTriangles(args []string, table *tablegroup, mat *Material) ([]*surface.Triangle, error) {
 	size := len(args)
 	if size < 3 {
 		return nil, fmt.Errorf("face requires at least 3 vertices (contains %v)", size)
@@ -216,7 +213,7 @@ func newTriangles(args []string, table *tablegroup, mat *Material) ([]render.Sur
 	if len(verts) != size {
 		return nil, fmt.Errorf("face vertex size != arg list size")
 	}
-	tris := make([]render.Surface, 0)
+	tris := make([]*surface.Triangle, 0)
 	for i := 2; i < size; i++ {
 		tri := surface.NewTriangle(verts[0], verts[i-1], verts[i], mat)
 		if len(norms) == size {

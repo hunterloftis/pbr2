@@ -10,7 +10,7 @@ import (
 
 // Triangle describes a triangle
 type Triangle struct {
-	Points  [3]geom.Vec
+	Points  [3]geom.Vec // TODO: private fields?
 	Normals [3]geom.Dir
 	Texture [3]geom.Vec
 	Mat     Material
@@ -38,6 +38,23 @@ func NewTriangle(a, b, c geom.Vec, m ...Material) *Triangle {
 	max := t.Points[0].Max(t.Points[1]).Max(t.Points[2])
 	t.bounds = geom.NewBounds(min, max)
 	return t
+}
+
+func (t *Triangle) Transformed(mtx *geom.Mtx) *Triangle {
+	t2 := &Triangle{
+		Mat: t.Mat,
+	}
+	for i := 0; i < 3; i++ {
+		t2.Points[i] = mtx.MultPoint(t.Points[i])
+		t2.Normals[i] = mtx.MultDir(t.Normals[i])
+		t2.Texture[i] = t.Texture[i]
+	}
+	t2.edge1 = t2.Points[1].Minus(t2.Points[0])
+	t2.edge2 = t2.Points[2].Minus(t2.Points[0])
+	min := t2.Points[0].Min(t2.Points[1]).Min(t2.Points[2])
+	max := t2.Points[0].Max(t2.Points[1]).Max(t2.Points[2])
+	t2.bounds = geom.NewBounds(min, max)
+	return t2
 }
 
 func (t *Triangle) Bounds() *geom.Bounds {

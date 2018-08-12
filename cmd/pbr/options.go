@@ -18,9 +18,10 @@ type Options struct {
 	Frames  float64 `arg:"-f" help:"number of frames at which to exit"`
 	Time    float64 `arg:"-t" help:"time to run before exiting (seconds)"`
 
-	Width  int  `arg:"-w" help:"rendering width in pixels"`
-	Height int  `arg:"-h" help:"rendering height in pixels"`
-	Mark   bool `help:"render a watermark"`
+	Width  int       `arg:"-w" help:"rendering width in pixels"`
+	Height int       `arg:"-h" help:"rendering height in pixels"`
+	Scale  *geom.Vec `help:"scale the scene by this amount"`
+	Mark   bool      `help:"render a watermark"`
 
 	Out     string `arg:"-o" help:"output render .png"`
 	Heat    string `help:"output heatmap as .png"`

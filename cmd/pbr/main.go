@@ -26,8 +26,10 @@ func run(o *Options) error {
 		return err
 	}
 
-	surfaces := mesh.Surfaces()
-	bounds := mesh.Bounds()
+	if o.Scale != nil {
+		mesh.Scale(*o.Scale)
+	}
+	surfaces, bounds := mesh.Surfaces()
 	camera := camera.NewSLR()
 	environment := render.Environment(env.NewGradient(rgb.Black, *o.Ambient, 3))
 
@@ -60,8 +62,9 @@ func run(o *Options) error {
 	}
 
 	if o.Sun != nil {
-		sun := surface.UnitSphere(material.Daylight(10000))
+		sun := surface.UnitSphere(material.Daylight(1000000))
 		sun.Shift(*o.Sun).Scale(geom.Vec{o.SunSize, o.SunSize, o.SunSize})
+		surfaces = append(surfaces, sun)
 	}
 
 	tree := surface.NewTree(surfaces...)

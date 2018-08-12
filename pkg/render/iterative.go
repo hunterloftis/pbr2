@@ -18,7 +18,7 @@ func Iterative(scene *Scene, file string, width, height, depth int, direct bool)
 
 	frame := scene.Render(width, height, depth, direct)
 	defer frame.Stop()
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(6 * time.Second) // 10 .s = 1 minute, 100 .s = 1 hr
 	defer ticker.Stop()
 
 	start := time.Now().UnixNano()
