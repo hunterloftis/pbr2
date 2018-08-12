@@ -47,3 +47,8 @@
 - https://free3d.com/3d-model/lata-bonus-76367.html
 - https://free3d.com/3d-model/lego-creator-plane-4953-24788.html
 - https://free3d.com/3d-model/lego-bricks-28-10026.html
+
+#### hdri
+
+- http://www.maximeroz.com/hdri-free-pack/
+- https://hdrihaven.com/hdris/category/?c=indoor

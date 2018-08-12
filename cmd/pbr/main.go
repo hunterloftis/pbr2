@@ -51,12 +51,17 @@ func run(o *Options) error {
 		}
 	}
 
-	if o.Floor {
-		floor := surface.UnitCube(material.Plastic(0.9, 0.9, 0.9, 0.5))
-		dims := bounds.Max.Minus(bounds.Min).Scaled(1.1)
-		floor.Shift(geom.Vec{bounds.Center.X, bounds.Min.Y - dims.Y*0.25, bounds.Center.Z})
-		floor.Scale(geom.Vec{dims.X, dims.Y * 0.5, dims.Z})
+	if o.Floor > 0 {
+		floor := surface.UnitCube(material.Plastic(o.FloorColor.X, o.FloorColor.Y, o.FloorColor.Z, o.FloorRough))
+		dims := bounds.Max.Minus(bounds.Min).Scaled(o.Floor)
+		floor.Shift(geom.Vec{bounds.Center.X, bounds.Min.Y - dims.Y*0.5, bounds.Center.Z})
+		floor.Scale(geom.Vec{dims.X, dims.Y, dims.Z})
 		surfaces = append(surfaces, floor)
+	}
+
+	if o.Sun != nil {
+		sun := surface.UnitSphere(material.Daylight(10000))
+		sun.Shift(*o.Sun).Scale(geom.Vec{o.SunSize, o.SunSize, o.SunSize})
 	}
 
 	tree := surface.NewTree(surfaces...)

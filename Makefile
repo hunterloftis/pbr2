@@ -40,10 +40,6 @@ moses:
 	go build ./cmd/pbr
 	./pbr fixtures/models/moses/model.obj -width 480 -height 640 -v
 
-gopher:
-	go build ./cmd/pbr
-	./pbr fixtures/models/gopher/gopher.obj -width 480 -height 640 -v
-
 cesar:
 	go build ./cmd/pbr
 	./pbr fixtures/models/simple/cesar.obj -width 500 -height 500 -v
@@ -62,7 +58,7 @@ legobricks:
 
 legoplane:
 	go build ./cmd/pbr
-	./pbr fixtures/models/legoplane/LEGO.Creator_Plane.obj -from 700,250,1100 -floor
+	./pbr fixtures/models/legoplane/LEGO.Creator_Plane.obj -from 700,250,1100 -floor 1.1 -floorcolor 0.25,0.25,0.2 -floorrough 0.3 -ambient 1200,1200,1100
 
 glassbowl:
 	go build ./cmd/pbr
@@ -79,4 +75,3 @@ toilet:
 gopher:
 	go build ./cmd/pbr
 	./pbr fixtures/models/gopher/gopher.obj -floor
-	

@@ -18,10 +18,9 @@ type SLR struct {
 	FStop  float64
 	Focus  float64
 
-	targetDist float64
-	trans      *geom.Mtx
-	position   geom.Vec
-	target     geom.Vec
+	trans    *geom.Mtx
+	position geom.Vec
+	target   geom.Vec
 }
 
 // NewSLR constructs a new camera with 35mm sensor full-frame / 50mm lens defaults.
@@ -54,6 +53,7 @@ func (s *SLR) MoveTo(pos geom.Vec) *SLR {
 }
 
 func (s *SLR) Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray {
+	targetDist := s.target.Minus(s.position).Len()
 	u := x / width
 	v := y / height
 	aSense := s.Width / s.Height
@@ -65,8 +65,8 @@ func (s *SLR) Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray {
 		r := aImage / aSense
 		u = (1-r)*0.5 + u*r
 	}
-	focusDist := s.targetDist * s.Focus
-	sensorPt := s.sensorPoint(u, v)
+	focusDist := targetDist * s.Focus
+	sensorPt := s.sensorPoint(u, v, focusDist)
 	straight, _ := geom.Vec{}.Minus(sensorPt).Unit()
 	focalPt := geom.Vec(straight).Scaled(focusDist) // TODO: is this creating a curved focal plane? need to project along the center axis?
 	lensPt := s.aperturePoint(rnd)
@@ -77,11 +77,9 @@ func (s *SLR) Ray(x, y, width, height float64, rnd *rand.Rand) *geom.Ray {
 
 func (s *SLR) transform() {
 	s.trans = geom.LookMatrix(s.position, s.target)
-	s.targetDist = s.target.Minus(s.position).Len()
 }
 
-func (s *SLR) sensorPoint(u, v float64) geom.Vec {
-	focusDist := s.targetDist * s.Focus
+func (s *SLR) sensorPoint(u, v, focusDist float64) geom.Vec {
 	z := 1 / ((1 / s.Lens) - (1 / focusDist))
 	x := (u - 0.5) * s.Width
 	y := (v - 0.5) * s.Height
