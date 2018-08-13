@@ -21,7 +21,7 @@ func main() {
 
 func run() error {
 	cam := camera.NewSLR()
-	ball := surface.UnitSphere(material.Gold(0.05))
+	ball := surface.UnitSphere(material.Gold(0.05, 1))
 	ball.Shift(geom.Vec{0, 0, -5})
 	floor := surface.UnitCube(material.Plastic(1, 1, 1, 0.1))
 	floor.Shift(geom.Vec{0, -1, -5}).Scale(geom.Vec{100, 1, 100})

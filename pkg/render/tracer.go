@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	maxWeight = 10
+	maxWeight = 20
 	maxEnergy = 2000
 )
 

@@ -17,10 +17,15 @@ func NewMesh() *Mesh {
 	}
 }
 
-func (m *Mesh) Surfaces() []render.Surface {
+func (m *Mesh) Surfaces(mat ...surface.Material) []render.Surface {
 	ss := make([]render.Surface, 0)
+	resurface := len(mat) > 0
 	for _, t := range m.Triangles {
-		ss = append(ss, t.Transformed(m.mtx))
+		t2 := t.Transformed(m.mtx)
+		if resurface {
+			t2.Mat = mat[0]
+		}
+		ss = append(ss, t2)
 	}
 	return ss
 }
