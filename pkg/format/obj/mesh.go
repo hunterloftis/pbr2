@@ -35,6 +35,11 @@ func (m *Mesh) Scale(v geom.Vec) *Mesh {
 	return m
 }
 
+func (m *Mesh) Rotate(v geom.Vec) *Mesh {
+	m.mtx = m.mtx.Mult(geom.Rotate(v))
+	return m
+}
+
 func (m *Mesh) MoveTo(pt, anchor geom.Vec) *Mesh {
 	inv := m.mtx.Inverse() // global to local
 	b, _ := m.Bounds()
