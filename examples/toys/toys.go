@@ -49,18 +49,20 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	sphere := surface.UnitSphere(material.Mirror(0.01)).Shift(geom.Vec{0.15, 0.05, 0.6}).Scale(geom.Vec{0.2, 0.2, 0.2})
+
 	camera := camera.NewSLR()
 	camera.Lens = 0.035
-	camera.Focus = 0.6
+	camera.Focus = 0.95
 	camera.FStop = 1.4
 
-	table.Scale(geom.Vec{35, 35, 35}).Rotate(geom.Vec{0, math.Pi * 0.5, 0}).MoveTo(geom.Vec{0, 0, -2}, geom.Vec{0, 1, 0})
+	table.Scale(geom.Vec{37, 37, 37}).Rotate(geom.Vec{0, math.Pi * 0.5, 0}).MoveTo(geom.Vec{0, 0, -2}, geom.Vec{0, 1, 0})
 	gopher.Scale(geom.Vec{0.1, 0.1, 0.1}).Rotate(geom.Vec{0, -2, 0}).MoveTo(geom.Vec{0.1, 0, 0.1}, geom.Vec{0, -1, 0})
 	mario.Scale(geom.Vec{0.005, 0.005, 0.005}).MoveTo(geom.Vec{-0.3, 0, -0.2}, geom.Vec{0, -1, 0})
-	angel.Scale(geom.Vec{0.0032, 0.0032, 0.0032}).Rotate(geom.Vec{0, -0.5, 0}).MoveTo(geom.Vec{-0.7, 0.001, 0.5}, geom.Vec{0, -1, 0})
+	angel.Scale(geom.Vec{0.0033, 0.0033, 0.0033}).Rotate(geom.Vec{0, -0.5, 0}).MoveTo(geom.Vec{-0.7, 0.001, 0.35}, geom.Vec{0, -1, 0})
 	buddha.Scale(geom.Vec{0.9, 0.9, 0.9}).Rotate(geom.Vec{0, math.Pi, 0}).MoveTo(geom.Vec{0.6, 0, 0.5}, geom.Vec{0, -1, 0})
 	lego.Scale(geom.Vec{0.003, 0.003, 0.003}).Rotate(geom.Vec{0, 0.08, 0}).MoveTo(geom.Vec{0.9, 0, -0.6}, geom.Vec{0, -1, 0})
-	camera.MoveTo(geom.Vec{-0.01, 1.65, 2.55}).LookAt(geom.Vec{0, 0.1, 0})
+	camera.MoveTo(geom.Vec{-0.01, 1.65, 2.6}).LookAt(geom.Vec{0, 0.1, 0})
 
 	surfaces := table.Surfaces()
 	surfaces = append(surfaces, gopher.Surfaces()...)
@@ -68,6 +70,7 @@ func run() error {
 	surfaces = append(surfaces, angel.Surfaces(material.ColoredGlass(0.2, 1, 1, 0.03))...)
 	surfaces = append(surfaces, buddha.Surfaces(material.Gold(0.03, 0.6))...)
 	surfaces = append(surfaces, lego.Surfaces()...)
+	surfaces = append(surfaces, sphere)
 
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
