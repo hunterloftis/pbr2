@@ -53,7 +53,6 @@ func readLibraries(lib map[string]*material.Mapped, files []string) {
 		}
 		for name, mat := range mats {
 			lib[name] = mat
-			fmt.Println(name, mat)
 		}
 	}
 }
@@ -66,7 +65,6 @@ type tablegroup struct {
 
 func (t *tablegroup) vert(i int) geom.Vec {
 	if i < 1 {
-		// fmt.Println("i:", i, "len(t.vv):", len(t.vv))
 		return t.vv[len(t.vv)+i]
 	}
 	return t.vv[i-1]
@@ -149,7 +147,6 @@ func Read(r io.Reader, dir string) *Mesh {
 		for i, lib := range libs {
 			mat.Files[i], _ = filepath.Abs(filepath.Join(dir, lib))
 		}
-		fmt.Println(mat)
 	}
 
 	return mesh

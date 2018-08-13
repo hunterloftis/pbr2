@@ -53,7 +53,7 @@ func run() error {
 
 	camera := camera.NewSLR()
 	camera.Lens = 0.035
-	camera.Focus = 0.95
+	camera.Focus = 0.97
 	camera.FStop = 1.4
 
 	table.Scale(geom.Vec{37, 37, 37}).Rotate(geom.Vec{0, math.Pi * 0.5, 0}).MoveTo(geom.Vec{0, 0, -2}, geom.Vec{0, 1, 0})
@@ -75,5 +75,6 @@ func run() error {
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
 
+	fmt.Println("Surfaces:", len(surfaces))
 	return render.Iterative(scene, "toys.png", 1280, 720, 8, true)
 }

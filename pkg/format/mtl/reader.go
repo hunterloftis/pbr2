@@ -32,7 +32,6 @@ func ReadFile(filename string, recursive bool) (map[string]*material.Mapped, err
 }
 
 func readTexture(filename string) image.Image {
-	fmt.Println("reading texture from", filename)
 	f, err := os.Open(filename)
 	if err != nil {
 		fmt.Println("unable to open image:", filename, err)
@@ -72,12 +71,6 @@ func Read(r io.Reader, dir string) map[string]*material.Mapped {
 
 		switch key {
 		case newMaterial:
-			if strings.Contains(current, "Glass") {
-				fmt.Println("\n\nCurrent", current)
-				fmt.Printf("%+v", lib[current].Base)
-				fmt.Println("\nGlass:")
-				fmt.Printf("%+v", material.Glass(0))
-			}
 			current = args[0]
 			lib[current] = material.NewMapped(&material.Uniform{
 				Color:       rgb.White,
@@ -105,7 +98,9 @@ func Read(r io.Reader, dir string) map[string]*material.Mapped {
 		case emit:
 			str := strings.Join(args, ",")
 			if e, err := rgb.ParseEnergy(str); err == nil {
-				lib[current].Base.Color, lib[current].Base.Emission = e.Compressed(1)
+				if !e.Zero() {
+					lib[current].Base.Color, lib[current].Base.Emission = e.Compressed(1)
+				}
 			}
 		case refraction:
 			if ior, err := strconv.ParseFloat(args[0], 64); err == nil {
