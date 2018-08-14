@@ -95,7 +95,6 @@ func Read(r io.Reader, dir string) *Mesh {
 	)
 
 	mesh := NewMesh()
-	// triangles := make([]*surface.Triangle, 0)
 	table := &tablegroup{}
 	mat := &Material{}
 	mats := make(map[string]*Material)

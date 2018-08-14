@@ -8,6 +8,8 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
+// TODO: fix issue where Roughness == 0 causes bad render
+
 // Cook-Torrance microfacet model
 type Microfacet struct {
 	Specular   rgb.Energy

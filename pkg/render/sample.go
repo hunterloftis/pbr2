@@ -140,6 +140,7 @@ func (s *Sample) WritePNG(name string, im image.Image) error {
 	return png.Encode(out, im)
 }
 
+// TODO: rename to Count()?
 func (s *Sample) Total() int {
 	total := 0
 	for y := 0; y < s.Height; y++ {

@@ -45,7 +45,7 @@ func Iterative(scene *Scene, file string, width, height, depth int, direct bool)
 	total := sample.Total()
 	p := message.NewPrinter(language.English)
 	secs := float64(stop-start) / 1e9
-	sps := math.Round(float64(total) / secs)
+	sps := math.Round(float64(total) / secs) // TODO: rename to pixels/sec for clarity
 	p.Printf("\n%v samples in %.1f seconds (%.0f samples/sec)\n", total, secs, sps)
 
 	return nil
