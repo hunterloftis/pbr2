@@ -163,7 +163,7 @@ func (t *tracer) shadow(pt geom.Vec, normal geom.Dir) (wi geom.Dir, energy rgb.E
 	if len(lights) < 1 {
 		return geom.Up, rgb.Black, 0
 	}
-	i := int(math.Floor(t.rnd.Float64() * float64(len(lights)))) // TODO: more elegant "select random element?"
+	i := t.rnd.Intn(len(lights))
 	l := lights[i]
 
 	ray, coverage := l.Bounds().ShadowRay(pt, normal, t.rnd)
