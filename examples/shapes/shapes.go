@@ -25,7 +25,7 @@ func run() error {
 	whitePlastic := material.Plastic(1, 1, 1, 0.07)
 	bluePlastic := material.Plastic(0.05, 0.05, 1, 0.01)
 	greenPlastic := material.Plastic(0.05, 1, 0.05, 0.01)
-	gold := material.Gold(0.05)
+	gold := material.Gold(0.05, 1)
 	glass := material.Glass(0.0001)
 	tealGlass := material.ColoredGlass(0, 1, 1, 0.00001)
 	grid := material.NewGrid(whitePlastic, bluePlastic, 20000, 0.1)

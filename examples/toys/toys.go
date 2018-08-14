@@ -49,7 +49,7 @@ func run() error {
 
 	camera := camera.NewSLR()
 	camera.Lens = 0.035
-	camera.Focus = 0.97
+	camera.Focus = 0.96
 	camera.FStop = 1.4
 
 	table.Scale(geom.Vec{37, 37, 37}).Rotate(geom.Vec{0, math.Pi * 0.5, 0}).MoveTo(geom.Vec{0, 0, -2}, geom.Vec{0, 1, 0})

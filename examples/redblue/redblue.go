@@ -25,8 +25,7 @@ func run() error {
 		return err
 	}
 
-	surfaces := mesh.Surfaces()
-	bounds := mesh.Bounds()
+	bounds, surfaces := mesh.Bounds()
 	camera := camera.NewSLR()
 	environment := render.Environment(env.NewFlat(0, 0, 0))
 
