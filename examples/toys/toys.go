@@ -62,7 +62,7 @@ func run() error {
 	surfaces := table.Surfaces()
 	surfaces = append(surfaces, gopher.Surfaces()...)
 	surfaces = append(surfaces, mario.Surfaces()...)
-	surfaces = append(surfaces, buddha.Surfaces(material.Gold(0.03, 0.6))...)
+	surfaces = append(surfaces, buddha.SetMaterial(material.Gold(0.03, 0.6)).Surfaces()...)
 	surfaces = append(surfaces, lego.Surfaces()...)
 
 	mats := []surface.Material{

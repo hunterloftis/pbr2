@@ -9,6 +9,7 @@ import (
 type Mesh struct {
 	Triangles []*surface.Triangle
 	mtx       *geom.Mtx
+	mat       *surface.Material
 }
 
 func NewMesh() *Mesh {
@@ -17,13 +18,12 @@ func NewMesh() *Mesh {
 	}
 }
 
-func (m *Mesh) Surfaces(mat ...surface.Material) []render.Surface {
+func (m *Mesh) Surfaces() []render.Surface {
 	ss := make([]render.Surface, 0)
-	resurface := len(mat) > 0
 	for _, t := range m.Triangles {
 		t2 := t.Transformed(m.mtx)
-		if resurface {
-			t2.Mat = mat[0]
+		if m.mat != nil {
+			t2.Mat = *m.mat
 		}
 		ss = append(ss, t2)
 	}
@@ -33,6 +33,11 @@ func (m *Mesh) Surfaces(mat ...surface.Material) []render.Surface {
 func (m *Mesh) Bounds() (*geom.Bounds, []render.Surface) {
 	ss := m.Surfaces()
 	return surface.BoundsAround(ss), ss
+}
+
+func (m *Mesh) SetMaterial(mat surface.Material) *Mesh {
+	m.mat = &mat
+	return m
 }
 
 func (m *Mesh) Scale(v geom.Vec) *Mesh {

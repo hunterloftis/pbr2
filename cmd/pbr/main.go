@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
@@ -12,6 +14,13 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 	"github.com/hunterloftis/pbr2/pkg/surface"
 )
+
+var materials = map[string]surface.Material{
+	"gold":    material.Gold(0.03, 0.9),
+	"mirror":  material.Mirror(0.001),
+	"glass":   material.Glass(0.03),
+	"plastic": material.Plastic(1, 1, 1, 0.5),
+}
 
 func main() {
 	if err := run(options()); err != nil {
@@ -28,6 +37,10 @@ func run(o *Options) error {
 
 	if o.Scale != nil {
 		mesh.Scale(*o.Scale)
+	}
+	if o.Material != "" {
+		m := materials[strings.ToLower(o.Material)]
+		mesh.SetMaterial(m)
 	}
 	bounds, surfaces := mesh.Bounds()
 	camera := camera.NewSLR()
@@ -70,5 +83,6 @@ func run(o *Options) error {
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
 
+	fmt.Println("Surfaces:", len(surfaces))
 	return render.Iterative(scene, o.Out, o.Width, o.Height, o.Bounce, !o.Indirect)
 }

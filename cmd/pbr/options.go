@@ -12,11 +12,12 @@ import (
 // Options configures rendering behavior.
 // TODO: add "watermark"
 type Options struct {
-	Scene   string  `arg:"positional,required" help:"input scene .obj"`
-	Verbose bool    `arg:"-v" help:"verbose output with scene information"`
-	Info    bool    `help:"output scene information and exit"`
-	Frames  float64 `arg:"-f" help:"number of frames at which to exit"`
-	Time    float64 `arg:"-t" help:"time to run before exiting (seconds)"`
+	Scene    string  `arg:"positional,required" help:"input scene .obj"`
+	Verbose  bool    `arg:"-v" help:"verbose output with scene information"`
+	Info     bool    `help:"output scene information and exit"`
+	Frames   float64 `arg:"-f" help:"number of frames at which to exit"`
+	Time     float64 `arg:"-t" help:"time to run before exiting (seconds)"`
+	Material string  `help:"override material (glass, gold, mirror, plastic)"`
 
 	Width  int       `arg:"-w" help:"rendering width in pixels"`
 	Height int       `arg:"-h" help:"rendering height in pixels"`

@@ -25,11 +25,15 @@ lambo:
 
 skull:
 	go build ./cmd/pbr
-	./pbr fixtures/models/simple/skull.obj
+	./pbr fixtures/models/simple/skull.obj -scale 0.1,0.1,0.1 -floor 2 -material gold -env fixtures/envmaps/georgentor_4k.hdr -rad 100 -fstop 1.4 -from 2,0.2,1.75 -width 1280 -height 720
 
 lucy:
 	go build ./cmd/pbr
-	./pbr fixtures/models/simple/lucy.obj -width 480 -height 640
+	./pbr fixtures/models/simple/lucy.obj -scale 0.005,0.005,0.005 -material glass -env fixtures/envmaps/georgentor_4k.hdr -rad 100 -fstop 1.4 -width 1280 -height 720 -from 1,1.25,1 -to 0.1,1.25,0.1 -bounce 10
+
+buddha:
+	go build ./cmd/pbr
+	./pbr fixtures/models/simple/buddha.obj -scale 0.1,0.1,0.1 -floor 2 -material gold -env fixtures/envmaps/georgentor_4k.hdr -rad 100 -fstop 1.4 -width 1280 -height 720
 
 falcon:
 	go build ./cmd/pbr
