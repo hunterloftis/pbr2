@@ -105,7 +105,10 @@ func (s *Sphere) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, 
 	p := i.MultPoint(pt)
 	pu, _ := p.Unit()
 	n := s.mtx.MultDir(pu)
-	return s.mat.At(0, 0, in, n, rnd)
+	n2, bsdf := s.mat.At(0, 0, in, n, rnd)
+	_ = n2
+	normal = n // TODO: compute normal by combining n and n2 (and a bitangent)
+	return normal, bsdf
 }
 
 func (s *Sphere) Light() rgb.Energy {

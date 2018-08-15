@@ -66,12 +66,11 @@ func (m *Mapped) At(u, v float64, in, norm geom.Dir, rnd *rand.Rand) (normal geo
 	// 	sample.Metalness = colToFloat(m.Metalness.At(x, y))
 	// }
 	if m.Roughness != nil {
-		r := colToFloat(m.Roughness.At(x, y))
-		sample.Roughness = r * r // TODO: squaring to generally darken; bad idea?
+		sample.Roughness = colToFloat(m.Roughness.At(x, y))
 	}
 	_, bsdf = sample.At(u, v, in, norm, rnd)
 	// TODO: combine normal map at u,v with norm
-	return norm, bsdf
+	return geom.Up, bsdf
 }
 
 func (m *Mapped) Light() rgb.Energy {

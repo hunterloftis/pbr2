@@ -90,11 +90,16 @@ func (t *Triangle) Intersect(ray *geom.Ray, max float64) (obj render.Object, dis
 }
 
 // At returns the material at a point on the Triangle
-func (t *Triangle) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
+// https://stackoverflow.com/questions/21210774/normal-mapping-on-procedural-sphere
+func (t *Triangle) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (geom.Dir, render.BSDF) {
 	u, v, w := t.Bary(pt)
 	n := t.normal(u, v, w)
 	texture := t.texture(u, v, w)
-	return t.Mat.At(texture.X, texture.Y, in, n, rnd)
+	n2, bsdf := t.Mat.At(texture.X, texture.Y, in, n, rnd)
+	// TODO: compute binormal and combine texture normal with n to return actual normal
+	_ = n2
+	normal := n
+	return normal, bsdf
 }
 
 func (t *Triangle) Lights() []render.Object {

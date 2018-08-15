@@ -57,7 +57,7 @@ legobricks:
 
 legoplane:
 	go build ./cmd/pbr
-	./pbr fixtures/models/legoplane/LEGO.Creator_Plane.obj -from 700,250,1100 -floor 1.1 -floorcolor 0.25,0.25,0.2 -floorrough 0.9 -ambient 1200,1200,1100 -out legoplane.png
+	./pbr fixtures/models/legoplane/LEGO.Creator_Plane.obj -from 800,600,1300 -floor 10 -floorcolor 0.5,0.5,0.5 -floorrough 0.1 -env fixtures/envmaps/306.hdr -rad 1000 -width 1280 -height 720 -out legoplane.png
 
 bowl:
 	go build ./cmd/pbr

@@ -25,16 +25,16 @@ func (un *Uniform) At(u, v float64, in, norm geom.Dir, rnd *rand.Rand) (geom.Dir
 	cos := in.Dot(norm)
 	if cos > 0 {
 		if un.Transmission == 0 {
-			return norm, bsdf.Ignore{} // TODO: doesn't seem to be working, have similar code in the trace() fn
+			return geom.Up, bsdf.Ignore{} // TODO: doesn't seem to be working, have similar code in the trace() fn
 		}
-		return norm, bsdf.Transmit{
+		return geom.Up, bsdf.Transmit{
 			Specular:   un.Specularity,
 			Roughness:  un.Roughness,
 			Multiplier: 1,
 		}
 	}
 	if rnd.Float64() <= un.Metalness {
-		return norm, bsdf.Microfacet{
+		return geom.Up, bsdf.Microfacet{
 			Specular:   un.Color,
 			Roughness:  un.Roughness,
 			Multiplier: 1,
@@ -42,20 +42,20 @@ func (un *Uniform) At(u, v float64, in, norm geom.Dir, rnd *rand.Rand) (geom.Dir
 	}
 	// TODO: dynamic reflect/refract ratio based on material properties
 	if rnd.Float64() < reflect {
-		return norm, bsdf.Microfacet{
+		return geom.Up, bsdf.Microfacet{
 			Specular:   rgb.Energy{un.Specularity, un.Specularity, un.Specularity},
 			Roughness:  un.Roughness,
 			Multiplier: 1 / reflect,
 		}
 	}
 	if un.Transmission > 0 {
-		return norm, bsdf.Transmit{
+		return geom.Up, bsdf.Transmit{
 			Specular:   un.Specularity,
 			Roughness:  un.Roughness,
 			Multiplier: 1 / refract,
 		}
 	}
-	return norm, bsdf.Lambert{
+	return geom.Up, bsdf.Lambert{
 		Color:      un.Color,
 		Multiplier: 1 / refract,
 	}

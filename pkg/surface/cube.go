@@ -89,7 +89,10 @@ func (c *Cube) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir, bs
 		v = p1.Y + 0.5
 	}
 	n := c.mtx.MultDir(normal)
-	return c.mat.At(u, v, in, n, rnd)
+	n2, bsdf := c.mat.At(u, v, in, n, rnd)
+	_ = n2
+	normal = n // TODO: combine n and n2
+	return normal, bsdf
 }
 
 func (c *Cube) Bounds() *geom.Bounds {
