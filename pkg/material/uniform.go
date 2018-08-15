@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/hunterloftis/pbr2/pkg/bsdf"
+	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
@@ -20,19 +21,20 @@ type Uniform struct {
 	Transmission float64 // TODO: scale this non-linearly so a 0-1 range is more natural (since 0.0001% - 100% is a "normal" range)
 }
 
-func (un *Uniform) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
+func (un *Uniform) At(u, v float64, in, norm geom.Dir, rnd *rand.Rand) (geom.Dir, render.BSDF) {
+	cos := in.Dot(norm)
 	if cos > 0 {
 		if un.Transmission == 0 {
-			return bsdf.Ignore{} // TODO: doesn't seem to be working, have similar code in the trace() fn
+			return norm, bsdf.Ignore{} // TODO: doesn't seem to be working, have similar code in the trace() fn
 		}
-		return bsdf.Transmit{
+		return norm, bsdf.Transmit{
 			Specular:   un.Specularity,
 			Roughness:  un.Roughness,
 			Multiplier: 1,
 		}
 	}
 	if rnd.Float64() <= un.Metalness {
-		return bsdf.Microfacet{
+		return norm, bsdf.Microfacet{
 			Specular:   un.Color,
 			Roughness:  un.Roughness,
 			Multiplier: 1,
@@ -40,20 +42,20 @@ func (un *Uniform) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
 	}
 	// TODO: dynamic reflect/refract ratio based on material properties
 	if rnd.Float64() < reflect {
-		return bsdf.Microfacet{
+		return norm, bsdf.Microfacet{
 			Specular:   rgb.Energy{un.Specularity, un.Specularity, un.Specularity},
 			Roughness:  un.Roughness,
 			Multiplier: 1 / reflect,
 		}
 	}
 	if un.Transmission > 0 {
-		return bsdf.Transmit{
+		return norm, bsdf.Transmit{
 			Specular:   un.Specularity,
 			Roughness:  un.Roughness,
 			Multiplier: 1 / refract,
 		}
 	}
-	return bsdf.Lambert{
+	return norm, bsdf.Lambert{
 		Color:      un.Color,
 		Multiplier: 1 / refract,
 	}

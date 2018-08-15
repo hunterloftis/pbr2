@@ -94,8 +94,7 @@ func (t *Triangle) At(pt geom.Vec, in geom.Dir, rnd *rand.Rand) (normal geom.Dir
 	u, v, w := t.Bary(pt)
 	n := t.normal(u, v, w)
 	texture := t.texture(u, v, w)
-	m := t.Mat.At(texture.X, texture.Y, in.Dot(n), rnd)
-	return n, m
+	return t.Mat.At(texture.X, texture.Y, in, n, rnd)
 }
 
 func (t *Triangle) Lights() []render.Object {

@@ -10,7 +10,7 @@ import (
 )
 
 type Material interface {
-	At(u, v, cos float64, rnd *rand.Rand) render.BSDF
+	At(u, v float64, in, norm geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF)
 	Light() rgb.Energy
 	Transmit() rgb.Energy
 }
@@ -18,8 +18,8 @@ type Material interface {
 type DefaultMaterial struct {
 }
 
-func (d *DefaultMaterial) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
-	return Lambert{}
+func (d *DefaultMaterial) At(u, v float64, in, norm geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
+	return norm, Lambert{}
 }
 
 func (d *DefaultMaterial) Light() rgb.Energy {

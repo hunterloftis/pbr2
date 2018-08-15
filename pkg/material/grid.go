@@ -4,6 +4,7 @@ import (
 	"math"
 	"math/rand"
 
+	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/render"
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 	"github.com/hunterloftis/pbr2/pkg/surface"
@@ -25,13 +26,13 @@ func NewGrid(base, line surface.Material, tiles int, thickness float64) *Grid {
 	}
 }
 
-func (g *Grid) At(u, v, cos float64, rnd *rand.Rand) render.BSDF {
+func (g *Grid) At(u, v float64, in, norm geom.Dir, rnd *rand.Rand) (normal geom.Dir, bsdf render.BSDF) {
 	du := math.Mod(u, g.spacing)
 	dv := math.Mod(v, g.spacing)
 	if du < g.radius || dv < g.radius {
-		return g.line.At(u, v, cos, rnd)
+		return g.line.At(u, v, in, norm, rnd)
 	}
-	return g.base.At(u, v, cos, rnd)
+	return g.base.At(u, v, in, norm, rnd)
 }
 
 func (g *Grid) Light() rgb.Energy {

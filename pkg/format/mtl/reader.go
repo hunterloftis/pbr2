@@ -20,6 +20,8 @@ import (
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
+// http://exocortex.com/blog/extending_wavefront_mtl_to_support_pbr
+
 // TODO: make robust
 func ReadFile(filename string, recursive bool) (map[string]*material.Mapped, error) {
 	f, err := os.Open(filename)
@@ -45,6 +47,7 @@ func readTexture(filename string) image.Image {
 }
 
 func Read(r io.Reader, dir string) map[string]*material.Mapped {
+	// TODO: use Ks (specular) for fresnel?
 	const (
 		newMaterial  = "newmtl"
 		color        = "kd"
@@ -52,9 +55,11 @@ func Read(r io.Reader, dir string) map[string]*material.Mapped {
 		transmit     = "tr"
 		invTransmit  = "d"
 		invRoughness = "ns"
+		roughMap     = "map_pr"
 		emit         = "ke"
 		refraction   = "ni"
 		metal        = "pm"
+		normal       = "norm"
 	)
 	scanner := bufio.NewScanner(r)
 	lib := make(map[string]*material.Mapped)
@@ -95,6 +100,9 @@ func Read(r io.Reader, dir string) map[string]*material.Mapped {
 			if ir, err := strconv.ParseFloat(args[0], 64); err == nil {
 				lib[current].Base.Roughness = 1 - (ir / 1000)
 			}
+		case roughMap:
+			f := filepath.Join(dir, strings.Join(args, " "))
+			lib[current].Roughness = readTexture(f)
 		case emit:
 			str := strings.Join(args, ",")
 			if e, err := rgb.ParseEnergy(str); err == nil {
@@ -112,6 +120,9 @@ func Read(r io.Reader, dir string) map[string]*material.Mapped {
 			if m, err := strconv.ParseFloat(args[0], 64); err == nil {
 				lib[current].Base.Metalness = m
 			}
+		case normal:
+			f := filepath.Join(dir, strings.Join(args, " "))
+			lib[current].Normal = readTexture(f)
 		}
 	}
 
