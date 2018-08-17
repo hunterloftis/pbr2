@@ -24,8 +24,7 @@ func main() {
 
 	surf := surface.NewList(ball, floor)
 	scene := render.NewScene(cam, surf, env)
-
-	err := render.Iterative(scene, "hello.png", 800, 450, 8, true)
+	err := render.Iterative(scene, "hello.png", 898, 450, 8, true)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
 	}

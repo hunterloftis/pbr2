@@ -26,7 +26,6 @@ func main() {
 
 	surf := surface.NewList(ball, floor)
 	scene := render.NewScene(cam, surf, env)
-
 	err := render.Iterative(scene, "hello.png", 800, 450, 8, true)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
@@ -34,14 +33,14 @@ func main() {
 }
 ```
 
-![Hello, World](https://user-images.githubusercontent.com/364501/44286247-60c11380-a236-11e8-8433-cea522f33cab.png)
+![Hello, World](https://user-images.githubusercontent.com/364501/44286751-35d7bf00-a238-11e8-91c5-5a1ea208f726.png)
 
 ## Features
 
-- Simple API, optimized and concurrent execution, 100% Go
+- Simple synchronous API, concurrent execution, 100% Go
 - A standalone CLI
-- OBJ and MTL meshes and materials
-- HDRI environment maps
+- .obj and .mtl meshes and materials (Wavefront)
+- .hdri environment maps (Radiance)
 - Physically-based materials (metalness/roughness workflow)
 - Texture maps (base, roughness, metalness)
 - Physically-based cameras (depth-of-field, f-stop, focal length, sensor size)
