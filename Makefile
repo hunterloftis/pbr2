@@ -1,5 +1,11 @@
 .PHONY: hello redblue shapes
 
+test:
+	go test -v ./...
+	go build ./cmd/pbr
+	go build ./examples/shapes/shapes.go
+	go build ./examples/hello/hello.go
+
 hello:
 	go run ./examples/hello/hello.go
 
