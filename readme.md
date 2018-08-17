@@ -101,3 +101,15 @@ Options:
   --help, -h             display this help and exit
   --version              display version and exit
   ```
+
+  ## Renders
+
+  ![Lion](https://user-images.githubusercontent.com/364501/44287057-62d8a180-a239-11e8-89b3-a6d5b5d0e6d1.png)
+
+  ![Lambo](https://user-images.githubusercontent.com/364501/44287090-7d127f80-a239-11e8-9590-3ea7b8a68c22.png)
+
+  ![Buddha](https://user-images.githubusercontent.com/364501/44287101-84398d80-a239-11e8-83d4-7062ababbe40.png)
+
+  ![Sponza](https://user-images.githubusercontent.com/364501/44287118-91567c80-a239-11e8-8463-2c16afdd204a.png)
+
+  
