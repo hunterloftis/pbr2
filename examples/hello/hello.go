@@ -14,22 +14,19 @@ import (
 )
 
 func main() {
-	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
-	}
-}
-
-func run() error {
-	cam := camera.NewSLR()
-	ball := surface.UnitSphere(material.Gold(0.05, 1))
-	ball.Shift(geom.Vec{0, 0, -5})
-	floor := surface.UnitCube(material.Plastic(1, 1, 1, 0.1))
-	floor.Shift(geom.Vec{0, -1, -5}).Scale(geom.Vec{100, 1, 100})
-	light := surface.UnitSphere(material.Halogen(1000))
-	light.Shift(geom.Vec{1, -0.375, -5}).Scale(geom.Vec{0.25, 0.25, 0.25})
-	surf := surface.NewList(ball, floor, light)
 	env := env.NewGradient(rgb.Black, rgb.Energy{750, 750, 750}, 7)
+	floor := surface.UnitCube(material.Plastic(1, 1, 1, 0.05))
+	floor.Shift(geom.Vec{0, -0.1, 0}).Scale(geom.Vec{10, 0.1, 10})
+	ball := surface.UnitSphere(material.Gold(0.05, 1))
+	ball.Scale(geom.Vec{0.1, 0.1, 0.1})
+	cam := camera.NewSLR()
+	cam.MoveTo(geom.Vec{0, 0, -0.5}).LookAt(geom.Vec{0, 0, 0})
+
+	surf := surface.NewList(ball, floor)
 	scene := render.NewScene(cam, surf, env)
 
-	return render.Iterative(scene, "hello.png", 800, 450, 8, true)
+	err := render.Iterative(scene, "hello.png", 800, 450, 8, true)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
+	}
 }
