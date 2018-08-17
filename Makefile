@@ -33,7 +33,7 @@ lucy:
 
 buddha:
 	go build ./cmd/pbr
-	./pbr fixtures/models/simple/buddha.obj -scale 0.1,0.1,0.1 -floor 2 -material gold -env fixtures/envmaps/georgentor_4k.hdr -rad 100 -fstop 1.4 -width 1280 -height 720
+	./pbr fixtures/models/simple/buddha.obj -width 1280 -height 720 -material gold -floor 20 -floorcolor 0,0,0 -env fixtures/envmaps/circus_maximus_1_4k.hdr -rad 200 -from 1.4,1.6,-1.8
 
 falcon:
 	go build ./cmd/pbr
@@ -41,7 +41,7 @@ falcon:
 
 moses:
 	go build ./cmd/pbr
-	./pbr fixtures/models/moses/model.obj -width 480 -height 640 -out moses.png
+	./pbr fixtures/models/moses/model.obj -out moses.png -scale 0.12,0.12,0.12 -width 1280 -height 720 -env fixtures/envmaps/georgentor_4k.hdr -rad 200 -fstop 1.4 -from 3,0,3 -to 0,0.5,0 -rotate 0,1,0
 
 cesar:
 	go build ./cmd/pbr
@@ -78,3 +78,27 @@ toilet:
 gopher:
 	go build ./cmd/pbr
 	./pbr fixtures/models/gopher2/gopher.obj -floor 15
+
+baccante1:
+	go build ./cmd/pbr
+	./pbr fixtures/models/baccante/baccante.obj -o baccante1.png -width 1280 -height 720 -floor 1 -rotate=-1.57,0,0 -scale 0.1,0.1,0.1 -to=0.5,0,-1.5 -from=-4.3,1,-2.6 -fstop 1.4 -env fixtures/envmaps/dresden_square_4k.hdr -rad 200
+
+baccante2:
+	go build ./cmd/pbr
+	./pbr fixtures/models/baccante/baccante.obj -o baccante2.png -width 1280 -height 720 -floor 1 -rotate=-1.57,0,0 -scale 0.1,0.1,0.1 -to=0.5,0,-1.5 -from=-4.3,1,-2.6 -fstop 1.4 -env fixtures/envmaps/konzerthaus_4k.hdr -rad 200
+
+baccante3:
+	go build ./cmd/pbr
+	./pbr fixtures/models/baccante/baccante.obj -o baccante3.png -width 1280 -height 720 -floor 1 -rotate=-1.57,0,0 -scale 0.1,0.1,0.1 -to=0.5,0,-1.5 -from=-4.3,1,-2.6 -fstop 1.4 -env fixtures/envmaps/venice_dawn_2_4k.hdr -rad 300
+
+lion1:
+	go build ./cmd/pbr
+	./pbr fixtures/models/lion/lion.obj -out lion1.png -floor 1.1 -rotate=-1.57,0,0 -scale 0.2,0.2,0.2 -fstop 1.4 -env fixtures/envmaps/dresden_square_4k.hdr -rad 200 -width 1280 -height 720 -from 8,6,6
+
+lion2:
+	go build ./cmd/pbr
+	./pbr fixtures/models/lion/lion.obj -out lion2.png -floor 1.1 -rotate=-1.57,0,0 -scale 0.2,0.2,0.2 -fstop 1.4 -env fixtures/envmaps/konzerthaus_4k.hdr -rad 300 -width 1280 -height 720 -from 8,6,6
+
+lion3:
+	go build ./cmd/pbr
+	./pbr fixtures/models/lion/lion.obj -out lion3.png -floor 1.1 -rotate=-1.57,0,0 -scale 0.2,0.2,0.2 -fstop 1.4 -env fixtures/envmaps/venice_dawn_2_4k.hdr -rad 300 -width 1280 -height 720 -from 8,6,6

@@ -152,7 +152,7 @@ func Read(r io.Reader, dir string) *Mesh {
 }
 
 func newVert(args []string) (geom.Vec, error) {
-	str := strings.Join(args, ",")
+	str := strings.Join(args[0:3], ",")
 	return geom.ParseVec(str)
 }
 

@@ -19,7 +19,8 @@ var materials = map[string]surface.Material{
 	"gold":    material.Gold(0.03, 0.9),
 	"mirror":  material.Mirror(0.001),
 	"glass":   material.Glass(0.03),
-	"plastic": material.Plastic(1, 1, 1, 0.5),
+	"flat":    material.Plastic(1, 1, 1, 0.5),
+	"plastic": material.Plastic(1, 1, 1, 0.1),
 }
 
 func main() {
@@ -37,6 +38,9 @@ func run(o *Options) error {
 
 	if o.Scale != nil {
 		mesh.Scale(*o.Scale)
+	}
+	if o.Rotate != nil {
+		mesh.Rotate(*o.Rotate)
 	}
 	if o.Material != "" {
 		m := materials[strings.ToLower(o.Material)]

@@ -1,10 +1,11 @@
 ## Next
 
 - web/worker
+- normal mapping
+- smoothing groups
 - gltf support
   - https://github.com/SamuelTS/SketchUp-PBR-Plugin
 - material clearcoat
-- bump mapping
 
 ### Maybe
 

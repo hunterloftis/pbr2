@@ -7,7 +7,7 @@ func Glass(roughness float64) *Uniform {
 		Color:        rgb.Energy{1, 1, 1},
 		Roughness:    roughness,
 		Specularity:  0.042,
-		Transmission: 0.91339, // https://www.shimadzu.com/an/industry/electronicselectronic/chem0501005.htm
+		Transmission: 0.91339,
 	}
 }
 

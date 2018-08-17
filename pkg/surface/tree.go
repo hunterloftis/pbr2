@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	minContents = 5
+	minContents = 8
+	maxDepth    = 16
 )
 
 type Tree struct {
@@ -27,7 +28,6 @@ type branch struct {
 }
 
 func NewTree(ss ...render.Surface) *Tree {
-	maxDepth := 12
 	t := Tree{
 		branch: *newBranch(BoundsAround(ss), ss, maxDepth),
 	}
