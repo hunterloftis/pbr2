@@ -3,6 +3,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/Opioid/rgbe"
+  packages = ["."]
+  revision = "01612e3f14b61fdbe443ba1b1dac0a97698ab81b"
+
+[[projects]]
+  branch = "master"
   name = "github.com/alexflint/go-arg"
   packages = ["."]
   revision = "f7c0423bd11ee80ab81d25c6d46f492998af8547"
@@ -41,6 +47,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d4cc758c65bbd1bd35a54febc4d581841b7bbc9bd2f6e81fa475f948cf27db2f"
+  inputs-digest = "bbbc79b3d618610b68c70bba3ce28a28b29442ffea7d1af400f5128224e9892f"
   solver-name = "gps-cdcl"
   solver-version = 1
