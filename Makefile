@@ -1,4 +1,4 @@
-.PHONY: hello redblue shapes
+.PHONY: hello redblue shapes toys
 
 test:
 	go test -v ./...
@@ -13,10 +13,16 @@ redblue:
 	go run ./examples/redblue/redblue.go
 
 shapes:
-	go run ./examples/shapes/shapes.go
+	go run ./examples/shapes/shapes.gom
 
 sponza:
 	go run ./examples/sponza/sponza.go
+
+toys-fixtures:
+	wget --no-check-certificate -r 'https://docs.google.com/uc?export=download&id=12YwRgYGilWMxtSek1uqF_ff8mfhpuYEB' -O toys.zip
+	unzip toys.zip
+	mv toys fixtures/toys
+	rm -rf toys.zip __MACOSX
 
 toys:
 	go run ./examples/toys/toys.go
