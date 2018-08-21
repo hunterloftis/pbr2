@@ -25,9 +25,9 @@ func Render(scene *render.Scene, url string, w, h, depth int, direct bool) error
 				fmt.Println("\nError:", err)
 				continue
 			}
-			_, err = http.Post(url, "application/octet-stream", buf) // TODO: gzip
-			if err != nil {
-				fmt.Println("\nError:", err)
+			resp, err := http.Post(url, "application/octet-stream", buf) // TODO: gzip
+			if resp.StatusCode != 200 || err != nil {
+				fmt.Println("\nStatus:", resp.Status, "Error:", err)
 				continue
 			}
 			frame.Clear()
