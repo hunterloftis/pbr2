@@ -1,8 +1,8 @@
-build:
-  languages:
+--- 
+build: 
+  languages: 
     - go
-  post:
-    make toys-fixtures
-run:
+  post: "make toys-fixtures"
+run: 
   web: bin/toys
-  worker: FARM_URI=https://agile-taiga-80619.herokuapp.com/sample bin/toys
+  worker: "FARM_URI=https://agile-taiga-80619.herokuapp.com/sample bin/toys"
