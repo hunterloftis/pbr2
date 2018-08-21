@@ -12,16 +12,6 @@ hello:
 shapes:
 	go run ./examples/shapes/shapes.gom
 
-toys-fixtures:
-	wget --no-check-certificate -r 'https://docs.google.com/uc?export=download&id=12YwRgYGilWMxtSek1uqF_ff8mfhpuYEB' -O toys.zip
-	unzip toys.zip
-	mkdir -p fixtures
-	mv toys fixtures/toys
-	rm -rf toys.zip __MACOSX
-
-toys:
-	go run ./examples/toys/toys.go
-
 fixtures:
 	wget --no-check-certificate -r 'https://docs.google.com/uc?export=download&id=1mNizqg4uSHbCILBwf1-fbrJDu6dtvA7R' -O fixtures.zip
 	unzip fixtures.zip
@@ -120,3 +110,10 @@ lion2:
 lion3:
 	go build ./cmd/pbr
 	./pbr fixtures/models/lion/lion.obj -out lion3.png -floor 1.1 -rotate=-1.57,0,0 -scale 0.2,0.2,0.2 -fstop 1.4 -env fixtures/envmaps/venice_dawn_2_4k.hdr -rad 300 -width 1280 -height 720 -from 8,6,6
+
+toys-fixtures:
+	wget --no-check-certificate -r 'https://docs.google.com/uc?export=download&id=12YwRgYGilWMxtSek1uqF_ff8mfhpuYEB' -O toys.zip
+	unzip toys.zip
+	mkdir -p fixtures
+	mv toys fixtures/toys
+	rm -rf toys.zip __MACOSX
