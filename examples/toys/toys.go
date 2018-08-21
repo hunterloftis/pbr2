@@ -9,6 +9,7 @@ import (
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
+	"github.com/hunterloftis/pbr2/pkg/farm"
 	"github.com/hunterloftis/pbr2/pkg/format/obj"
 	"github.com/hunterloftis/pbr2/pkg/geom"
 	"github.com/hunterloftis/pbr2/pkg/material"
@@ -24,13 +25,14 @@ func main() {
 
 func run() error {
 	port := os.Getenv("PORT")
-	if port != "" {
-		return farm.ListenAndServe(":"+port, 1280, 720)
-	}
+	uri := os.Getenv("FARM_URI")
 
-	url := os.Getenv("FARM_URL")
-	if url == "" {
-		return errors.New("No FARM_URL or PORT specified")
+	if uri == "" {
+		if port != "" {
+			fmt.Println("Listening on", port)
+			return farm.ListenAndServe(":"+port, 1280, 720)
+		}
+		return errors.New("No FARM_URI or PORT specified")
 	}
 
 	table, err := obj.ReadFile("./fixtures/models/table4/Table.obj", true)
@@ -96,5 +98,5 @@ func run() error {
 	scene := render.NewScene(camera, tree, environment)
 	fmt.Println("Surfaces:", len(surfaces))
 
-	return farm.Render(scene, url, 1280, 720, 8, true)
+	return farm.Render(scene, uri, 1280, 720, 8, true)
 }

@@ -1,7 +1,10 @@
 package render
 
 import (
+	"bytes"
+	"encoding/binary"
 	"image"
+	"io"
 	"math"
 
 	"github.com/hunterloftis/pbr2/pkg/rgb"
@@ -70,6 +73,21 @@ func (s *Sample) Image() *image.RGBA {
 		}
 	}
 	return im
+}
+
+func (s *Sample) Buffer() (*bytes.Buffer, error) {
+	buf := &bytes.Buffer{}
+	err := binary.Write(buf, binary.BigEndian, s.data)
+	return buf, err
+}
+
+func (s *Sample) Read(r io.Reader) error {
+	data := make([]float64, len(s.data))
+	err := binary.Read(r, binary.BigEndian, data)
+	for i, _ := range s.data {
+		s.data[i] += data[i]
+	}
+	return err
 }
 
 // TODO: rename to Count()?

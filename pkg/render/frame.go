@@ -28,6 +28,13 @@ func NewFrame(s *Scene, width, height, bounce int, direct bool) *Frame {
 	return &f
 }
 
+func (f *Frame) Clear() {
+	f.active.mu.Lock()
+	defer f.active.mu.Unlock()
+	f.data = NewSample(f.data.Width, f.data.Height)
+	f.samples = 0
+}
+
 func (f *Frame) Active() bool {
 	return f.active.State()
 }
@@ -48,6 +55,8 @@ func (f *Frame) Stop() {
 	}
 }
 
+// TODO: this locking is pointless; still reading from *Sample
+// after returning. Should return copy of Sample instead.
 func (f *Frame) Sample() (*Sample, int) {
 	f.active.mu.Lock()
 	defer f.active.mu.Unlock()

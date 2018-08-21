@@ -14,21 +14,23 @@ func Render(scene *render.Scene, url string, w, h, depth int, direct bool) error
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 
-	max := 0
 	fmt.Printf("\nRendering to %v", url)
 
 	for frame.Active() {
 		<-ticker.C
-		if sample, n := frame.Sample(); n > max {
-			max = n
+		if sample, n := frame.Sample(); n > 0 {
 			fmt.Print(".")
-			// buf := new(bytes.Buffer)
-			// rgbe := sample.Rgbe()
-			buf := sample.Buffer()
-			resp, err := http.Post(url, "application/octet-stream", &buf)
+			buf, err := sample.Buffer()
 			if err != nil {
 				fmt.Println("\nError:", err)
+				continue
 			}
+			_, err = http.Post(url, "application/octet-stream", buf) // TODO: gzip
+			if err != nil {
+				fmt.Println("\nError:", err)
+				continue
+			}
+			frame.Clear()
 		}
 	}
 	return nil

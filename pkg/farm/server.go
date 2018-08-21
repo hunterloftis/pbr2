@@ -51,6 +51,10 @@ func (s *Server) postSample(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	// s.sample.Merge(newSample)
-	fmt.Fprintln(w, "Hi")
+	err := s.sample.Read(r.Body)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Fprintln(w, "OK")
 }
