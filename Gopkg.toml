@@ -30,4 +30,5 @@
 
 [metadata.heroku]
   install = [ "./examples/toys" ]
+  root-package = "github.com/hunterloftis/pbr2"
   
