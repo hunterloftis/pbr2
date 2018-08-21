@@ -21,6 +21,7 @@ sponza:
 toys-fixtures:
 	wget --no-check-certificate -r 'https://docs.google.com/uc?export=download&id=12YwRgYGilWMxtSek1uqF_ff8mfhpuYEB' -O toys.zip
 	unzip toys.zip
+	mkdir fixtures
 	mv toys fixtures/toys
 	rm -rf toys.zip __MACOSX
 
