@@ -123,3 +123,19 @@ $ make fixtures
 
 ![Sponza](https://user-images.githubusercontent.com/364501/44287118-91567c80-a239-11e8-8463-2c16afdd204a.png)
 
+## Render Farm
+
+The `farm` package provides a client and server for quickly spinning up a render farm.
+The client workers render a scene and POST samples to the server over HTTP.
+The server integrates the samples into a render which it returns at GET /.
+
+To try out the 'toys' render farm example:
+
+```
+$ heroku create
+$ heroku stack:set container
+$ heroku labs:enable runtime-dyno-metadata
+$ git push heroku master
+$ heroku scale web=1:performance-l worker=10:performance-l
+$ heroku open
+```
