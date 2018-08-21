@@ -68,7 +68,7 @@ func run() error {
 	table.Scale(geom.Vec{37, 37, 37}).Rotate(geom.Vec{0, math.Pi * 0.5, 0}).MoveTo(geom.Vec{0, 0, -2}, geom.Vec{0, 1, 0})
 	gopher.Scale(geom.Vec{0.59, 0.59, 0.59}).Rotate(geom.Vec{0, -2, 0}).MoveTo(geom.Vec{0.05, 0, 0.1}, geom.Vec{0, -1, 0})
 	mario.Scale(geom.Vec{0.005, 0.005, 0.005}).MoveTo(geom.Vec{-0.3, 0, -0.2}, geom.Vec{0, -1, 0})
-	buddha.Scale(geom.Vec{0.09, 0.09, 0.09}).MoveTo(geom.Vec{0.6, 0, 0.5}, geom.Vec{0, -1, 0})
+	buddha.Scale(geom.Vec{0.9, 0.9, 0.9}).Rotate(geom.Vec{0, math.Pi, 0}).MoveTo(geom.Vec{0.6, 0, 0.5}, geom.Vec{0, -1, 0})
 	lego.Scale(geom.Vec{0.003, 0.003, 0.003}).Rotate(geom.Vec{0, 0.08, 0}).MoveTo(geom.Vec{0.9, 0, -0.6}, geom.Vec{0, -1, 0})
 	camera.MoveTo(geom.Vec{-0.01, 1.65, 2.6}).LookAt(geom.Vec{0, 0.1, 0})
 
