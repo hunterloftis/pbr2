@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"math/rand"
@@ -22,6 +23,16 @@ func main() {
 }
 
 func run() error {
+	port := os.Getenv("PORT")
+	if port != "" {
+		return farm.ListenAndServe(":"+port, 1280, 720)
+	}
+
+	url := os.Getenv("FARM_URL")
+	if url == "" {
+		return errors.New("No FARM_URL or PORT specified")
+	}
+
 	table, err := obj.ReadFile("./fixtures/models/table4/Table.obj", true)
 	if err != nil {
 		return err
@@ -83,7 +94,7 @@ func run() error {
 
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
-
 	fmt.Println("Surfaces:", len(surfaces))
-	return render.Iterative(scene, "toys.png", 1280*0.5, 720*0.5, 8, true)
+
+	return farm.Render(scene, url, 1280, 720, 8, true)
 }
