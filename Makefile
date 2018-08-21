@@ -9,24 +9,29 @@ test:
 hello:
 	go run ./examples/hello/hello.go
 
-redblue:
-	go run ./examples/redblue/redblue.go
-
 shapes:
 	go run ./examples/shapes/shapes.gom
-
-sponza:
-	go run ./examples/sponza/sponza.go
 
 toys-fixtures:
 	wget --no-check-certificate -r 'https://docs.google.com/uc?export=download&id=12YwRgYGilWMxtSek1uqF_ff8mfhpuYEB' -O toys.zip
 	unzip toys.zip
-	mkdir fixtures
+	mkdir -p fixtures
 	mv toys fixtures/toys
 	rm -rf toys.zip __MACOSX
 
 toys:
 	go run ./examples/toys/toys.go
+
+fixtures:
+	wget --no-check-certificate -r 'https://docs.google.com/uc?export=download&id=1mNizqg4uSHbCILBwf1-fbrJDu6dtvA7R' -O fixtures.zip
+	unzip fixtures.zip
+	rm -rf fixtures.zip __MACOSX
+
+redblue:
+	go run ./examples/redblue/redblue.go
+
+sponza:
+	go run ./examples/sponza/sponza.go
 
 mario:
 	go build ./cmd/pbr
