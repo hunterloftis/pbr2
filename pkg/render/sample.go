@@ -2,10 +2,7 @@ package render
 
 import (
 	"image"
-	"image/color"
-	"image/png"
 	"math"
-	"os"
 
 	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
@@ -43,36 +40,6 @@ func (s *Sample) At(x, y int) (rgb.Energy, int) {
 	}, int(c)
 }
 
-func (s *Sample) Noise(x0, y0 int) float64 {
-	sum := rgb.Black
-	count := 0.0
-	minY := int(math.Max(0, float64(y0-1)))
-	maxY := int(math.Min(float64(s.Height-1), float64(y0+1)))
-	minX := int(math.Max(0, float64(x0-1)))
-	maxX := int(math.Min(float64(s.Width-1), float64(x0+1)))
-	for y := minY; y <= maxY; y++ {
-		for x := minX; x <= maxX; x++ {
-			energy, _ := s.At(x, y)
-			sum = sum.Plus(energy)
-			count++
-		}
-	}
-	mean := sum.Scaled(1 / count).Size()
-	if mean < 1 {
-		return 0
-	}
-	dist := 0.0
-	for y := minY; y <= maxY; y++ {
-		for x := minX; x <= maxX; x++ {
-			energy, _ := s.At(x, y)
-			d := energy.Size() - mean
-			dist += d * d
-		}
-	}
-	sd := math.Sqrt(dist / count)
-	return math.Min(1, sd/mean)
-}
-
 func (s *Sample) Add(x, y int, e rgb.Energy) {
 	i := (y*s.Width + x) * stride
 	s.data[i+red] += e.X
@@ -103,41 +70,6 @@ func (s *Sample) Image() *image.RGBA {
 		}
 	}
 	return im
-}
-
-func (s *Sample) HeatImage() *image.RGBA {
-	im := image.NewRGBA(image.Rect(0, 0, int(s.Width), int(s.Height)))
-	max := 1
-	for y := 0; y < s.Height; y++ {
-		for x := 0; x < s.Width; x++ {
-			if _, count := s.At(x, y); count > max {
-				max = count
-			}
-		}
-	}
-	for y := 0; y < s.Height; y++ {
-		for x := 0; x < s.Width; x++ {
-			_, count := s.At(x, y)
-			bright := uint8(float64(count) / float64(max) * 255)
-			c := color.RGBA{
-				R: bright,
-				G: bright,
-				B: bright,
-				A: 255,
-			}
-			im.SetRGBA(x, y, c)
-		}
-	}
-	return im
-}
-
-func (s *Sample) WritePNG(name string, im image.Image) error {
-	out, err := os.Create(name)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	return png.Encode(out, im)
 }
 
 // TODO: rename to Count()?

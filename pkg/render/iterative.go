@@ -2,6 +2,8 @@ package render
 
 import (
 	"fmt"
+	"image"
+	"image/png"
 	"math"
 	"os"
 	"os/signal"
@@ -33,7 +35,7 @@ func Iterative(scene *Scene, file string, width, height, depth int, direct bool)
 			if sample, n := frame.Sample(); n > max {
 				max = n
 				fmt.Print(".")
-				if err := sample.WritePNG(file, sample.Image()); err != nil {
+				if err := writePng(file, sample.Image()); err != nil {
 					return err
 				}
 			}
@@ -49,4 +51,13 @@ func Iterative(scene *Scene, file string, width, height, depth int, direct bool)
 	p.Printf("\n%v samples in %.1f seconds (%.0f samples/sec)\n", total, secs, sps)
 
 	return nil
+}
+
+func writePng(filename string, im image.Image) error {
+	out, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	return png.Encode(out, im)
 }
