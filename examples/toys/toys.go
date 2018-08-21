@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"strings"
 
 	"github.com/hunterloftis/pbr2/pkg/camera"
 	"github.com/hunterloftis/pbr2/pkg/env"
@@ -25,14 +26,20 @@ func main() {
 
 func run() error {
 	port := os.Getenv("PORT")
+	dyno := os.Getenv("DYNO")
+	if strings.Contains(dyno, "web") && port != "" {
+		fmt.Println("Listening on", port)
+		return farm.ListenAndServe(":"+port, 1280, 720)
+	}
+
+	app := os.Getenv("HEROKU_APP_NAME")
 	uri := os.Getenv("FARM_URI")
 
 	if uri == "" {
-		if port != "" {
-			fmt.Println("Listening on", port)
-			return farm.ListenAndServe(":"+port, 1280, 720)
+		if app == "" {
+			return errors.New("No FARM_URI or HEROKU_APP_NAME specified")
 		}
-		return errors.New("No FARM_URI or PORT specified")
+		uri = "https://" + app + ".herokuapp.com/sample"
 	}
 
 	table, err := obj.ReadFile("./fixtures/toys/table4/Table.obj", true)
