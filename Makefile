@@ -45,7 +45,7 @@ buddha:
 
 falcon:
 	go build ./cmd/pbr
-	./pbr fixtures/models/falcon/millenium-falcon.obj -width 800 -height 400 -to=-86,-18,-2681 -from=800,200,-3000 -out falcon.png
+	./pbr fixtures/models/falcon/millenium-falcon.obj -width 900 -height 450 -to=-86,-18,-2681 -from=500,300,-3400 -out falcon.png -env fixtures/envmaps/milkyway.hdr -rad 100 -sun 200,800,-3000 -sunsize 700 -lens 35
 
 moses:
 	go build ./cmd/pbr
